@@ -1,0 +1,7 @@
+logs.out
+node_modules
+.env
+dist
+.cache
+/.DS_Store
+/.idea
