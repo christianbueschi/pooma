@@ -3,12 +3,12 @@ import store from './store';
 require('firebase/firestore');
 
 const config = {
-	apiKey: '',
-	authDomain: '',
-	databaseURL: '',
-	projectId: '',
-	storageBucket: '',
-	messagingSenderId: ''
+	apiKey: 'AIzaSyBLWgnEjIn6Rg6ZFEj4lP0bdYJsVs_VW24',
+	authDomain: 'scrum-poker-98227.firebaseapp.com',
+	databaseURL: 'https://scrum-poker-98227.firebaseio.com',
+	projectId: 'scrum-poker-98227',
+	storageBucket: 'scrum-poker-98227.appspot.com',
+	messagingSenderId: '450465622076'
 };
 
 firebase.initializeApp(config);

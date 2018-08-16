@@ -40,6 +40,8 @@
                 </div>
             </nav>
 
+            <a class="c-sidebar__contact" href="mailto:hello@pooma.app">hello@pooma.app</a>
+
         </section>
     </aside>
 </template>
@@ -215,6 +217,12 @@
           color: #46B29D;
       }
     }
+  }
+
+  &__contact {
+      color: white;
+      position: absolute;
+      bottom: 20px;
   }
 }
 </style>

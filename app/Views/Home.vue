@@ -11,6 +11,8 @@
 
 		<Sidebar v-bind="{sharedState}"/>
 
+		<AddToHomeScreen/>
+
     </div>
 </template>
 
@@ -19,10 +21,11 @@
 	import Tabs from '../Components/Tabs';
 	import Sidebar from '../Components/Sidebar';
 	import Header from '../Components/Header';
+	import AddToHomeScreen from '../Components/AddToHomeScreen';
 
 	export default {
 		name: 'app',
-		components: {Tabs, Sidebar, Header},
+		components: {Tabs, Sidebar, Header, AddToHomeScreen},
 		data() {
 
 			return {
