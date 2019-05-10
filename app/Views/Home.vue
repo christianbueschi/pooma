@@ -1,17 +1,17 @@
 <template>
     <div>
 
-		<Header/>
+		<Header></Header>
 
         <section class="v-home__copy" v-if="!isTeamSet && !isUserSet">
             <p><span>Scrum Planning Poker at its finest!</span> <span>Virtually estimate your team stories with ease 🎉</span></p>
         </section>
 
-        <Tabs v-bind="{sharedState}"/>
+        <Tabs v-bind="{sharedState}"></Tabs>
 
-		<Sidebar v-bind="{sharedState}"/>
+		<Sidebar v-bind="{sharedState}"></Sidebar>
 
-		<AddToHomeScreen/>
+		<AddToHomeScreen></AddToHomeScreen>
 
     </div>
 </template>

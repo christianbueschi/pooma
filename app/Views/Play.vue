@@ -1,11 +1,11 @@
 <template>
     <div>
 		
-		<Header/>
+		<Header></Header>
 
-        <Cards v-if="isUserSet" v-bind="{handleClick, isLocked, activeCard}"/>
+        <Cards v-if="isUserSet" v-bind="{handleClick, isLocked, activeCard}"></Cards>
 
-		<Sidebar v-bind="{sharedState}"/>
+		<Sidebar v-bind="{sharedState}"></Sidebar>
 		<div v-if="!sharedState.user" class="a-not-set">
 			<p>You have not yet joined a team.</p>
 			<router-link class="a-btn" :to="{ name: 'home', params: {tab: 'join' } }">

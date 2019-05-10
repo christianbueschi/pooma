@@ -1,6 +1,10 @@
-import firebase from 'firebase';
+//import firebase from 'firebase';
 import store from './store';
-require('firebase/firestore');
+//require('firebase/firestore');
+
+import firebase from '@firebase/app';
+import '@firebase/firestore';
+import '@firebase/auth';
 
 const config = {
 	apiKey: 'AIzaSyBLWgnEjIn6Rg6ZFEj4lP0bdYJsVs_VW24',
@@ -15,16 +19,8 @@ firebase.initializeApp(config);
 const fs = firebase.firestore();
 export default fs;
 
-
 firebase.auth().signInAnonymously().catch(error => console.log(errorCode, errorMessage));
 
-firebase.auth().onAuthStateChanged((user) => {
-	if (user) {
-		console.log(user);
-	} else {
-		console.log('couldtn log in user');
-	}
-});
 
 const teamsRef = fs.collection('teams');
 

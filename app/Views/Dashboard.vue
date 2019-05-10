@@ -1,11 +1,11 @@
 <template>
     <div>
 
-        <Header/>
+        <Header></Header>
 
-        <TableCards v-bind="{members, isOpen, highest, lowest, remove}"/>
+        <TableCards v-bind="{members, isOpen, highest, lowest, remove}"></TableCards>
 
-        <Sidebar v-bind="{sharedState}"/>
+        <Sidebar v-bind="{sharedState}"></Sidebar>
         
         <div v-if="members.length !== 0">
             <button class="a-btn a-btn--center" v-bind:class="{'a-btn--active': isOpen}" v-on:click="handleResolve">
