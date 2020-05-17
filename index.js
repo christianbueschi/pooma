@@ -1,9 +1,9 @@
 import VueRouter from 'vue-router';
-//import Vue from 'vue';
 import home from './app/Views/Home';
 import dashboard from './app/Views/Dashboard';
 import play from './app/Views/Play';
 import share from './app/Views/Share';
+import store from './app/store';
 
 const routes = [
 	{ 
@@ -28,7 +28,6 @@ const routes = [
 	}
 ];
 
-//Vue.use(VueRouter);
 
 const router = new VueRouter({
 	routes,
@@ -39,6 +38,7 @@ window.onload = () => {
 	new Vue({
 		/* eslint-enable */
 		router,
+		store
 	}).$mount('#app');
 };
 
@@ -47,5 +47,5 @@ if (module.hot) {
 }
 
 
-Vue.config.devtools = true;
+window.addEventListener("touchmove", (event) => event.preventDefault(), {passive: false} );
 

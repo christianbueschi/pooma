@@ -1,32 +1,46 @@
 <template>
-   
-    <ul class="c-tablecards" v-if="members.length > 0">
-        <li class="c-tablecards__card" v-bind:key="i" v-for="(member, i) in members">
-            <h4 class="c-tablecards__card__name">
-                <span class="c-tablecards__card__name__inner">{{member.name}}</span><!--
-                --><span class="remove" v-on:click="() => remove(member.name)"></span>
-            </h4>
-            <div class="c-tablecards__card__container"
-                    v-bind:class="{'is-ready': member.card, 'is-open' : isOpen, 'is-highest': member.card === highest, 'is-lowest': member.card === lowest }">
-                <div class="c-tablecards__card__container__inner">
-                        <div class="c-tablecards__card__front">
-                            <span v-if="!member.card">?</span>
-                            <span v-if="member.card">Ready</span>
-                        </div>
-                        <div class="c-tablecards__card__back" v-bind:class="{'small' : member.card && member.card.length > 3}">
-                            {{member.card}}
-                        </div>
-                    </div>
-                </div>
-            </li>
-        </ul>
-
+  <ul class="c-tablecards" v-if="members.length > 0">
+    <li class="c-tablecards__card" v-bind:key="i" v-for="(member, i) in members">
+      <h4 class="c-tablecards__card__name">
+        <span class="c-tablecards__card__name__inner">{{ member.name }}</span>
+        <!--
+        -->
+        <span class="remove" v-on:click="() => remove(member.name)"></span>
+      </h4>
+      <div
+        class="c-tablecards__card__container"
+        v-bind:class="{
+          'is-ready': member.card,
+          'is-open': isOpen,
+          'is-highest': member.card === highest,
+          'is-lowest': member.card === lowest,
+        }"
+      >
+        <div class="c-tablecards__card__container__inner">
+          <div class="c-tablecards__card__front">
+            <span v-if="!member.card">?</span>
+            <span v-if="member.card">Ready</span>
+          </div>
+          <div
+            class="c-tablecards__card__back"
+            v-bind:class="{ small: member.card && numberNames[member.card].length > 3 }"
+          >{{ numberNames[member.card] }}</div>
+        </div>
+      </div>
+    </li>
+  </ul>
 </template>
 
 <script>
+import { FIBONACCI_NUMBERS, T_SHIRT_SIZES } from "../Variables";
 export default {
   name: "tableCards",
-  props: ["members", "isOpen", "highest", "lowest", "remove"]
+  props: ["members", "cardMode", "isOpen", "highest", "lowest", "remove"],
+  computed: {
+    numberNames: function() {
+      return this.cardMode === "fibonacci" ? FIBONACCI_NUMBERS : T_SHIRT_SIZES;
+    }
+  }
 };
 </script>
 
@@ -79,6 +93,7 @@ export default {
         width: 20px;
         height: 18px;
         cursor: pointer;
+        position: absolute;
 
         &:before,
         &:after {
@@ -88,8 +103,7 @@ export default {
           height: 15px;
           width: 2px;
           background-color: #333;
-          top: 1rem;
-          right: 5px;
+          top: 5px;
         }
 
         &:before {
@@ -146,7 +160,7 @@ export default {
       transform: rotateY(0deg);
 
       .is-ready & {
-        background: #324D5C;
+        background: #324d5c;
       }
     }
 
