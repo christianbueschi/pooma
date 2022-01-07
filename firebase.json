@@ -1,10 +1,23 @@
 {
   "hosting": {
     "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/:*+"
-    ]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/:*+"]
+  },
+  "emulators": {
+    "firestore": {
+      "host": "localhost",
+      // "rules": "database.rules.json",
+      "port": "3006"
+    },
+    "auth": {
+      "port": 9099
+    },
+
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true
+    }
   }
 }
