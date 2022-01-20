@@ -8,16 +8,21 @@ export type Member = {
   name: string;
 };
 
-export const useMembers = (team?: string): [Member[] | undefined, boolean] => {
+export const useMembers = (
+  teamId?: string
+): [Member[] | undefined, boolean] => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!team) return;
+    if (!teamId) return;
+    const myTeamName = teamId || localStorage.getItem('teamId');
+
+    if (!myTeamName) return;
 
     setIsLoading(true);
 
-    const membersQuery = query(collection(db, 'teams', team, 'members'));
+    const membersQuery = query(collection(db, 'teams', myTeamName, 'members'));
     const unsubscribe = onSnapshot(membersQuery, (querySnapshot) => {
       const newMembers: any = [];
       querySnapshot.forEach((doc) => {
@@ -31,7 +36,7 @@ export const useMembers = (team?: string): [Member[] | undefined, boolean] => {
     return () => {
       unsubscribe();
     };
-  }, [team]);
+  }, [teamId]);
 
   return [members, isLoading];
 };
@@ -59,6 +64,13 @@ export const useTeam = (
 
     const teamDoc = doc(db, 'teams', myTeamName);
     const unsubscribe = onSnapshot(teamDoc, (querySnapshot) => {
+      // if team is not there remotly, remove everything locally
+      if (!querySnapshot.data()) {
+        localStorage.removeItem('teamId');
+        localStorage.removeItem('member');
+        throw 'No team available';
+      }
+
       const newTeam = {
         id: querySnapshot.id,
         ...querySnapshot.data(),
@@ -84,7 +96,7 @@ export const useMember = (
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const myTeamName = memberName || localStorage.getItem('teamId');
+    const myTeamName = teamName || localStorage.getItem('teamId');
     const myMemberName = memberName || localStorage.getItem('member');
 
     if (!myTeamName || !myMemberName) return;
@@ -93,6 +105,10 @@ export const useMember = (
 
     const memberDoc = doc(db, 'teams', myTeamName, 'members', myMemberName);
     const unsubscribe = onSnapshot(memberDoc, (querySnapshot) => {
+      if (!querySnapshot.data()) {
+        localStorage.removeItem('member');
+        throw 'No member available';
+      }
       const newMember = {
         id: querySnapshot.id,
         ...querySnapshot.data(),

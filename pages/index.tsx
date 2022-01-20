@@ -1,40 +1,27 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 import { Header } from '../components/Header';
-import { Sidebar } from '../components/Sidebar';
 import { Tabs } from '../components/Tabs';
+import { MainTitle, LogoTitle } from '../components/elements/Title';
+import { Flex } from '../components/elements/Flex';
+import { BodyBig } from '../components/elements/Body';
 
 const Home: NextPage = () => {
   return (
     <>
-      <Header />
+      <Header isHome />
 
-      <section>
-        <StyledText>
-          <span>Scrum Planning Poker at it&apos;s finest!</span>
-          <span>Virtually estimate your team stories with ease 🎉</span>
-        </StyledText>
-      </section>
-
-      <Tabs />
-
-      <Sidebar />
+      <Flex css={{ justifyContent: 'center', alignItems: 'center' }} gap={48}>
+        <MainTitle>POOMA</MainTitle>
+        <BodyBig css={{ textAlign: 'center' }}>
+          Scrum Planning Poker at it&apos;s finest!
+          <br />
+          Virtually estimate your team stories with ease 🎉
+        </BodyBig>
+        <Tabs />
+      </Flex>
     </>
   );
 };
 
 export default Home;
-
-const StyledText = styled.p`
-  color: ${({ theme }) => theme.colors.grey};
-  margin: 0 auto;
-  font-size: 20px;
-  margin-bottom: 4rem;
-  text-align: center;
-
-  @media (min-width: 672px) {
-    span {
-      display: block;
-    }
-  }
-`;

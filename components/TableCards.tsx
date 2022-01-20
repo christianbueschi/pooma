@@ -3,11 +3,10 @@ import { DocumentData } from '@firebase/firestore';
 import { useEffect, useState } from 'react';
 import { api } from './api';
 import { Member } from './apiHooks';
-import { FIBONACCI_NUMBERS, T_SHIRT_SIZES } from './constants';
+import { borderRadius } from './theme/borderRadius';
 
 type TableCardsProps = {
-  members: any[];
-  cardMode: string;
+  members: Member[];
   isOpen: boolean;
   highest: string;
   lowest: string;
@@ -16,27 +15,11 @@ type TableCardsProps = {
 
 export const TableCards: React.FC<TableCardsProps> = ({
   members,
-  cardMode,
   isOpen,
   highest,
   lowest,
   onRemove,
 }) => {
-  const [team, setTeam] = useState<DocumentData>();
-
-  const getTeam = async () => {
-    const localTeam = localStorage.getItem('teamId');
-
-    if (!localTeam) return;
-
-    const myTeam = await api.getTeam(localTeam);
-    setTeam(myTeam.data());
-  };
-
-  useEffect(() => {
-    getTeam();
-  }, []);
-
   return (
     <>
       {members.length > 0 && (
@@ -47,22 +30,23 @@ export const TableCards: React.FC<TableCardsProps> = ({
                 <CardName>
                   <CardNameInner>{member.name}</CardNameInner>
                   <CardRemoveButton
-                    onClick={() => onRemove(member.name)}
+                    onClick={() => onRemove(member)}
                   ></CardRemoveButton>
                 </CardName>
                 <CardContainer>
                   <CardContainerInner isOpen={isOpen}>
-                    <CardFront isReady={member.card}>
+                    <CardFront isReady={!!member.card}>
                       <span>{member.card ? 'Ready' : '?'}</span>
                     </CardFront>
                     <CardBack
                       isOpen={isOpen}
                       isLowest={member.card === lowest}
                       isHighest={member.card === highest}
-                      isSmall={member.card && member.card.length > 3}
-                    >
-                      {member.card}
-                    </CardBack>
+                      isSmall={!!member.card && member.card.length > 3}
+                      dangerouslySetInnerHTML={{
+                        __html: member.card,
+                      }}
+                    />
                   </CardContainerInner>
                 </CardContainer>
               </Card>
@@ -74,10 +58,10 @@ export const TableCards: React.FC<TableCardsProps> = ({
   );
 };
 
-const CARD_STYLES = `
+export const CARD_STYLES = `
   width: 120px;
   height: 150px;
-  border-radius: 8px;
+  border-radius: ${borderRadius[8]};
 `;
 
 const FRONT_BACK_CARD_STYLES = `
@@ -90,7 +74,7 @@ display: flex;
 color: white;
 align-items: center;
 justify-content: center;
-font-size: 25px;
+font-size: 22px;
 box-shadow: 0px 5px 20px -5px rgb(0, 0, 0);
 `;
 
@@ -98,8 +82,7 @@ const CardList = styled.ul`
   display: block;
   overflow: hidden;
   padding-left: 0;
-  padding-bottom: 5rem;
-  margin-bottom: 2rem;
+  padding-bottom: 2rem;
   text-align: center;
 `;
 

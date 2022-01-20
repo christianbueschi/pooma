@@ -36,7 +36,7 @@ export const Tabs = () => {
     localStorage.setItem('teamId', teamId);
     localStorage.setItem('member', member);
 
-    router.push(`${teamId}/dashboard`);
+    router.push(teamId);
   };
 
   const onJoinTeam = async (ev: React.FormEvent) => {
@@ -59,12 +59,12 @@ export const Tabs = () => {
     localStorage.setItem('teamId', teamId);
     localStorage.setItem('member', member);
 
-    router.push(`${teamId}/play`);
+    router.push(teamId);
   };
 
   return (
     <>
-      <Flex css={{ alignItems: 'center' }} gap={4}>
+      <Flex css={{ alignItems: 'center' }} gap={12}>
         <Button variant='solid' onClick={() => setShowStartModal(true)}>
           Start New Game
         </Button>
@@ -79,28 +79,35 @@ export const Tabs = () => {
           handleClose={() => setShowStartModal(false)}
         >
           <TabForm onSubmit={onCreateTeam}>
-            <Flex gap={12} css={{ alignItems: 'center' }}>
-              <TabFormInput
-                type='text'
-                value={team}
-                placeholder='Team Name'
-                onChange={(ev) => setTeam(ev.currentTarget.value)}
-              />
-              <TabFormInput
-                type='text'
-                value={member}
-                placeholder='Member Name'
-                onChange={(ev) => setMember(ev.currentTarget.value)}
-              />
-              <Flex gap={8}>
-                <Label>Card Deck</Label>
-                <StyledDropdownd
-                  options={CARD_MODE_OPTIONS}
-                  onChange={(option) => setCardModeOption(option)}
-                  value={cardModeOption}
-                  placeholder='Select an option'
-                />
+            <Flex gap={24} css={{ alignItems: 'center' }}>
+              <Flex gap={12} css={{ alignItems: 'center' }}>
+                <Flex horizontal gap={24} css={{ alignItems: 'center' }}>
+                  <Label>Team Name</Label>
+                  <TabFormInput
+                    type='text'
+                    value={team}
+                    onChange={(ev) => setTeam(ev.currentTarget.value)}
+                  />
+                </Flex>
+                <Flex horizontal gap={24} css={{ alignItems: 'center' }}>
+                  <Label>Member Name</Label>
+                  <TabFormInput
+                    type='text'
+                    value={member}
+                    onChange={(ev) => setMember(ev.currentTarget.value)}
+                  />
+                </Flex>
+                <Flex horizontal gap={24} css={{ alignItems: 'center' }}>
+                  <Label>Card Deck</Label>
+                  <StyledDropdown
+                    options={CARD_MODE_OPTIONS}
+                    onChange={(option) => setCardModeOption(option)}
+                    value={cardModeOption}
+                    placeholder='Select an option'
+                  />
+                </Flex>
               </Flex>
+
               <Button variant='solid' type='submit' onClick={onCreateTeam}>
                 Start Game
               </Button>
@@ -113,24 +120,31 @@ export const Tabs = () => {
       {showJoinModal && (
         <Modal title='Join a game' handleClose={() => setShowJoinModal(false)}>
           <TabForm onSubmit={onJoinTeam}>
-            <Flex gap={12} css={{ alignItems: 'center' }}>
-              <TabFormInput
-                type='text'
-                value={teamId}
-                placeholder='Team ID'
-                onChange={(ev) => setTeamId(ev.currentTarget.value)}
-              />
-              <TabFormInput
-                type='text'
-                value={member}
-                placeholder='Member Name'
-                onChange={(ev) => setMember(ev.currentTarget.value)}
-              />
+            <Flex gap={24} css={{ alignItems: 'center' }}>
+              <Flex gap={12} css={{ alignItems: 'center' }}>
+                <Flex horizontal gap={24} css={{ alignItems: 'center' }}>
+                  <Label>Team ID</Label>
+                  <TabFormInput
+                    type='text'
+                    value={teamId}
+                    onChange={(ev) => setTeamId(ev.currentTarget.value)}
+                  />
+                </Flex>
+                <Flex horizontal gap={24} css={{ alignItems: 'center' }}>
+                  <Label>Member Name</Label>
+                  <TabFormInput
+                    type='text'
+                    value={member}
+                    onChange={(ev) => setMember(ev.currentTarget.value)}
+                  />
+                </Flex>
+              </Flex>
 
               <Button variant='solid' type='submit' onClick={onJoinTeam}>
                 Join Game
               </Button>
             </Flex>
+
             {error && <ErrorText>{error}</ErrorText>}
           </TabForm>
         </Modal>
@@ -141,39 +155,21 @@ export const Tabs = () => {
 
 export const Title = styled.h2`
   font-size: 32px;
+  font-weight: 600;
 `;
 
 export const Label = styled.label`
   color: white;
+  width: 150px;
 `;
 
-export const StyledDropdownd = styled(Dropdown)`
+export const StyledDropdown = styled(Dropdown)`
   .Dropdown-control {
     min-width: 250px;
-    border-radius: 8px;
-  }
-`;
-
-const TabItem = styled.button<{ isActive: boolean }>`
-  font-size: 18px;
-  margin: 0 0.5rem;
-  padding: 1rem;
-  border: none;
-  max-width: 30%;
-  background-color: ${({ theme, isActive }) =>
-    isActive ? theme.colors.blue : theme.colors.green};
-  color: white;
-  transition: background-color 0.25s ease-in-out;
-  border-radius: 8px 8px 0 0;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-  }
-
-  @media (min-width: 672px) {
-    font-size: 24px;
-    min-width: 160px;
+    border-radius: ${({ theme }) => theme.borderRadius[8]};
+    height: 42px;
+    display: flex;
+    align-items: center;
   }
 `;
 
@@ -182,16 +178,16 @@ const ErrorText = styled.p`
 `;
 
 const TabForm = styled.form`
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius[8]};
   max-width: 900px;
-  margin: 0 auto;
 `;
 
 const TabFormInput = styled.input`
   background: transparent;
   border: 1px solid white;
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius[8]};
+  height: 42px;
+  padding: ${({ theme }) => theme.spacings[12]};
   font-size: 16px;
   display: block;
   color: white;
@@ -202,20 +198,5 @@ const TabFormInput = styled.input`
   &:focus {
     outline: none;
     border: 1px solid ${({ theme }) => theme.colors.green};
-  }
-
-  &::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: 'white';
-  }
-
-  &:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
-    color: #20323c;
-  }
-
-  &::-ms-input-placeholder {
-    /* Microsoft Edge */
-    color: #20323c;
   }
 `;

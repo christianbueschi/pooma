@@ -20,7 +20,7 @@ export const Modal: React.FC<ModalProps> = ({
         <StyledButton variant='ghost' onClick={handleClose}>
           <FiX size={32} />
         </StyledButton>
-        <Flex gap={24}>
+        <Flex gap={48}>
           <Title css={{ textAlign: 'center', color: 'white' }}>{title}</Title>
           {children}
         </Flex>
@@ -46,12 +46,12 @@ const StyledModalInner = styled.div`
   position: relative;
   width: 600px;
   background: ${({ theme }) => theme.colors.blue};
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius[8]};
   padding: ${({ theme }) => theme.spacings[24]};
 `;
 
 const StyledButton = styled(Button)`
   position: absolute;
-  top: 0;
+  top: 10px;
   right: 0;
 `;

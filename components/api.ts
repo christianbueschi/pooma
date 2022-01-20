@@ -63,13 +63,13 @@ const api = {
     return teamId;
   },
 
-  updateTeam: async (teamName?: string | null, payload?: any) => {
-    if (!teamName) {
+  updateTeam: async (teamId?: string | null, payload?: any) => {
+    if (!teamId) {
       console.error('updateTeam()', 'team is not defined');
       return;
     }
 
-    const teamDoc = doc(db, 'teams', teamName);
+    const teamDoc = doc(db, 'teams', teamId);
     return await updateDoc(teamDoc, payload);
   },
 
@@ -95,10 +95,13 @@ const api = {
     setDoc(membersDoc, { name: member });
   },
 
-  updateMember: async (teamName: string, member: string, payload: any) => {
-    if (!member) console.error('updateMember()', 'member is not defined');
+  updateMember: async (teamId?: string, member?: string, payload?: any) => {
+    if (!member || !teamId) {
+      console.error('updateMember()', 'member is not defined');
+      return;
+    }
 
-    const memberDoc = doc(db, 'teams', teamName, 'members', member);
+    const memberDoc = doc(db, 'teams', teamId, 'members', member);
     await updateDoc(memberDoc, payload);
   },
 

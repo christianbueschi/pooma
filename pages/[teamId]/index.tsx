@@ -1,8 +1,16 @@
+import { useTheme } from '@emotion/react';
 import { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 import { api } from '../../components/api';
-import { Member, useMembers } from '../../components/apiHooks';
+import {
+  Member,
+  useMember,
+  useMembers,
+  useTeam,
+} from '../../components/apiHooks';
+import { Cards } from '../../components/Cards';
 import { Button } from '../../components/elements/Button';
+import { Flex } from '../../components/elements/Flex';
 import { Loading } from '../../components/elements/Loading';
 import { Header } from '../../components/Header';
 import { Sidebar } from '../../components/Sidebar';
@@ -13,23 +21,18 @@ type Statistic = {
   count: number;
 };
 
-const Dashboard: NextPage = () => {
+const Team: NextPage = () => {
   const [isOpen, toggleIsOpen] = useState(false);
-  const [team, setTeam] = useState('');
+
   const [lowest, setLowest] = useState('');
   const [highest, setHighest] = useState('');
-  // const [members, setMembers] = useState<Member[]>([]);
   const [cardMode, setCardMode] = useState('');
 
-  const [members, isLoading] = useMembers(team);
+  const [team, teamIsLoading] = useTeam();
+  const [members, membersIsLoading] = useMembers(team?.id);
+  const [member, memberIsLoading] = useMember();
 
-  useEffect(() => {
-    const myTeam = localStorage.getItem('teamId');
-
-    if (!myTeam) return;
-
-    setTeam(myTeam);
-  }, []);
+  const isLoading = teamIsLoading || membersIsLoading;
 
   const handleResolve = () => {
     isOpen ? clear() : resolve();
@@ -81,7 +84,7 @@ const Dashboard: NextPage = () => {
     toggleIsOpen(true);
     // const stats = this.setStats();
 
-    api.updateTeam(team, { isLocked: true });
+    api.updateTeam(team?.id, { isLocked: true });
 
     const getColor = (number: string) => {
       if (number === highest) return 'rgba(222,91,73,1)';
@@ -94,9 +97,9 @@ const Dashboard: NextPage = () => {
     // todo: add await
     members &&
       members.forEach((member) => {
-        api.updateMember(team, member.name, { card: '' });
+        api.updateMember(team?.id, member.name, { card: '' });
       });
-    await api.updateTeam(team, { isLocked: false });
+    await api.updateTeam(team?.id, { isLocked: false });
     toggleIsOpen(false);
   };
 
@@ -110,10 +113,14 @@ const Dashboard: NextPage = () => {
     }
   };
   return (
-    <>
+    <Flex gap={48}>
       <Header />
 
-      <Sidebar />
+      <Flex>
+        {member && team && !memberIsLoading && (
+          <Cards member={member} team={team} />
+        )}
+      </Flex>
 
       {isLoading ? (
         <Loading />
@@ -121,7 +128,6 @@ const Dashboard: NextPage = () => {
         members && (
           <TableCards
             members={members}
-            cardMode={cardMode}
             isOpen={isOpen}
             highest={highest}
             lowest={lowest}
@@ -129,24 +135,25 @@ const Dashboard: NextPage = () => {
           />
         )
       )}
+      <Flex horizontal css={{ justifyContent: 'center' }}>
+        {!isLoading && members && members.length > 0 && (
+          <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
+            {isOpen ? 'Hide Cards' : 'Show Cards'}
+          </Button>
+        )}
 
-      {!isLoading && members && members.length > 0 && (
-        <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
-          {isOpen ? 'Hide Cards' : 'Show Cards'}
-        </Button>
-      )}
+        {!team && !isLoading && (
+          <div className='a-not-set'>
+            <p>You have not yet created or selected a team.</p>
+          </div>
+        )}
 
-      {!team && (
-        <div className='a-not-set'>
-          <p>You have not yet created or selected a team.</p>
-        </div>
-      )}
-
-      {members?.length === 0 && (
-        <p className='a-not-set'>No members here at the moment.</p>
-      )}
-    </>
+        {!isLoading && members?.length === 0 && (
+          <p className='a-not-set'>No members here at the moment.</p>
+        )}
+      </Flex>
+    </Flex>
   );
 };
 
-export default Dashboard;
+export default Team;

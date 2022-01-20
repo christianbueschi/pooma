@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
 import { api } from './api';
 import { Member, Team } from './apiHooks';
+import { Card } from './Card';
 import { CARDS } from './constants';
 
 type CardsProps = {
@@ -13,8 +14,15 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
   const [activeCard, setActiveCard] = useState<string>();
 
   const onClickCard = async (card: string) => {
-    setActiveCard(card);
-    await api.updateMember(team.id, member.id, { card });
+    if (team.isLocked) return;
+    let newCard = card;
+
+    if (card === activeCard) {
+      newCard = '';
+    }
+
+    setActiveCard(newCard);
+    await api.updateMember(team.id, member.id, { card: newCard });
   };
 
   const onClickReady = async () => {
@@ -34,17 +42,21 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
     <section>
       {team && (
         <CardList>
-          {CARDS[team.cardMode].map((card, index) => (
-            <Card key={index} onClick={() => onClickCard(card)}>
-              <CardTitle isSmall={card.length > 3}>{card}</CardTitle>
-            </Card>
+          {CARDS[team.cardMode].map((card) => (
+            <Card
+              key={card}
+              card={card}
+              onClick={onClickCard}
+              activeCard={activeCard}
+              isLocked={team.isLocked}
+            />
           ))}
 
-          {(team.isLocked || activeCard) && (
+          {/* {(team.isLocked || activeCard) && (
             <CardReady isLocked={team.isLocked} onClick={onClickReady}>
               <p>{team.isLocked ? 'Locked' : 'Ready'}</p>
             </CardReady>
-          )}
+          )} */}
         </CardList>
       )}
     </section>
@@ -53,68 +65,13 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
 
 const CardList = styled.ul`
   position: relative;
-  overflow: hidden;
-  display: block;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
   padding: 0;
-  width: 900px;
+  width: 632px; // 120px*5 + 4*8px
   max-width: 100%;
   margin: 0 auto;
-`;
-
-const Card = styled.li`
-  float: left;
-  padding: 1rem;
-  margin: 0 0.5rem 0.5rem 0;
-  list-style: none;
-  font-size: 2rem;
-  text-align: center;
-  line-height: 2rem;
-  background: ${({ theme }) => theme.colors.green};
-  cursor: pointer;
-  transition: transform 0.25s ease-in-out;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:before {
-    content: '';
-    padding-bottom: 100%;
-  }
-
-  @media (min-width: 320px) and (max-width: 768px) {
-    width: calc(33% - 0.35rem);
-
-    &:nth-child(3n) {
-      margin-right: 0;
-    }
-  }
-
-  @media (min-width: 769px) {
-    width: calc(20% - 0.5rem);
-
-    &:nth-child(5n) {
-      margin-right: 0;
-    }
-
-    &:nth-child(5n + 1) {
-      clear: left;
-    }
-  }
-
-  &:hover {
-    transform: scale(1.08);
-  }
-`;
-
-const CardTitle = styled.span<{ isSmall: boolean }>`
-  ${({ isSmall }) =>
-    isSmall
-      ? `
-        font-size: 1.2rem;
-        line-height: 1.4rem;
-    `
-      : ''}
 `;
 
 const CardReady = styled.li<{ isLocked: boolean }>`
