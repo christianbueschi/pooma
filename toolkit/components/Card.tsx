@@ -1,0 +1,73 @@
+import styled from '@emotion/styled';
+import { CARD_STYLES } from './TeamCards';
+
+type CardProps = {
+  card: string;
+  activeCard?: string;
+  isLocked: boolean;
+  onClick: (card: string) => void;
+};
+
+export const Card: React.FC<CardProps> = ({
+  card,
+  activeCard,
+  isLocked,
+  onClick,
+}) => {
+  const isActiveCard = card === activeCard;
+
+  return (
+    <StyledCard
+      onClick={() => onClick(card)}
+      isActiveCard={isActiveCard}
+      isLocked={isLocked}
+    >
+      <CardTitle
+        isSmall={card.length > 3}
+        dangerouslySetInnerHTML={{ __html: card }}
+      />
+    </StyledCard>
+  );
+};
+
+const StyledCard = styled.li<{ isActiveCard: boolean; isLocked: boolean }>`
+  ${CARD_STYLES}
+  list-style: none;
+  line-height: 2rem;
+  background: ${({ theme, isActiveCard, isLocked }) =>
+    isLocked && isActiveCard
+      ? theme.colors.red
+      : isActiveCard
+      ? theme.colors.blue
+      : theme.colors.green};
+  cursor: ${({ isLocked }) => (isLocked ? 'not-allowed' : 'pointer')};
+  transition: transform 0.25s ease-in-out;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacings[12]};
+  text-align: center;
+
+  &:before {
+    content: '';
+    padding-bottom: 100%;
+  }
+
+  &:hover {
+    transform: ${({ isLocked }) => (isLocked ? 'scale(1)' : 'scale(1.08)')};
+  }
+`;
+
+const CardTitle = styled.span<{ isSmall: boolean }>`
+  ${({ isSmall }) =>
+    isSmall
+      ? `
+        font-size: 16px;
+        line-height: 18px;
+    `
+      : `
+        font-size: 22px;
+        line-height: 24px;
+      `}
+`;

@@ -1,159 +1,154 @@
-import { useTheme } from '@emotion/react';
-import { NextPage } from 'next';
+import { NextPage, NextPageContext } from 'next';
 import { useEffect, useState } from 'react';
-import { api } from '../../components/api';
+import { api } from '../../toolkit/components/api';
 import {
   Member,
   useMember,
   useMembers,
   useTeam,
-} from '../../components/apiHooks';
-import { Cards } from '../../components/Cards';
-import { Button } from '../../components/elements/Button';
-import { Flex } from '../../components/elements/Flex';
-import { Loading } from '../../components/elements/Loading';
-import { Header } from '../../components/Header';
-import { Sidebar } from '../../components/Sidebar';
-import { TableCards } from '../../components/TableCards';
+} from '../../toolkit/components/apiHooks';
+import { Cards } from '../../toolkit/components/Cards';
+import { Header } from '../../toolkit/components/Header';
+import { JoinModal } from '../../toolkit/components/JoinModal';
+import { Modal } from '../../toolkit/components/Modal';
+import { TeamCards } from '../../toolkit/components/TeamCards';
+import { Body } from '../../toolkit/elements/Body';
 
-type Statistic = {
-  label: string;
-  count: number;
+import { Button } from '../../toolkit/elements/Button';
+import { Flex } from '../../toolkit/elements/Flex';
+
+import { Loading } from '../../toolkit/elements/Loading';
+import { Title } from '../../toolkit/elements/Title';
+
+type TeamProps = {
+  teamId: string;
 };
 
-const Team: NextPage = () => {
+const Team: NextPage<TeamProps> = (props) => {
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const [lowest, setLowest] = useState('');
-  const [highest, setHighest] = useState('');
-  const [cardMode, setCardMode] = useState('');
+  const [team, teamIsLoading, error] = useTeam(props.teamId);
+  const [members, membersIsLoading] = useMembers(props.teamId);
+  const [member, memberIsLoading] = useMember(props.teamId);
 
-  const [team, teamIsLoading] = useTeam();
-  const [members, membersIsLoading] = useMembers(team?.id);
-  const [member, memberIsLoading] = useMember();
+  const [memberToRemove, setMemberToRemove] = useState<Member>();
+  const [removeMemberModal, toggleRemoveMemberModal] = useState(false);
 
-  const isLoading = teamIsLoading || membersIsLoading;
+  const isLoading = teamIsLoading || membersIsLoading || memberIsLoading;
 
   const handleResolve = () => {
     isOpen ? clear() : resolve();
   };
 
-  const addToStats = (stats: Statistic[], card: string) => {
-    let alreadySet = false;
-
-    stats.forEach((item) => {
-      if (item.label === card) {
-        item.count++;
-        alreadySet = true;
-      }
-    });
-
-    if (!alreadySet) {
-      stats.push({ label: card, count: 1 });
-    }
-  };
-
-  const setStats = () => {
-    let lowest = '';
-    let highest = '';
-    const stats: Statistic[] = [];
-
-    members &&
-      members.forEach((member) => {
-        if (member && member.card === '') return;
-
-        addToStats(stats, member.card);
-
-        if (!lowest && !highest) {
-          lowest = member.card;
-          highest = member.card;
-        } else if (member.card < lowest) {
-          lowest = member.card;
-        } else if (member.card > highest) {
-          highest = member.card;
-        }
-      });
-
-    setLowest(lowest);
-    setHighest(highest);
-
-    return stats;
-  };
-
   const resolve = () => {
     toggleIsOpen(true);
-    // const stats = this.setStats();
-
     api.updateTeam(team?.id, { isLocked: true });
-
-    const getColor = (number: string) => {
-      if (number === highest) return 'rgba(222,91,73,1)';
-      else if (number === lowest) return 'rgba(70,178,157,1)';
-      else return 'rgba(7,134,216,1)';
-    };
   };
 
   const clear = async () => {
     // todo: add await
     members &&
+      team &&
       members.forEach((member) => {
-        api.updateMember(team?.id, member.name, { card: '' });
+        api.updateMember(team.id, member.id, { card: '' });
       });
     await api.updateTeam(team?.id, { isLocked: false });
     toggleIsOpen(false);
   };
 
-  const remove = async (member: Member) => {
-    if (member.name === window.localStorage.getItem('member')) {
-      if (window.confirm('Do you want to remove yourself from the team?')) {
-        await api.removeMember(team, member.name);
-      }
-    } else {
-      await api.removeMember(team, member.name);
-    }
+  const handleRemove = async (member: Member) => {
+    if (!team) return;
+
+    setMemberToRemove(member);
+
+    toggleRemoveMemberModal(true);
   };
+
+  const onRemoveMember = () => {
+    if (!team || !memberToRemove) {
+      toggleRemoveMemberModal(false);
+      return;
+    }
+
+    api.removeMember(team.id, memberToRemove.id);
+    toggleRemoveMemberModal(false);
+  };
+
+  useEffect(() => {
+    if (team?.isLocked) {
+      toggleIsOpen(true);
+    }
+  }, [team]);
+
   return (
     <Flex gap={48}>
       <Header />
 
-      <Flex>
-        {member && team && !memberIsLoading && (
-          <Cards member={member} team={team} />
-        )}
-      </Flex>
-
       {isLoading ? (
         <Loading />
-      ) : (
-        members && (
-          <TableCards
+      ) : members && member && team ? (
+        <>
+          <Flex>
+            <Cards member={member} team={team} />
+          </Flex>
+          <Title>{team?.name}</Title>
+          <TeamCards
             members={members}
             isOpen={isOpen}
-            highest={highest}
-            lowest={lowest}
-            onRemove={remove}
+            onRemove={handleRemove}
           />
-        )
+          <Flex horizontal css={{ justifyContent: 'center' }}>
+            {!isLoading && members && members.length > 0 && (
+              <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
+                {isOpen ? 'Hide Cards' : 'Show Cards'}
+              </Button>
+            )}
+
+            {!team && !isLoading && (
+              <div className='a-not-set'>
+                <p>You have not yet created or selected a team.</p>
+              </div>
+            )}
+
+            {!isLoading && members?.length === 0 && (
+              <p className='a-not-set'>No members here at the moment.</p>
+            )}
+          </Flex>
+        </>
+      ) : (
+        <JoinModal teamId={props.teamId} title='Join this game' />
       )}
-      <Flex horizontal css={{ justifyContent: 'center' }}>
-        {!isLoading && members && members.length > 0 && (
-          <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
-            {isOpen ? 'Hide Cards' : 'Show Cards'}
-          </Button>
-        )}
-
-        {!team && !isLoading && (
-          <div className='a-not-set'>
-            <p>You have not yet created or selected a team.</p>
-          </div>
-        )}
-
-        {!isLoading && members?.length === 0 && (
-          <p className='a-not-set'>No members here at the moment.</p>
-        )}
-      </Flex>
+      {removeMemberModal && memberToRemove && (
+        <Modal
+          title='Remove Member'
+          handleClose={() => toggleRemoveMemberModal(false)}
+        >
+          <Body css={{ textAlign: 'center' }}>
+            Are you sure you want to remove <b>{memberToRemove.name}</b>?
+          </Body>
+          <Flex gap={8}>
+            <Button variant='solid' onClick={onRemoveMember}>
+              Remove
+            </Button>
+            <Button
+              variant='ghost'
+              onClick={() => toggleRemoveMemberModal(false)}
+            >
+              Cancel
+            </Button>
+          </Flex>
+        </Modal>
+      )}
     </Flex>
   );
 };
 
 export default Team;
+
+export async function getServerSideProps(context: NextPageContext) {
+  const teamId = `${context.query.teamId}`;
+
+  return {
+    props: { teamId },
+  };
+}
