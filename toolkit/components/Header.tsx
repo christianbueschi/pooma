@@ -120,7 +120,7 @@ const StyledIconButton = styled.button`
 const StyledLinkButton = styled(Button)`
   color: ${({ theme }) => theme.colors.green};
   font-size: 16px;
-  text-align: left;
+  justify-content: start;
 
   &:hover {
     color: ${({ theme }) => theme.colors.green};

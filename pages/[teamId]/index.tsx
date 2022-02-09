@@ -19,6 +19,7 @@ import { Flex } from '../../toolkit/elements/Flex';
 
 import { Loading } from '../../toolkit/elements/Loading';
 import { Title } from '../../toolkit/elements/Title';
+import { spacings } from '../../toolkit/theme/spacings';
 
 type TeamProps = {
   teamId: string;
@@ -88,7 +89,7 @@ const Team: NextPage<TeamProps> = (props) => {
         <Loading />
       ) : members && member && team ? (
         <>
-          <Flex>
+          <Flex css={{ alignItems: 'center' }}>
             <Cards member={member} team={team} />
           </Flex>
           <Title>{team?.name}</Title>
@@ -97,21 +98,14 @@ const Team: NextPage<TeamProps> = (props) => {
             isOpen={isOpen}
             onRemove={handleRemove}
           />
-          <Flex horizontal css={{ justifyContent: 'center' }}>
+          <Flex
+            horizontal
+            css={{ justifyContent: 'center', padding: spacings[12] }}
+          >
             {!isLoading && members && members.length > 0 && (
               <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
                 {isOpen ? 'Hide Cards' : 'Show Cards'}
               </Button>
-            )}
-
-            {!team && !isLoading && (
-              <div className='a-not-set'>
-                <p>You have not yet created or selected a team.</p>
-              </div>
-            )}
-
-            {!isLoading && members?.length === 0 && (
-              <p className='a-not-set'>No members here at the moment.</p>
             )}
           </Flex>
         </>

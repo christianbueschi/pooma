@@ -1,10 +1,11 @@
-import type { AppProps } from "next/app";
-import { css, Global, ThemeProvider } from "@emotion/react";
-import emotionReset from "emotion-reset";
-import { theme } from "../toolkit/theme";
+import type { AppProps } from 'next/app';
+import { css, Global, ThemeProvider } from '@emotion/react';
+import emotionReset from 'emotion-reset';
+import { theme } from '../toolkit/theme';
+import Head from 'next/head';
 
 const GLOBAL_STYLES = css`
-  @import url("https://fonts.googleapis.com/css?family=Monoton|Montserrat:300,400,600,700");
+  @import url('https://fonts.googleapis.com/css?family=Monoton|Montserrat:300,400,600,700');
 
   ${emotionReset}
 
@@ -16,7 +17,7 @@ const GLOBAL_STYLES = css`
     margin: 0;
     min-height: 100vh;
     background: white;
-    font-family: "Montserrat", sans-serif;
+    font-family: 'Montserrat', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #f2f2f2;
@@ -27,6 +28,9 @@ const GLOBAL_STYLES = css`
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <>
+      <Head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      </Head>
       <Global styles={GLOBAL_STYLES} />
       <ThemeProvider theme={theme}>
         <Component {...pageProps} />

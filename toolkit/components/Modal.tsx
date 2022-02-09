@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { FiX } from 'react-icons/fi';
-import { Button } from '../elements/Button';
 import { Flex } from '../elements/Flex';
 import { Title } from '../elements/Title';
+import { MQ } from './constants';
 
 type ModalProps = {
   title: string;
@@ -50,7 +50,12 @@ const StyledModalInner = styled.div`
   width: 600px;
   background: ${({ theme }) => theme.colors.white};
   border-radius: ${({ theme }) => theme.borderRadius[8]};
-  padding: ${({ theme }) => `${theme.spacings[24]} 84px`};
+  padding: ${({ theme }) => `${theme.spacings[24]}`};
+  margin: ${({ theme }) => `${theme.spacings[24]}`};
+
+  ${MQ[1]} {
+    padding: ${({ theme }) => `${theme.spacings[24]} 84px`};
+  }
 `;
 
 const StyledButton = styled.button`

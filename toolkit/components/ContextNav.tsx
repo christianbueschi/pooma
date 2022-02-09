@@ -29,6 +29,7 @@ export const ContextNav: React.FC<ContextNavProps> = ({
 
 const StyledDroplet = styled.div`
   position: absolute;
+  z-index: 1;
   right: 0;
   top: 40px;
   background-color: ${({ theme }) => theme.colors.blue};

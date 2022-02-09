@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 
 type JoinModalProps = {
   title: string;
+  handleClose?: () => void;
   teamId?: string;
 };
 
@@ -34,7 +35,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
     const teamExists = await api.doesTeamExists(teamId);
     if (!teamExists) {
       setTeamError(
-        `Sorry, but we couldn't find the team <b>${teamId}</b>. <br> Please try a different team.`
+        `Sorry, but we couldn't find the team <b>${teamId}</b>. <br> Please try a different team or create a new one.`
       );
       return;
     }
@@ -63,7 +64,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
   };
 
   return (
-    <Modal title={props.title}>
+    <Modal title={props.title} handleClose={props.handleClose}>
       {(teamError || error) && (
         <ErrorInfo>
           <Body dangerouslySetInnerHTML={{ __html: teamError || error }} />

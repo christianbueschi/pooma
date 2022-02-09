@@ -156,8 +156,7 @@ const CardBack = styled.div<{
   isOpen: boolean;
   isSmall: boolean;
 }>`
-  background-color: ${({ theme, isOpen }) =>
-    isOpen ? theme.colors.blue : theme.colors.red};
+  background-color: ${({ theme }) => theme.colors.blue};
   transform: rotateY(180deg);
   ${CARD_STYLES}
   ${FRONT_BACK_CARD_STYLES}

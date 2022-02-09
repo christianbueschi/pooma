@@ -71,7 +71,7 @@ export const useTeam = (
         destroyCookie(null, 'teamId');
         destroyCookie(null, 'memberId');
         setError(
-          `Sorry, but we couldn't find the team <b>${myTeamId}</b>. <br> Please try a different team.`
+          `Sorry, but we couldn't find the team <b>${myTeamId}</b>. <br> Please try a different team or create a new one.`
         );
       }
 

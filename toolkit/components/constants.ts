@@ -20,14 +20,14 @@ export const FIBONACCI_NUMBERS = [
 ];
 
 export const T_SHIRT_SIZES = [
-  '🐭 <br>Too small',
+  '<em>🐭</em><br>Too small',
   'XS',
   'S',
   'M',
   'L',
   'XL',
-  '🐘 <br>Too big',
-  'I need a break ☕',
+  '<em>🐘</em><br>Too big',
+  '<em>☕</em><br>I need a break',
 ];
 
 type Cards = {
@@ -38,3 +38,7 @@ export const CARDS: Cards = {
   fibonacci: FIBONACCI_NUMBERS,
   tshirt: T_SHIRT_SIZES,
 };
+
+const BREAKPOINTS = [375, 576, 768, 992, 1200];
+
+export const MQ = BREAKPOINTS.map((bp) => `@media (min-width: ${bp}px)`);

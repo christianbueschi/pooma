@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
+import { spacings } from '../theme/spacings';
 import { api } from './api';
 import { Member, Team } from './apiHooks';
 import { Card } from './Card';
-import { CARDS } from './constants';
+import { CARDS, MQ } from './constants';
 
 type CardsProps = {
   member: Member;
@@ -32,7 +33,7 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
   }, [member.card]);
 
   return (
-    <section>
+    <>
       {team && (
         <CardList>
           {CARDS[team.cardMode].map((card) => (
@@ -46,33 +47,20 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
           ))}
         </CardList>
       )}
-    </section>
+    </>
   );
 };
 
 const CardList = styled.ul`
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 0;
-  width: 632px; // 120px*5 + 4*8px
-  max-width: 100%;
-  margin: 0 auto;
-`;
+  margin: ${spacings[12]};
 
-const CardReady = styled.li<{ isLocked: boolean }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: ${({ theme, isLocked }) =>
-    isLocked ? theme.colors.red : theme.colors.blue};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: ${({ isLocked }) => (isLocked ? 'default' : 'poiner')};
-  color: white;
-  font-size: 24px;
+  ${MQ[1]} {
+    max-width: 632px; // 120px*5 + 4*8px
+    grid-template-columns: repeat(5, 1fr);
+  }
 `;

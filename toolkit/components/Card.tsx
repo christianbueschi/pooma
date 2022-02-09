@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { borderRadius } from '../theme/borderRadius';
 import { CARD_STYLES } from './TeamCards';
 
 type CardProps = {
@@ -31,15 +32,11 @@ export const Card: React.FC<CardProps> = ({
 };
 
 const StyledCard = styled.li<{ isActiveCard: boolean; isLocked: boolean }>`
-  ${CARD_STYLES}
+  height: 150px;
+  border-radius: ${borderRadius[8]};
   list-style: none;
-  line-height: 2rem;
   background: ${({ theme, isActiveCard, isLocked }) =>
-    isLocked && isActiveCard
-      ? theme.colors.red
-      : isActiveCard
-      ? theme.colors.blue
-      : theme.colors.green};
+    isActiveCard ? theme.colors.blue : theme.colors.green};
   cursor: ${({ isLocked }) => (isLocked ? 'not-allowed' : 'pointer')};
   transition: transform 0.25s ease-in-out;
   color: white;
@@ -50,8 +47,8 @@ const StyledCard = styled.li<{ isActiveCard: boolean; isLocked: boolean }>`
   text-align: center;
 
   &:before {
-    content: '';
-    padding-bottom: 100%;
+    // content: '';
+    // padding-bottom: 100%;
   }
 
   &:hover {
@@ -69,5 +66,9 @@ const CardTitle = styled.span<{ isSmall: boolean }>`
       : `
         font-size: 22px;
         line-height: 24px;
-      `}
+  `}
+
+  em {
+    font-size: 42px;
+  }
 `;
