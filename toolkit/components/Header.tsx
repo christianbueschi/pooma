@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
       {member?.state === 'removed' && (
         <Modal title='You have been removed'>
           <Body css={{ textAlign: 'center' }}>
-            You have been removed from the team <b>{team?.name}</b>?
+            You have been removed from the team <b>{team?.name}</b>.
           </Body>
           <Flex gap={8}>
             <Button variant='solid' onClick={handleMemberRemovedModalOk}>

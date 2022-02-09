@@ -2,7 +2,7 @@ import { Body } from '../elements/Body';
 import { Info } from '../elements/Form';
 
 type ShareLinkProps = {
-  inverse: boolean;
+  inverse?: boolean;
 };
 
 export const ShareLink: React.FC<ShareLinkProps> = ({ inverse }) => {

@@ -30,6 +30,10 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
     (member) => !member.spectactorMode
   );
 
+  const isCurrentUserOnlyMember =
+    filteredMembers.length === 1 &&
+    filteredMembers[0].name_lowercase === currentMember?.name_lowercase;
+
   return (
     <Flex css={{ justifyContent: 'center', alignItems: 'center' }}>
       {filteredMembers.length > 0 ? (
@@ -68,6 +72,15 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
         <Flex gap={8} css={{ alignItems: 'center' }}>
           <Body>
             No players here. That's sad 😢. Quick, go and invite others..
+          </Body>
+          <ShareLink />
+        </Flex>
+      )}
+      {isCurrentUserOnlyMember && (
+        <Flex gap={8} css={{ alignItems: 'center' }}>
+          <Body>
+            Quite boring 😪 to play alone, don't you think? Quick, go and invite
+            others..
           </Body>
           <ShareLink />
         </Flex>
