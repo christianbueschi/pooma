@@ -22,7 +22,7 @@ const Home: NextPage = () => {
       <Header isHome />
       <Flex css={{ justifyContent: 'center', alignItems: 'center' }} gap={48}>
         <MainTitle>POOMA</MainTitle>
-        <BodyBig css={{ textAlign: 'center', padding: spacings[12] }}>
+        <BodyBig as='h2' css={{ textAlign: 'center', padding: spacings[12] }}>
           Scrum Planning Poker at it&apos;s finest!
           <br />
           Virtually estimate your team stories with ease 🎉

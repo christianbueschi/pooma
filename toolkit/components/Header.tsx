@@ -11,6 +11,11 @@ import { Button, LINK_STYLES } from '../elements/Button';
 import Link from 'next/link';
 import { ContextNav } from './ContextNav';
 import { colors } from '../theme/colors';
+import Toggle from 'react-toggle';
+import 'react-toggle/style.css';
+import { api } from './api';
+import { Modal } from './Modal';
+import { ShareLink } from './ShareLink';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -36,13 +41,23 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     router.push('/');
   };
 
+  const handleToggleSpectactoreMode = (event: any) => {
+    if (!team || !member) return;
+
+    api.updateMember(team?.id, member?.id, {
+      spectactorMode: event.currentTarget.checked,
+    });
+  };
+
+  const handleMemberRemovedModalOk = () => {
+    destroyCookie(null, 'teamId');
+    destroyCookie(null, 'memberId');
+    router.push('/');
+  };
+
   return (
     <StyledHeader>
-      {!isHome && (
-        <>
-          <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>
-        </>
-      )}
+      {!isHome && <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>}
 
       <StyledNav>
         <Flex horizontal css={{ alignItems: 'center' }} gap={24}>
@@ -51,47 +66,67 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
             css={{ alignItems: 'center', position: 'relative' }}
             gap={4}
           >
-            <StyledIconButton onClick={() => toggleUserNav(!showUserNav)}>
-              <Flex horizontal css={{ alignItems: 'center' }} gap={8}>
-                <FiUser color={colors.green} size='32px' />
-                <Body
-                  css={{ color: colors.green, textTransform: 'capitalize' }}
-                  ellipsis
-                >
-                  {member?.name}
-                </Body>
-              </Flex>
-            </StyledIconButton>
+            {isTeamSet && (
+              <StyledIconButton onClick={() => toggleUserNav(!showUserNav)}>
+                <Flex horizontal css={{ alignItems: 'center' }} gap={8}>
+                  <FiUser color={colors.green} size='32px' />
+                  <Body
+                    css={{ color: colors.green, textTransform: 'capitalize' }}
+                    ellipsis
+                  >
+                    {member?.name}
+                  </Body>
+                </Flex>
+              </StyledIconButton>
+            )}
             {showUserNav && (
               <ContextNav handleClose={() => toggleUserNav(false)}>
-                {isTeamSet ? (
-                  <Flex gap={24}>
-                    <Body css={{ color: colors.white }}>
-                      Logged in to: <br />
-                      <Link href={team?.id} passHref>
-                        <StyledLink>{team?.name}</StyledLink>
-                      </Link>
-                    </Body>
-                    <StyledLinkButton variant='link' onClick={handleLogout}>
-                      Logout
-                    </StyledLinkButton>
-                  </Flex>
-                ) : (
+                <Flex gap={24}>
                   <Body css={{ color: colors.white }}>
-                    You are not logged in yet: <br />
-                    Start a new game or join one.
+                    Logged in to: <br />
+                    <Link href={team?.id} passHref>
+                      <StyledLink>{team?.name}</StyledLink>
+                    </Link>
                   </Body>
-                )}
+                  <Flex
+                    as='label'
+                    horizontal
+                    gap={8}
+                    css={{ alignItems: 'center' }}
+                  >
+                    <StyledToggle
+                      defaultChecked={member?.spectactorMode}
+                      onChange={handleToggleSpectactoreMode}
+                    />
+                    <Body css={{ color: 'white' }}>Spectactor Mode</Body>
+                  </Flex>
+                  <Flex gap={8}>
+                    <Body css={{ color: colors.white }} as='label'>
+                      Invite others:
+                    </Body>
+                    <ShareLink inverse />
+                  </Flex>
+                  <StyledLinkButton variant='link' onClick={handleLogout}>
+                    Logout
+                  </StyledLinkButton>
+                </Flex>
               </ContextNav>
             )}
           </Flex>
-          {/* <FiSettings
-            color={colors.green}
-            size='32px'
-            onClick={onClickSettings}
-          /> */}
         </Flex>
       </StyledNav>
+      {member?.state === 'removed' && (
+        <Modal title='You have been removed'>
+          <Body css={{ textAlign: 'center' }}>
+            You have been removed from the team <b>{team?.name}</b>?
+          </Body>
+          <Flex gap={8}>
+            <Button variant='solid' onClick={handleMemberRemovedModalOk}>
+              Ok
+            </Button>
+          </Flex>
+        </Modal>
+      )}
     </StyledHeader>
   );
 };
@@ -140,5 +175,19 @@ export const StyledLink = styled.a`
 
   &:hover {
     text-decoration: underline;
+  }
+`;
+
+const StyledToggle = styled(Toggle)`
+  .react-toggle-track {
+    background-color: ${({ theme }) => theme.colors.grey40};
+  }
+
+  &.react-toggle--checked .react-toggle-track {
+    background-color: ${({ theme }) => theme.colors.green};
+
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.greenDark};
+    }
   }
 `;

@@ -139,6 +139,7 @@ const api = {
       name: memberName,
       id: memberId,
       name_lowercase: memberName.toLocaleLowerCase(), // to query case insensitive
+      state: 'active',
     } as Member;
 
     // add memberId to be able to remove a specific member
@@ -160,7 +161,7 @@ const api = {
   removeMember: async (teamId: string, memberId: string) => {
     if (!memberId) console.error('removeMember()', 'member is not defined');
     const docRef = doc(db, 'teams', teamId, 'members', memberId);
-    await deleteDoc(docRef);
+    await updateDoc(docRef, { state: 'removed' });
   },
 };
 

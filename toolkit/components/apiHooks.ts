@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, query } from '@firebase/firestore';
+import { collection, doc, onSnapshot, query, where } from '@firebase/firestore';
 import { destroyCookie, parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import db from './api';
@@ -7,7 +7,9 @@ export type Member = {
   id: string;
   name: string;
   name_lowercase: string;
+  state: 'active' | 'removed';
   card?: string;
+  spectactorMode?: boolean;
 };
 
 export const useMembers = (
@@ -23,7 +25,10 @@ export const useMembers = (
 
     setIsLoading(true);
 
-    const membersQuery = query(collection(db, 'teams', myTeamId, 'members'));
+    const membersQuery = query(
+      collection(db, 'teams', myTeamId, 'members'),
+      where('state', '!=', 'removed')
+    );
     const unsubscribe = onSnapshot(membersQuery, (querySnapshot) => {
       const newMembers: any = [];
       querySnapshot.forEach((doc) => {

@@ -3,6 +3,12 @@ import { Member, useMember } from './apiHooks';
 import { Flex } from '../elements/Flex';
 import { borderRadius } from '../theme/borderRadius';
 import { FiX } from 'react-icons/fi';
+import { Body } from '../elements/Body';
+import { Info } from '../elements/Form';
+import { Router, useRouter } from 'next/router';
+import { NextRequest } from 'next/server';
+import { NextPageContext } from 'next';
+import { ShareLink } from './ShareLink';
 
 type TeamCardsProps = {
   members: Member[];
@@ -19,11 +25,16 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
 
   const [currentMember] = useMember();
 
+  // filter out spectactors
+  const filteredMembers = sortedMembers.filter(
+    (member) => !member.spectactorMode
+  );
+
   return (
-    <Flex css={{ justifyContent: 'center' }}>
-      {members.length > 0 && (
+    <Flex css={{ justifyContent: 'center', alignItems: 'center' }}>
+      {filteredMembers.length > 0 ? (
         <CardList>
-          {sortedMembers.map((member, index) => {
+          {filteredMembers.map((member, index) => {
             return (
               <Card key={index}>
                 <CardName>
@@ -53,6 +64,13 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
             );
           })}
         </CardList>
+      ) : (
+        <Flex gap={8} css={{ alignItems: 'center' }}>
+          <Body>
+            No players here. That's sad 😢. Quick, go and invite others..
+          </Body>
+          <ShareLink />
+        </Flex>
       )}
     </Flex>
   );
@@ -122,11 +140,14 @@ const CardNameInner = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 22px;
 `;
 
 const CardRemoveButton = styled(FiX)`
   display: none;
   cursor: pointer;
+  position: absolute;
+  top: 4px;
 `;
 
 const CardContainer = styled.div`

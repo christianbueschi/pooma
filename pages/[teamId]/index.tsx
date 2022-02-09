@@ -1,4 +1,5 @@
 import { NextPage, NextPageContext } from 'next';
+import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { api } from '../../toolkit/components/api';
 import {
@@ -42,7 +43,7 @@ const Team: NextPage<TeamProps> = (props) => {
   };
 
   const resolve = () => {
-    toggleIsOpen(true);
+    // toggleIsOpen(true);
     api.updateTeam(team?.id, { isLocked: true });
   };
 
@@ -54,7 +55,7 @@ const Team: NextPage<TeamProps> = (props) => {
         api.updateMember(team.id, member.id, { card: '' });
       });
     await api.updateTeam(team?.id, { isLocked: false });
-    toggleIsOpen(false);
+    // toggleIsOpen(false);
   };
 
   const handleRemove = async (member: Member) => {
@@ -76,22 +77,25 @@ const Team: NextPage<TeamProps> = (props) => {
   };
 
   useEffect(() => {
-    if (team?.isLocked) {
-      toggleIsOpen(true);
-    }
-  }, [team]);
+    toggleIsOpen(!!team?.isLocked);
+  }, [team?.isLocked]);
 
   return (
     <Flex gap={48}>
+      <Head>
+        <title>POOMA - {team?.name}</title>
+      </Head>
       <Header />
 
       {isLoading ? (
         <Loading />
       ) : members && member && team ? (
         <>
-          <Flex css={{ alignItems: 'center' }}>
-            <Cards member={member} team={team} />
-          </Flex>
+          {!member.spectactorMode && (
+            <Flex css={{ alignItems: 'center' }}>
+              <Cards member={member} team={team} />
+            </Flex>
+          )}
           <Title>{team?.name}</Title>
           <TeamCards
             members={members}

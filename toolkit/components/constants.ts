@@ -14,9 +14,9 @@ export const FIBONACCI_NUMBERS = [
   '55',
   '89',
   '144',
-  "🤷‍♂️<br>I don't know",
-  " 🙅 <br>Impossible, we don't do that!",
-  ' ☕ <br>I need a break',
+  "<em>🤷‍♀️</em><br>I don't know",
+  "<em>🙅</em><br>Impossible, we don't do that!",
+  '<em>☕</em> <br>I need a break',
 ];
 
 export const T_SHIRT_SIZES = [

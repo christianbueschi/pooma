@@ -24,8 +24,9 @@ export const ErrorInfo = styled.div`
   padding: ${({ theme }) => theme.spacings[16]};
 `;
 
-export const Info = styled.div`
-  background-color: ${({ theme }) => theme.colors.blue};
+export const Info = styled.div<{ color: 'green' | 'blue' }>`
+  background-color: ${({ theme, color }) =>
+    color === 'blue' ? theme.colors.blue : theme.colors.green};
   border-radius: ${({ theme }) => theme.borderRadius[8]};
   color: white;
   padding: ${({ theme }) => theme.spacings[16]};
