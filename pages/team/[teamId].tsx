@@ -152,6 +152,10 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
 export async function getServerSideProps(context: NextPageContext) {
   const teamId = `${context.query.teamId}`;
 
+  // always save the path as teamId cookie
+  // if the team doesn't exists, we will later delete it
+  setCookie(null, 'teamId', teamId);
+
   return {
     props: { teamId },
   };
