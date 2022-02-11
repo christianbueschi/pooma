@@ -66,6 +66,7 @@ export const useTeam = (
     const cookies = parseCookies();
 
     const myTeamId = teamId || cookies.teamId;
+    console.log('useTeam', myTeamId);
 
     if (!myTeamId) return;
 
