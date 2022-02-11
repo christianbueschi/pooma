@@ -147,7 +147,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   // always save the path as teamId cookie
   // if the team doesn't exists, we will later delete it
-  setCookie(context, 'teamId', teamId);
+  setCookie(null, 'teamId', teamId);
 
   return {
     props: { teamId },
