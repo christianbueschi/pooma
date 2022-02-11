@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "emulate": "firebase emulators:start",
-    "build": "next build && next export",
+    "build": "next build",
     "deploy": "firebase deploy",
     "start": "next start",
     "lint": "next lint"

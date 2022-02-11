@@ -1,6 +1,5 @@
-import { NextPage } from 'next';
+import { NextPage, NextPageContext } from 'next';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { setCookie } from 'nookies';
 import { useEffect, useState } from 'react';
 import { api } from '../../toolkit/components/api';
@@ -24,11 +23,12 @@ import { Loading } from '../../toolkit/elements/Loading';
 import { Title } from '../../toolkit/elements/Title';
 import { spacings } from '../../toolkit/theme/spacings';
 
-const Team: NextPage = () => {
-  const [isOpen, toggleIsOpen] = useState(false);
+type TeamProps = {
+  teamId: string;
+};
 
-  const router = useRouter();
-  const teamId = router.query.teamId && router.query.teamId[0];
+const Team: NextPage<TeamProps> = ({ teamId }) => {
+  const [isOpen, toggleIsOpen] = useState(false);
 
   const [team, teamIsLoading, error] = useTeam(teamId);
   const [members, membersIsLoading] = useMembers(teamId);
@@ -148,5 +148,13 @@ const Team: NextPage = () => {
     </Flex>
   );
 };
+
+export async function getServerSideProps(context: NextPageContext) {
+  const teamId = `${context.query.teamId}`;
+
+  return {
+    props: { teamId },
+  };
+}
 
 export default Team;
