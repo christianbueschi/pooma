@@ -81,13 +81,6 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
     toggleIsOpen(!!team?.isLocked);
   }, [team?.isLocked]);
 
-  useEffect(() => {
-    if (!teamId) return;
-    // always save the path as teamId cookie
-    // if the team doesn't exists, we will later delete it
-    setCookie(null, 'teamId', teamId);
-  }, [teamId]);
-
   return (
     <Flex gap={48}>
       <Head>
@@ -154,7 +147,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   // always save the path as teamId cookie
   // if the team doesn't exists, we will later delete it
-  setCookie(null, 'teamId', teamId);
+  setCookie(context, 'teamId', teamId);
 
   return {
     props: { teamId },
