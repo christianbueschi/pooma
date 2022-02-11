@@ -3,12 +3,13 @@ import { Member, useMember } from './apiHooks';
 import { Flex } from '../elements/Flex';
 import { borderRadius } from '../theme/borderRadius';
 import { FiX } from 'react-icons/fi';
-import { Body } from '../elements/Body';
+import { Body, BodyBig } from '../elements/Body';
 import { Info } from '../elements/Form';
 import { Router, useRouter } from 'next/router';
 import { NextRequest } from 'next/server';
 import { NextPageContext } from 'next';
 import { ShareLink } from './ShareLink';
+import { useState } from 'react';
 
 type TeamCardsProps = {
   members: Member[];
@@ -34,6 +35,25 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
     filteredMembers.length === 1 &&
     filteredMembers[0].name_lowercase === currentMember?.name_lowercase;
 
+  const [highestCard, setHighestCard] = useState<number>();
+  const [lowestCard, setLowestCard] = useState<number>();
+  const [average, setAverage] = useState<number>();
+
+  const calculateStats = () => {
+    const cards: number[] = [];
+    filteredMembers.forEach((member) => {
+      // @ts-ignore
+      if (member.card && isNaN(member.card)) return;
+      cards.push(Number(member.card));
+    });
+    const sortedCards = cards.sort((a, b) => (a < b ? 1 : -1));
+
+    setHighestCard(sortedCards[0]);
+    setLowestCard(sortedCards[cards.length - 1]);
+
+    const average = (sortedCards[0] + sortedCards[cards.length - 1]) / 2;
+  };
+
   return (
     <Flex css={{ justifyContent: 'center', alignItems: 'center' }}>
       {filteredMembers.length > 0 ? (
@@ -55,13 +75,21 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
                     <CardFront isReady={!!member.card}>
                       <span>{member.card ? 'Ready' : '?'}</span>
                     </CardFront>
-                    <CardBack
-                      isOpen={isOpen}
-                      isSmall={!!member.card && member.card.length > 3}
-                      dangerouslySetInnerHTML={{
-                        __html: member.card || '',
-                      }}
-                    />
+                    <CardBack isOpen={isOpen}>
+                      {!!member.card && member.card.length > 3 ? (
+                        <Body
+                          dangerouslySetInnerHTML={{
+                            __html: member.card || '',
+                          }}
+                        />
+                      ) : (
+                        <BodyBig
+                          dangerouslySetInnerHTML={{
+                            __html: member.card || '',
+                          }}
+                        />
+                      )}
+                    </CardBack>
                   </CardContainerInner>
                 </CardContainer>
               </Card>
@@ -102,6 +130,7 @@ position: absolute;
 top: 0;
 left: 0;
 display: flex;
+flex-direction: column;
 color: white;
 align-items: center;
 justify-content: center;
@@ -188,12 +217,13 @@ const CardFront = styled.div<{ isReady: boolean }>`
 
 const CardBack = styled.div<{
   isOpen: boolean;
-  isSmall: boolean;
 }>`
   background-color: ${({ theme }) => theme.colors.blue};
   transform: rotateY(180deg);
   ${CARD_STYLES}
   ${FRONT_BACK_CARD_STYLES}
 
-  ${({ isSmall }) => (isSmall ? 'font-size: 16px' : '')};
+  em {
+    font-size: 42px;
+  }
 `;

@@ -1,12 +1,8 @@
 import { NextPage } from 'next';
 import { MainTitle } from '../toolkit/elements/Title';
 import { Flex } from '../toolkit/elements/Flex';
-import { Body, BodyBig } from '../toolkit/elements/Body';
+import { BodyBig } from '../toolkit/elements/Body';
 import { Header } from '../toolkit/components/Header';
-
-import { setCookie } from 'nookies';
-import { useRouter } from 'next/router';
-
 import { useState } from 'react';
 import { Button } from '../toolkit/elements/Button';
 import { JoinModal } from '../toolkit/components/JoinModal';

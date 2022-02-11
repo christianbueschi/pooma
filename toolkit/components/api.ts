@@ -1,18 +1,16 @@
 import { initializeApp } from '@firebase/app';
+import { isSupported, getAnalytics } from '@firebase/analytics';
 import {
   getFirestore,
   collection,
   doc,
   setDoc,
   connectFirestoreEmulator,
-  addDoc,
   getDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   getDocs,
-  DocumentData,
 } from '@firebase/firestore';
 import { getAuth, signInAnonymously } from '@firebase/auth';
 import ShortUniqueId from 'short-unique-id';
@@ -25,11 +23,17 @@ const config = {
   projectId: 'scrum-poker-98227',
   storageBucket: 'scrum-poker-98227.appspot.com',
   messagingSenderId: '450465622076',
+  appId: '1:450465622076:web:7f1a3cad81b66d12f7fb39',
+  measurementId: 'G-XKVM3913F8',
 };
 
-initializeApp(config);
+const app = initializeApp(config);
 const db = getFirestore();
 export default db;
+
+(async () => {
+  (await isSupported()) && getAnalytics(app);
+})();
 
 if (location.hostname === 'localhost') {
   // Point to the RTDB emulator running on localhost.
@@ -38,9 +42,7 @@ if (location.hostname === 'localhost') {
 }
 
 const auth = getAuth();
-signInAnonymously(auth)
-  .then((u) => console.log('signed in'))
-  .catch((error) => console.log(error));
+signInAnonymously(auth);
 
 /**
  * check if member exists,
@@ -64,9 +66,8 @@ const doesMemberExistsInTeam = async (teamId: string, memberName: string) => {
 
 const api = {
   getTeam: async (teamId: string) => {
-    if (!teamId) {
-      console.error('getTeam(): team is not defined');
-    }
+    if (!teamId) return;
+
     const docRef = doc(db, 'teams', teamId);
     const docSnap = await getDoc(docRef);
 
@@ -86,7 +87,7 @@ const api = {
   },
 
   setTeam: async (teamName: string, cardMode: string) => {
-    if (!teamName) console.error('setTeam()', 'team is not defined');
+    if (!teamName) return;
 
     const uid = new ShortUniqueId({ length: 10 });
     const teamId = `${teamName
@@ -102,19 +103,15 @@ const api = {
   },
 
   updateTeam: async (teamId?: string | null, payload?: any) => {
-    if (!teamId) {
-      console.error('updateTeam()', 'team is not defined');
-      return;
-    }
+    if (!teamId) return;
 
     const teamDoc = doc(db, 'teams', teamId);
     return await updateDoc(teamDoc, payload);
   },
 
   getMember: async (teamId: string, memberId: string) => {
-    if (!teamId || !memberId) {
-      console.error('getMember(): team or member is not defined');
-    }
+    if (!teamId || !memberId) return;
+
     const docRef = doc(db, 'teams', teamId, 'members', memberId);
     const docSnap = await getDoc(docRef);
     return docSnap;
@@ -149,17 +146,14 @@ const api = {
   },
 
   updateMember: async (teamId: string, memberId: string, payload?: any) => {
-    if (!memberId || !teamId) {
-      console.error('updateMember()', 'member is not defined');
-      return;
-    }
+    if (!memberId || !teamId) return;
 
     const memberDoc = doc(db, 'teams', teamId, 'members', memberId);
     await updateDoc(memberDoc, payload);
   },
 
   removeMember: async (teamId: string, memberId: string) => {
-    if (!memberId) console.error('removeMember()', 'member is not defined');
+    if (!memberId) return;
     const docRef = doc(db, 'teams', teamId, 'members', memberId);
     await updateDoc(docRef, { state: 'removed' });
   },

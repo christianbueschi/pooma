@@ -31,6 +31,10 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
       <Head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <title>POOMA</title>
+        <meta
+          name='description'
+          content='Dead simple planning poker for your scrum team!'
+        />
       </Head>
       <Global styles={GLOBAL_STYLES} />
       <ThemeProvider theme={theme}>

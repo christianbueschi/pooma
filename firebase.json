@@ -1,13 +1,13 @@
 {
   "hosting": {
-    "public": "dist",
+    "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/:*+"]
   },
   "emulators": {
     "firestore": {
-      // "host": "localhost",
+
       "host": "127.0.0.1",
-      // "rules": "database.rules.json",
+      "rules": "database.rules.json",
       "port": "3006"
     },
     "auth": {

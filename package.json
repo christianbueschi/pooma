@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "emulate": "firebase emulators:start",
-    "build": "next build",
+    "build": "next build && next export",
+    "deploy": "firebase deploy",
     "start": "next start",
     "lint": "next lint"
   },
@@ -13,6 +14,7 @@
     "@emotion/styled": "11.6.0",
     "@firebase/auth": "0.19.4",
     "@firebase/firestore": "3.4.1",
+    "@types/nookies": "^2.0.3",
     "emotion-reset": "3.0.1",
     "firebase": "9.6.1",
     "next": "12.0.7",

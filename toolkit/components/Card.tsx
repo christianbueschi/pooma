@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Body } from '../elements/Body';
 import { borderRadius } from '../theme/borderRadius';
 import { CARD_STYLES } from './TeamCards';
 
@@ -56,16 +57,16 @@ const StyledCard = styled.li<{ isActiveCard: boolean; isLocked: boolean }>`
   }
 `;
 
-const CardTitle = styled.span<{ isSmall: boolean }>`
+const CardTitle = styled(Body)<{ isSmall: boolean }>`
   ${({ isSmall }) =>
     isSmall
       ? `
         font-size: 16px;
-        line-height: 18px;
+        line-height: 20px;
     `
       : `
         font-size: 22px;
-        line-height: 24px;
+        line-height: 26px;
   `}
 
   em {

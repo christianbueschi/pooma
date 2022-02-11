@@ -1,5 +1,7 @@
-import { NextPage, NextPageContext } from 'next';
+import { NextPage } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { setCookie } from 'nookies';
 import { useEffect, useState } from 'react';
 import { api } from '../../toolkit/components/api';
 import {
@@ -22,16 +24,15 @@ import { Loading } from '../../toolkit/elements/Loading';
 import { Title } from '../../toolkit/elements/Title';
 import { spacings } from '../../toolkit/theme/spacings';
 
-type TeamProps = {
-  teamId: string;
-};
-
-const Team: NextPage<TeamProps> = (props) => {
+const Team: NextPage = () => {
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const [team, teamIsLoading, error] = useTeam(props.teamId);
-  const [members, membersIsLoading] = useMembers(props.teamId);
-  const [member, memberIsLoading] = useMember(props.teamId);
+  const router = useRouter();
+  const teamId = router.query.teamId && router.query.teamId[0];
+
+  const [team, teamIsLoading, error] = useTeam(teamId);
+  const [members, membersIsLoading] = useMembers(teamId);
+  const [member, memberIsLoading] = useMember(teamId);
 
   const [memberToRemove, setMemberToRemove] = useState<Member>();
   const [removeMemberModal, toggleRemoveMemberModal] = useState(false);
@@ -80,6 +81,13 @@ const Team: NextPage<TeamProps> = (props) => {
     toggleIsOpen(!!team?.isLocked);
   }, [team?.isLocked]);
 
+  useEffect(() => {
+    if (!teamId) return;
+    // always save the path as teamId cookie
+    // if the team doesn't exists, we will later delete it
+    setCookie(null, 'teamId', teamId);
+  }, [teamId]);
+
   return (
     <Flex gap={48}>
       <Head>
@@ -114,7 +122,7 @@ const Team: NextPage<TeamProps> = (props) => {
           </Flex>
         </>
       ) : (
-        <JoinModal teamId={props.teamId} title='Join this game' />
+        <JoinModal teamId={teamId} title='Join this game' />
       )}
       {removeMemberModal && memberToRemove && (
         <Modal
@@ -142,11 +150,3 @@ const Team: NextPage<TeamProps> = (props) => {
 };
 
 export default Team;
-
-export async function getServerSideProps(context: NextPageContext) {
-  const teamId = `${context.query.teamId}`;
-
-  return {
-    props: { teamId },
-  };
-}

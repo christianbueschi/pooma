@@ -12,6 +12,7 @@ export const ContextNav: React.FC<ContextNavProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const handleClickOutside = (ev: MouseEvent) => {
+    // @ts-ignore
     if (ref.current && !ref.current.contains(ev.target)) {
       handleClose();
     }

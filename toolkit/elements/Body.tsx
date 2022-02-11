@@ -19,6 +19,6 @@ export const Body = styled.p<{ ellipsis?: boolean }>`
 `;
 
 export const BodyBig = styled.p`
-  font-size: 20px;
-  line-height: 24px;
+  font-size: 22px;
+  line-height: 26px;
 `;

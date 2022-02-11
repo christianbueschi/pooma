@@ -63,7 +63,9 @@ export const useTeam = (
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const myTeamId = teamId || parseCookies(null).teamId;
+    const cookies = parseCookies();
+
+    const myTeamId = teamId || cookies.teamId;
 
     if (!myTeamId) return;
 

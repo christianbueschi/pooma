@@ -39,12 +39,15 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
     ev.preventDefault();
 
     const teamId = await api.setTeam(team, cardModeOption.value);
+
+    if (!teamId) return;
+
     const memberRes = await api.addMember(teamId, member);
 
     setCookie(null, 'teamId', teamId);
     setCookie(null, 'memberId', memberRes.member.id);
 
-    router.push(teamId);
+    router.push('/team' + '/' + teamId);
   };
 
   return (

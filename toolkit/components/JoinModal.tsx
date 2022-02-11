@@ -53,7 +53,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
     setCookie(null, 'teamId', teamId);
     setCookie(null, 'memberId', memberRes.member.id);
 
-    router.push(teamId);
+    router.push('/team' + '/' + teamId);
   };
 
   const loginAs = (memberId: string) => {

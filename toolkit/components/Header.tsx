@@ -79,12 +79,12 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 </Flex>
               </StyledIconButton>
             )}
-            {showUserNav && (
+            {showUserNav && team && (
               <ContextNav handleClose={() => toggleUserNav(false)}>
                 <Flex gap={24}>
                   <Body css={{ color: colors.white }}>
                     Logged in to: <br />
-                    <Link href={team?.id} passHref>
+                    <Link href={team.id} passHref>
                       <StyledLink>{team?.name}</StyledLink>
                     </Link>
                   </Body>
