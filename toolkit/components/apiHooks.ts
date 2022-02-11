@@ -75,8 +75,9 @@ export const useTeam = (
     const unsubscribe = onSnapshot(teamDoc, (querySnapshot) => {
       // if team is not there remotly, remove the cookie
       if (!querySnapshot.data()) {
-        destroyCookie(null, 'teamId');
-        destroyCookie(null, 'memberId');
+        // destroyCookie(null, 'teamId');
+        // destroyCookie(null, 'memberId');
+        console.log('!querySnapshot.data()', myTeamId);
         setError(
           `Sorry, but we couldn't find the team <b>${myTeamId}</b>. <br> Please try a different team or create a new one.`
         );
