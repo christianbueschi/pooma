@@ -15,6 +15,7 @@ import 'react-toggle/style.css';
 import { api } from './api';
 import { Modal } from './Modal';
 import { ShareLink } from './ShareLink';
+import { COOKIE_OPTIONS } from './constants';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -31,10 +32,11 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   };
 
   const isTeamSet = team?.id;
+  const isMemberSet = member?.id;
 
   const handleLogout = () => {
-    destroyCookie(null, 'teamId');
-    destroyCookie(null, 'memberId');
+    destroyCookie(null, 'teamId', COOKIE_OPTIONS);
+    destroyCookie(null, 'memberId', COOKIE_OPTIONS);
     router.push('/');
   };
 
@@ -47,8 +49,8 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   };
 
   const handleMemberRemovedModalOk = () => {
-    destroyCookie(null, 'teamId');
-    destroyCookie(null, 'memberId');
+    destroyCookie(null, 'teamId', COOKIE_OPTIONS);
+    destroyCookie(null, 'memberId', COOKIE_OPTIONS);
     router.push('/');
   };
 
@@ -73,49 +75,54 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 </Link>
               </Flex>
             )}
-            <ContextNav
-              TriggerComponent={
-                <StyledIconButton>
-                  <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
-                    <FiUser color={colors.green} size='32px' />
-                    <Body
-                      css={{ color: colors.green, textTransform: 'capitalize' }}
-                      ellipsis
-                    >
-                      {member?.name}
-                    </Body>
+            {isMemberSet && (
+              <ContextNav
+                TriggerComponent={
+                  <StyledIconButton>
+                    <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
+                      <FiUser color={colors.green} size='32px' />
+                      <Body
+                        css={{
+                          color: colors.green,
+                          textTransform: 'capitalize',
+                        }}
+                        ellipsis
+                      >
+                        {member?.name}
+                      </Body>
+                    </Flex>
+                  </StyledIconButton>
+                }
+              >
+                <Flex gap={24}>
+                  <Flex
+                    as='label'
+                    horizontal
+                    gap={8}
+                    css={{ alignItems: 'center' }}
+                  >
+                    <StyledToggle
+                      defaultChecked={member?.spectactorMode}
+                      onChange={handleToggleSpectactoreMode}
+                    />
+                    <Body css={{ color: 'white' }}>Spectactor Mode</Body>
                   </Flex>
-                </StyledIconButton>
-              }
-            >
-              <Flex gap={24}>
-                <Flex
-                  as='label'
-                  horizontal
-                  gap={8}
-                  css={{ alignItems: 'center' }}
-                >
-                  <StyledToggle
-                    defaultChecked={member?.spectactorMode}
-                    onChange={handleToggleSpectactoreMode}
-                  />
-                  <Body css={{ color: 'white' }}>Spectactor Mode</Body>
+                  <Flex gap={8}>
+                    <Body css={{ color: colors.white }} as='label'>
+                      Invite others:
+                    </Body>
+                    <ShareLink inverse />
+                  </Flex>
+                  <StyledLinkButton variant='link' onClick={handleLogout}>
+                    Logout
+                  </StyledLinkButton>
                 </Flex>
-                <Flex gap={8}>
-                  <Body css={{ color: colors.white }} as='label'>
-                    Invite others:
-                  </Body>
-                  <ShareLink inverse />
-                </Flex>
-                <StyledLinkButton variant='link' onClick={handleLogout}>
-                  Logout
-                </StyledLinkButton>
-              </Flex>
-            </ContextNav>
+              </ContextNav>
+            )}
           </Flex>
         </Flex>
       </StyledNav>
-      {member?.state === 'removed' && (
+      {member?.state === 'removed' && !isHome && (
         <Modal title='You have been removed'>
           <Body css={{ textAlign: 'center' }}>
             You have been removed from the team <b>{team?.name}</b>.

@@ -122,22 +122,12 @@ export const useMember = (
     const memberDoc = doc(db, 'teams', myTeamId, 'members', myMemberId);
 
     const unsubscribe = onSnapshot(memberDoc, (querySnapshot) => {
-      console.log(querySnapshot.data());
-      // if (!querySnapshot.data()) {
-      //   destroyCookie(null, 'memberId');
-      //   setIsLoading(false);
-      //   // return;
-      // }
       const newMember = {
         id: querySnapshot.id,
         ...querySnapshot.data(),
       } as Member;
 
       setMember(newMember);
-      console.log(
-        '🚀 ~ file: apiHooks.ts ~ line 142 ~ unsubscribe ~ newMember',
-        newMember
-      );
       setIsLoading(false);
     });
 

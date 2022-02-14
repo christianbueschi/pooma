@@ -30,7 +30,6 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
   const [isOpen, toggleIsOpen] = useState(false);
 
   const [team, teamIsLoading, error] = useTeam(teamId);
-  console.log('🚀 ~ file: [teamId].tsx ~ line 34 ~ team', team);
 
   const [members, membersIsLoading] = useMembers(teamId);
   const [member, memberIsLoading] = useMember(teamId);

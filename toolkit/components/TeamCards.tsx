@@ -54,6 +54,8 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
     const average = (sortedCards[0] + sortedCards[cards.length - 1]) / 2;
   };
 
+  const isMe = (member: Member) => currentMember?.id === member.id;
+
   return (
     <Flex css={{ justifyContent: 'center', alignItems: 'center' }}>
       {filteredMembers.length > 0 ? (
@@ -62,8 +64,10 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
             return (
               <Card key={index}>
                 <CardName>
-                  <CardNameInner>{member.name}</CardNameInner>
-                  {currentMember?.id !== member.id && (
+                  <CardNameInner>
+                    {member.name} {isMe(member) ? '(Me)' : ''}
+                  </CardNameInner>
+                  {!isMe(member) && (
                     <CardRemoveButton
                       size={16}
                       onClick={() => onRemove(member)}
