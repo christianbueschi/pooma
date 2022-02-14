@@ -42,3 +42,8 @@ export const CARDS: Cards = {
 const BREAKPOINTS = [375, 576, 768, 992, 1200];
 
 export const MQ = BREAKPOINTS.map((bp) => `@media (min-width: ${bp}px)`);
+
+export const COOKIE_OPTIONS = {
+  expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year from now
+  path: '/',
+};

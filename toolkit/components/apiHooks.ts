@@ -75,12 +75,13 @@ export const useTeam = (
     const unsubscribe = onSnapshot(teamDoc, (querySnapshot) => {
       // if team is not there remotly, remove the cookie
       if (!querySnapshot.data()) {
-        destroyCookie(null, 'teamId');
-        destroyCookie(null, 'memberId');
-
         setError(
           `Sorry, but we couldn't find the team <b>${myTeamId}</b>. <br> Please try a different team or create a new one.`
         );
+
+        setIsLoading(false);
+
+        return;
       }
 
       const newTeam = {
@@ -107,30 +108,36 @@ export const useMember = (
   const [member, setMember] = useState<Member>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const myTeamId = teamId || parseCookies(null).teamId;
-  const myMemberId = memberId || parseCookies(null).memberId;
+  const myTeamId = teamId || parseCookies().teamId;
+  const myMemberId = memberId || parseCookies().memberId;
 
   useEffect(() => {
     if (!myTeamId || !myMemberId) {
-      // destroyCookie(null, "memberId");
+      destroyCookie(null, 'memberId');
       return;
     }
 
     setIsLoading(true);
 
     const memberDoc = doc(db, 'teams', myTeamId, 'members', myMemberId);
+
     const unsubscribe = onSnapshot(memberDoc, (querySnapshot) => {
-      if (!querySnapshot.data()) {
-        destroyCookie(null, 'memberId');
-        setIsLoading(false);
-        return;
-      }
+      console.log(querySnapshot.data());
+      // if (!querySnapshot.data()) {
+      //   destroyCookie(null, 'memberId');
+      //   setIsLoading(false);
+      //   // return;
+      // }
       const newMember = {
         id: querySnapshot.id,
         ...querySnapshot.data(),
       } as Member;
 
       setMember(newMember);
+      console.log(
+        '🚀 ~ file: apiHooks.ts ~ line 142 ~ unsubscribe ~ newMember',
+        newMember
+      );
       setIsLoading(false);
     });
 

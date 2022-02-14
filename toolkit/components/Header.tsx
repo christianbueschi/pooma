@@ -2,10 +2,9 @@ import styled from '@emotion/styled';
 import { destroyCookie } from 'nookies';
 import { useMember, useTeam } from './apiHooks';
 import { Flex } from '../elements/Flex';
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiExternalLink } from 'react-icons/fi';
 import { LogoTitle } from '../elements/Title';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 import { Body } from '../elements/Body';
 import { Button, LINK_STYLES } from '../elements/Button';
 import Link from 'next/link';
@@ -24,8 +23,6 @@ type HeaderProps = {
 export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const [team] = useTeam();
   const [member] = useMember();
-
-  const [showUserNav, toggleUserNav] = useState(false);
 
   const router = useRouter();
 
@@ -67,51 +64,54 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
             gap={4}
           >
             {isTeamSet && (
-              <StyledIconButton onClick={() => toggleUserNav(!showUserNav)}>
-                <Flex horizontal css={{ alignItems: 'center' }} gap={8}>
-                  <FiUser color={colors.green} size='32px' />
-                  <Body
-                    css={{ color: colors.green, textTransform: 'capitalize' }}
-                    ellipsis
-                  >
-                    {member?.name}
-                  </Body>
-                </Flex>
-              </StyledIconButton>
-            )}
-            {showUserNav && team && (
-              <ContextNav handleClose={() => toggleUserNav(false)}>
-                <Flex gap={24}>
-                  <Body css={{ color: colors.white }}>
-                    Logged in to: <br />
-                    <Link href={team.id} passHref>
-                      <StyledLink>{team?.name}</StyledLink>
-                    </Link>
-                  </Body>
-                  <Flex
-                    as='label'
-                    horizontal
-                    gap={8}
-                    css={{ alignItems: 'center' }}
-                  >
-                    <StyledToggle
-                      defaultChecked={member?.spectactorMode}
-                      onChange={handleToggleSpectactoreMode}
-                    />
-                    <Body css={{ color: 'white' }}>Spectactor Mode</Body>
+              <Flex gap={24} horizontal css={{ alignItems: 'center' }}>
+                <Link href={`/team/${team.id}`} passHref>
+                  <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
+                    <FiExternalLink color={colors.green} size='32px' />
+                    <StyledLink>{team?.name}</StyledLink>
                   </Flex>
-                  <Flex gap={8}>
-                    <Body css={{ color: colors.white }} as='label'>
-                      Invite others:
+                </Link>
+              </Flex>
+            )}
+            <ContextNav
+              TriggerComponent={
+                <StyledIconButton>
+                  <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
+                    <FiUser color={colors.green} size='32px' />
+                    <Body
+                      css={{ color: colors.green, textTransform: 'capitalize' }}
+                      ellipsis
+                    >
+                      {member?.name}
                     </Body>
-                    <ShareLink inverse />
                   </Flex>
-                  <StyledLinkButton variant='link' onClick={handleLogout}>
-                    Logout
-                  </StyledLinkButton>
+                </StyledIconButton>
+              }
+            >
+              <Flex gap={24}>
+                <Flex
+                  as='label'
+                  horizontal
+                  gap={8}
+                  css={{ alignItems: 'center' }}
+                >
+                  <StyledToggle
+                    defaultChecked={member?.spectactorMode}
+                    onChange={handleToggleSpectactoreMode}
+                  />
+                  <Body css={{ color: 'white' }}>Spectactor Mode</Body>
                 </Flex>
-              </ContextNav>
-            )}
+                <Flex gap={8}>
+                  <Body css={{ color: colors.white }} as='label'>
+                    Invite others:
+                  </Body>
+                  <ShareLink inverse />
+                </Flex>
+                <StyledLinkButton variant='link' onClick={handleLogout}>
+                  Logout
+                </StyledLinkButton>
+              </Flex>
+            </ContextNav>
           </Flex>
         </Flex>
       </StyledNav>
@@ -137,6 +137,7 @@ const StyledHeader = styled.div`
   grid-column-gap: 5px;
   justify-items: center;
   padding: ${({ theme }) => theme.spacings[16]};
+  min-height: 66px;
 `;
 
 const StyledNav = styled.nav`
@@ -165,13 +166,13 @@ const StyledLinkButton = styled(Button)`
 
 export const StyledLink = styled.a`
   padding: ${LINK_STYLES.default.padding};
-  font-size: 20px;
+
   border: none;
   text-transform: capitalize;
 
   color: ${LINK_STYLES.default.color};
   cursor: pointer;
-  text-decoration: none;
+  /* text-decoration: none; */
 
   &:hover {
     text-decoration: underline;

@@ -1,6 +1,5 @@
 import { NextPage, NextPageContext } from 'next';
 import Head from 'next/head';
-import { setCookie } from 'nookies';
 import { useEffect, useState } from 'react';
 import { api } from '../../toolkit/components/api';
 import {
@@ -31,6 +30,8 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
   const [isOpen, toggleIsOpen] = useState(false);
 
   const [team, teamIsLoading, error] = useTeam(teamId);
+  console.log('🚀 ~ file: [teamId].tsx ~ line 34 ~ team', team);
+
   const [members, membersIsLoading] = useMembers(teamId);
   const [member, memberIsLoading] = useMember(teamId);
 
@@ -144,10 +145,6 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
 
 export async function getServerSideProps(context: NextPageContext) {
   const teamId = `${context.query.teamId}`;
-
-  // always save the path as teamId cookie
-  // if the team doesn't exists, we will later delete it
-  setCookie(null, 'teamId', teamId);
 
   return {
     props: { teamId },

@@ -6,7 +6,7 @@ type ShareLinkProps = {
 };
 
 export const ShareLink: React.FC<ShareLinkProps> = ({ inverse }) => {
-  const href = window && window.location.href;
+  const href = window?.location.href;
 
   const copyTextToClipboard = () => {
     navigator.clipboard.writeText(href);

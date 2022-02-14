@@ -10,6 +10,7 @@ import { StyledLink } from './Header';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
+import { COOKIE_OPTIONS } from './constants';
 
 type JoinModalProps = {
   title: string;
@@ -33,6 +34,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
 
     // reroute to new teamId path if it doesn't exists
     const teamExists = await api.doesTeamExists(teamId);
+
     if (!teamExists) {
       setTeamError(
         `Sorry, but we couldn't find the team <b>${teamId}</b>. <br> Please try a different team or create a new one.`
@@ -50,15 +52,15 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
       return;
     }
 
-    setCookie(null, 'teamId', teamId);
-    setCookie(null, 'memberId', memberRes.member.id);
+    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', memberRes.member.id, COOKIE_OPTIONS);
 
     router.push('/team' + '/' + teamId);
   };
 
   const loginAs = (memberId: string) => {
     if (!teamId) return;
-    setCookie(null, 'teamId', teamId);
+    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
     setCookie(null, 'memberId', memberId);
     router.push(teamId);
   };
@@ -80,7 +82,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
               }}
             />
           </ErrorInfo>
-          <Info>
+          <Info color='blue'>
             <Flex gap={8}>
               <Body>
                 Is this you? Then you can just login. Otherwise please use a

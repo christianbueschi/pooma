@@ -107,7 +107,7 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
       {isCurrentUserOnlyMember && (
         <Flex gap={8} css={{ alignItems: 'center' }}>
           <Body>
-            Quite boring 😪 to play alone, don't you think? Quick, go and invite
+            Quite boring to play alone, 😪 don't you think? Quick, go and invite
             others..
           </Body>
           <ShareLink />

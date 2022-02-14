@@ -15,6 +15,7 @@ import { api } from './api';
 import { useState } from 'react';
 import { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
+import { COOKIE_OPTIONS } from './constants';
 
 const CARD_MODE_OPTIONS = [
   { value: 'fibonacci', label: 'Fibonacci' },
@@ -44,8 +45,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
 
     const memberRes = await api.addMember(teamId, member);
 
-    setCookie(null, 'teamId', teamId);
-    setCookie(null, 'memberId', memberRes.member.id);
+    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', memberRes.member.id, COOKIE_OPTIONS);
 
     router.push('/team' + '/' + teamId);
   };
