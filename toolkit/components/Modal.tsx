@@ -38,6 +38,7 @@ const StyledModal = styled.div`
   width: 100vw;
   height: 100vh;
   background-color: ${({ theme }) => theme.colors.blue};
+
   display: flex;
   align-items: start;
   justify-content: center;

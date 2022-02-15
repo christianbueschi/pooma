@@ -37,7 +37,12 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const handleLogout = () => {
     destroyCookie(null, 'teamId', COOKIE_OPTIONS);
     destroyCookie(null, 'memberId', COOKIE_OPTIONS);
-    router.push('/');
+
+    if (router.pathname === '/') {
+      location.reload();
+    } else {
+      router.push('/');
+    }
   };
 
   const handleToggleSpectactoreMode = (event: any) => {
@@ -69,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
               <Flex gap={24} horizontal css={{ alignItems: 'center' }}>
                 <Link href={`/team/${team.id}`} passHref>
                   <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
-                    <FiExternalLink color={colors.green} size='32px' />
+                    <FiExternalLink color={colors.green} size='24px' />
                     <StyledLink>{team?.name}</StyledLink>
                   </Flex>
                 </Link>
@@ -80,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 TriggerComponent={
                   <StyledIconButton>
                     <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
-                      <FiUser color={colors.green} size='32px' />
+                      <FiUser color={colors.green} size='24px' />
                       <Body
                         css={{
                           color: colors.green,

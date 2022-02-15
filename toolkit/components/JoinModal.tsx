@@ -122,9 +122,11 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
           >
             Join Game
           </Button>
-          <Link href='/' passHref>
-            <StyledLink>Start over</StyledLink>
-          </Link>
+          {teamId && (
+            <Link href='/' passHref>
+              <StyledLink>Start over</StyledLink>
+            </Link>
+          )}
         </Flex>
       </form>
     </Modal>
