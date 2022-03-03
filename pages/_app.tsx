@@ -5,6 +5,7 @@ import { theme } from '../toolkit/theme';
 import Head from 'next/head';
 import CookieConsent from 'react-cookie-consent';
 import { Footer } from '../toolkit/components/Footer';
+import Script from 'next/script';
 
 const GLOBAL_STYLES = css`
   @import url('https://fonts.googleapis.com/css?family=Monoton|Montserrat:300,400,600,700');
@@ -39,6 +40,21 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
           name='description'
           content='Dead simple planning poker for your scrum team!'
         />
+
+        <Script
+          async
+          src='https://www.googletagmanager.com/gtag/js?id=UA-119147367-1'
+        ></Script>
+        <Script>
+          {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'UA-119147367-1');
+      
+    `}
+        </Script>
       </Head>
       <Global styles={GLOBAL_STYLES} />
       <ThemeProvider theme={theme}>

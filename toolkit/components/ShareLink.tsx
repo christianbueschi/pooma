@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import { Body } from '../elements/Body';
 import { Info } from '../elements/Form';
 
@@ -13,12 +14,21 @@ export const ShareLink: React.FC<ShareLinkProps> = ({ inverse }) => {
   };
 
   return (
-    <Info
-      css={{ cursor: 'pointer' }}
+    <StyledInfo
       color={inverse ? 'green' : 'blue'}
       onClick={copyTextToClipboard}
     >
       <Body css={{ wordBreak: 'break-all' }}>{href} ✂️</Body>
-    </Info>
+    </StyledInfo>
   );
 };
+
+const StyledInfo = styled(Info)`
+  cursor: pointer;
+  /* background-color: ${({ theme }) => theme.colors.white}; */
+  /* color: ${({ theme }) => theme.colors.green}; */
+
+  /* &:hover {
+    background-color: ${({ theme }) => theme.colors.green};
+  } */
+`;
