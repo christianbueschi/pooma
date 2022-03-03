@@ -40,13 +40,13 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
           name='description'
           content='Dead simple planning poker for your scrum team!'
         />
-
-        <Script
-          async
-          src='https://www.googletagmanager.com/gtag/js?id=UA-119147367-1'
-        ></Script>
-        <Script>
-          {`
+      </Head>
+      <Script
+        strategy='afterInteractive'
+        src='https://www.googletagmanager.com/gtag/js?id=UA-119147367-1'
+      ></Script>
+      <Script id='google-analytics' strategy='afterInteractive'>
+        {`
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
@@ -54,8 +54,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     gtag('config', 'UA-119147367-1');
       
     `}
-        </Script>
-      </Head>
+      </Script>
       <Global styles={GLOBAL_STYLES} />
       <ThemeProvider theme={theme}>
         <Component {...pageProps} />
