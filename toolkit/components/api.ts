@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  Timestamp,
 } from '@firebase/firestore';
 import { getAuth, signInAnonymously } from '@firebase/auth';
 import ShortUniqueId from 'short-unique-id';
@@ -97,7 +98,7 @@ const api = {
     await setDoc(doc(db, 'teams', teamId), {
       name: teamName,
       cardMode,
-      created: Date.now(),
+      created: Timestamp.now(),
     });
 
     return teamId;
@@ -108,7 +109,7 @@ const api = {
 
     const teamDoc = doc(db, 'teams', teamId);
     const newTeam = {
-      updated: Date.now(),
+      updated: Timestamp.now(),
       ...payload,
     };
     return await updateDoc(teamDoc, newTeam);
