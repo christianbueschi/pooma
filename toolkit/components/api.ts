@@ -97,6 +97,7 @@ const api = {
     await setDoc(doc(db, 'teams', teamId), {
       name: teamName,
       cardMode,
+      created: Date.now(),
     });
 
     return teamId;
@@ -106,7 +107,11 @@ const api = {
     if (!teamId) return;
 
     const teamDoc = doc(db, 'teams', teamId);
-    return await updateDoc(teamDoc, payload);
+    const newTeam = {
+      updated: Date.now(),
+      ...payload,
+    };
+    return await updateDoc(teamDoc, newTeam);
   },
 
   getMember: async (teamId: string, memberId: string) => {
