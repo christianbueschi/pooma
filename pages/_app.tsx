@@ -30,6 +30,9 @@ const GLOBAL_STYLES = css`
   }
 `;
 
+const shouldRenderAnalytics =
+  typeof window !== 'undefined' && window.location.hostname === 'pooma.app';
+
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <>
@@ -41,12 +44,15 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
           content='Dead simple planning poker for your scrum team!'
         />
       </Head>
-      <Script
-        strategy='afterInteractive'
-        src='https://www.googletagmanager.com/gtag/js?id=UA-119147367-1'
-      ></Script>
-      <Script id='google-analytics' strategy='afterInteractive'>
-        {`
+
+      {shouldRenderAnalytics && (
+        <>
+          <Script
+            strategy='afterInteractive'
+            src='https://www.googletagmanager.com/gtag/js?id=UA-119147367-1'
+          ></Script>
+          <Script id='google-analytics' strategy='afterInteractive'>
+            {`
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
@@ -54,7 +60,10 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     gtag('config', 'UA-119147367-1');
       
     `}
-      </Script>
+          </Script>
+        </>
+      )}
+
       <Global styles={GLOBAL_STYLES} />
       <ThemeProvider theme={theme}>
         <Component {...pageProps} />

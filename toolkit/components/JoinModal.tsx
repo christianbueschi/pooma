@@ -104,12 +104,14 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
               type='text'
               value={teamId}
               onChange={(ev) => setTeamId(ev.currentTarget.value)}
+              data-testid='team-name-input'
             />
             <Label>Member Name</Label>
             <Input
               type='text'
               value={memberName}
               onChange={(ev) => setMemberName(ev.currentTarget.value)}
+              data-testid='member-name-input'
             />
           </FormGrid>
 
@@ -119,6 +121,7 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
             onClick={onJoinTeam}
             isDisabled={!teamId || !memberName}
             isFullWidth
+            data-testid='join-button'
           >
             Join Game
           </Button>

@@ -1,5 +1,4 @@
 import { initializeApp } from '@firebase/app';
-import { isSupported, getAnalytics } from '@firebase/analytics';
 import {
   getFirestore,
   collection,
@@ -28,13 +27,9 @@ const config = {
   measurementId: 'G-XKVM3913F8',
 };
 
-const app = initializeApp(config);
+initializeApp(config);
 const db = getFirestore();
 export default db;
-
-(async () => {
-  (await isSupported()) && getAnalytics(app);
-})();
 
 if (location.hostname === 'localhost') {
   // Point to the RTDB emulator running on localhost.

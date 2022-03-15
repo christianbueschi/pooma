@@ -67,6 +67,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
               type='text'
               value={team}
               onChange={(ev) => setTeam(ev.currentTarget.value)}
+              data-testid='team-name-input'
             />
 
             <Label>Member Name</Label>
@@ -74,6 +75,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
               type='text'
               value={member}
               onChange={(ev) => setMember(ev.currentTarget.value)}
+              data-testid='member-name-input'
             />
 
             <Label>Card Deck</Label>
@@ -91,6 +93,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
             onClick={onCreateTeam}
             isFullWidth
             isDisabled={!team || !member}
+            data-testid='start-game-button'
           >
             Start Game
           </Button>

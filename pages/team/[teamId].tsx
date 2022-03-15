@@ -97,7 +97,7 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
               <Cards member={member} team={team} />
             </Flex>
           )}
-          <Title>{team?.name}</Title>
+          <Title data-testid='title'>{team?.name}</Title>
           <TeamCards
             members={members}
             isOpen={isOpen}
@@ -108,7 +108,12 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
             css={{ justifyContent: 'center', padding: spacings[12] }}
           >
             {!isLoading && members && members.length > 0 && (
-              <Button variant='solid' isActive={isOpen} onClick={handleResolve}>
+              <Button
+                variant='solid'
+                isActive={isOpen}
+                onClick={handleResolve}
+                data-testid='show-cards-button'
+              >
                 {isOpen ? 'Hide Cards' : 'Show Cards'}
               </Button>
             )}

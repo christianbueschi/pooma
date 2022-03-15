@@ -24,10 +24,18 @@ const Home: NextPage = () => {
           Virtually estimate your team stories with ease 🎉
         </BodyBig>
         <Flex css={{ alignItems: 'center' }} gap={12}>
-          <Button variant='solid' onClick={() => setShowStartModal(true)}>
+          <Button
+            variant='solid'
+            onClick={() => setShowStartModal(true)}
+            data-testid='new-game-button'
+          >
             Start New Game
           </Button>
-          <Button variant='link' onClick={() => setShowJoinModal(true)}>
+          <Button
+            variant='link'
+            onClick={() => setShowJoinModal(true)}
+            data-testid='join-game-button'
+          >
             Join Game
           </Button>
         </Flex>

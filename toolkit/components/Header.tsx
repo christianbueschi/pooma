@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
             {isMemberSet && (
               <ContextNav
                 TriggerComponent={
-                  <StyledIconButton>
+                  <StyledIconButton data-testid='user-context-menu-button'>
                     <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
                       <FiUser color={colors.green} size='24px' />
                       <Body
@@ -118,7 +118,11 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                     </Body>
                     <ShareLink inverse />
                   </Flex>
-                  <StyledLinkButton variant='link' onClick={handleLogout}>
+                  <StyledLinkButton
+                    variant='link'
+                    onClick={handleLogout}
+                    data-testid='logout-button'
+                  >
                     Logout
                   </StyledLinkButton>
                 </Flex>

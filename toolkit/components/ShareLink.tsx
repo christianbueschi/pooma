@@ -18,7 +18,9 @@ export const ShareLink: React.FC<ShareLinkProps> = ({ inverse }) => {
       color={inverse ? 'green' : 'blue'}
       onClick={copyTextToClipboard}
     >
-      <Body css={{ wordBreak: 'break-all' }}>{href} ✂️</Body>
+      <Body css={{ wordBreak: 'break-all' }}>
+        <span data-testid='share-link'>{href}</span> ✂️
+      </Body>
     </StyledInfo>
   );
 };

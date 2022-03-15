@@ -23,6 +23,7 @@ export const Card: React.FC<CardProps> = ({
       onClick={() => onClick(card)}
       isActiveCard={isActiveCard}
       isLocked={isLocked}
+      data-testid='card'
     >
       <CardTitle
         isSmall={card.length > 3}

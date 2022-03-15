@@ -7,7 +7,9 @@
     "build": "next build",
     "deploy": "firebase deploy",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "yarn playwright test",
+    "test:headed": "yarn playwright test --headed"
   },
   "dependencies": {
     "@emotion/react": "11.7.1",
@@ -27,6 +29,7 @@
     "short-unique-id": "4.4.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.19.2",
     "@types/node": "17.0.5",
     "@types/react": "17.0.38",
     "@types/react-toggle": "^4.0.3",

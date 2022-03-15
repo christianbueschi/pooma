@@ -59,10 +59,10 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   return (
     <Flex css={{ justifyContent: 'center', alignItems: 'center' }}>
       {filteredMembers.length > 0 ? (
-        <CardList>
+        <CardList data-testid='team-card-list'>
           {filteredMembers.map((member, index) => {
             return (
-              <Card key={index}>
+              <Card key={index} data-testid={`team-card-${member.name}`}>
                 <CardName>
                   <CardNameInner>
                     {member.name} {isMe(member) ? '(Me)' : ''}
@@ -85,12 +85,14 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
                           dangerouslySetInnerHTML={{
                             __html: member.card || '',
                           }}
+                          data-testid='card-value'
                         />
                       ) : (
                         <BodyBig
                           dangerouslySetInnerHTML={{
                             __html: member.card || '',
                           }}
+                          data-testid='card-value'
                         />
                       )}
                     </CardBack>
