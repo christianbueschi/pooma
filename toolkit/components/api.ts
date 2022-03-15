@@ -31,7 +31,7 @@ initializeApp(config);
 const db = getFirestore();
 export default db;
 
-if (location.hostname === 'localhost') {
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
   // Point to the RTDB emulator running on localhost.
   console.log('emulator on');
   connectFirestoreEmulator(db, 'localhost', 3006);
