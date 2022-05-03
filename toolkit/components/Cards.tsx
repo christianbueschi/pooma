@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
 import { spacings } from '../theme/spacings';
-import { api } from './api';
-import { Member, Team } from './apiHooks';
+import { api } from '../api/api';
+import { Member, Team } from '../api/apiHooks';
 import { Card } from './Card';
 import { CARDS, MQ } from './constants';
 

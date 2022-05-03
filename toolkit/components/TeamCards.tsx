@@ -1,15 +1,11 @@
 import styled from '@emotion/styled';
-import { Member, useMember } from './apiHooks';
+import { Member, useMember } from '../api/apiHooks';
 import { Flex } from '../elements/Flex';
 import { borderRadius } from '../theme/borderRadius';
 import { FiX } from 'react-icons/fi';
 import { Body, BodyBig } from '../elements/Body';
-import { Info } from '../elements/Form';
-import { Router, useRouter } from 'next/router';
-import { NextRequest } from 'next/server';
-import { NextPageContext } from 'next';
+
 import { ShareLink } from './ShareLink';
-import { useState } from 'react';
 
 type TeamCardsProps = {
   members: Member[];
@@ -34,25 +30,6 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   const isCurrentUserOnlyMember =
     filteredMembers.length === 1 &&
     filteredMembers[0].name_lowercase === currentMember?.name_lowercase;
-
-  const [highestCard, setHighestCard] = useState<number>();
-  const [lowestCard, setLowestCard] = useState<number>();
-  const [average, setAverage] = useState<number>();
-
-  const calculateStats = () => {
-    const cards: number[] = [];
-    filteredMembers.forEach((member) => {
-      // @ts-ignore
-      if (member.card && isNaN(member.card)) return;
-      cards.push(Number(member.card));
-    });
-    const sortedCards = cards.sort((a, b) => (a < b ? 1 : -1));
-
-    setHighestCard(sortedCards[0]);
-    setLowestCard(sortedCards[cards.length - 1]);
-
-    const average = (sortedCards[0] + sortedCards[cards.length - 1]) / 2;
-  };
 
   const isMe = (member: Member) => currentMember?.id === member.id;
 

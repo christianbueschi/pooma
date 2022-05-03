@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { destroyCookie } from 'nookies';
-import { useMember, useTeam } from './apiHooks';
+import { useMember, useTeam } from '../api/apiHooks';
 import { Flex } from '../elements/Flex';
 import { FiUser, FiExternalLink } from 'react-icons/fi';
 import { LogoTitle } from '../elements/Title';
@@ -12,7 +12,7 @@ import { ContextNav } from './ContextNav';
 import { colors } from '../theme/colors';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import { api } from './api';
+import { api } from '../api/api';
 import { Modal } from './Modal';
 import { ShareLink } from './ShareLink';
 import { COOKIE_OPTIONS } from './constants';

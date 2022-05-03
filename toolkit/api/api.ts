@@ -11,6 +11,7 @@ import {
   where,
   getDocs,
   Timestamp,
+  addDoc,
 } from '@firebase/firestore';
 import { getAuth, signInAnonymously } from '@firebase/auth';
 import ShortUniqueId from 'short-unique-id';
@@ -39,6 +40,11 @@ if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
 
 const auth = getAuth();
 signInAnonymously(auth);
+
+export type Round = {
+  resolvedAt: Timestamp;
+  members: Member[];
+};
 
 /**
  * check if member exists,
@@ -157,6 +163,13 @@ const api = {
     if (!memberId) return;
     const docRef = doc(db, 'teams', teamId, 'members', memberId);
     await updateDoc(docRef, { state: 'removed' });
+  },
+
+  addRound: async (teamId?: string, round?: Round) => {
+    if (!teamId || !round) return;
+
+    const docRef = collection(db, 'teams', teamId, 'rounds');
+    await addDoc(docRef, round);
   },
 };
 

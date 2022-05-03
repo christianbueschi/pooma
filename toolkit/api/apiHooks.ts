@@ -12,9 +12,7 @@ export type Member = {
   spectactorMode?: boolean;
 };
 
-export const useMembers = (
-  teamId?: string
-): [Member[] | undefined, boolean] => {
+export const useMembers = (teamId?: string) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +42,7 @@ export const useMembers = (
     };
   }, [teamId]);
 
-  return [members, isLoading];
+  return [members, isLoading] as const;
 };
 
 export type Team = {

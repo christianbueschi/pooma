@@ -11,7 +11,7 @@ import {
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
-import { api } from './api';
+import { api } from '../api/api';
 import { useState } from 'react';
 import { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';

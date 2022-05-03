@@ -1,13 +1,14 @@
+import { Timestamp } from '@firebase/firestore';
 import { NextPage, NextPageContext } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import { api } from '../../toolkit/components/api';
+import { api, Round } from '../../toolkit/api/api';
 import {
   Member,
   useMember,
   useMembers,
   useTeam,
-} from '../../toolkit/components/apiHooks';
+} from '../../toolkit/api/apiHooks';
 import { Cards } from '../../toolkit/components/Cards';
 import { Header } from '../../toolkit/components/Header';
 import { JoinModal } from '../../toolkit/components/JoinModal';
@@ -43,10 +44,21 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
     isOpen ? clear() : resolve();
   };
 
+  const [round, setRound] = useState<Round>();
+
   const resolve = () => {
-    // toggleIsOpen(true);
+    setRound({
+      resolvedAt: Timestamp.now(),
+      members: [...members],
+    });
     api.updateTeam(team?.id, { isLocked: true });
   };
+
+  useEffect(() => {
+    if (!round) return;
+
+    api.addRound(team?.id, round);
+  }, [round]);
 
   const clear = async () => {
     // todo: add await
@@ -56,7 +68,6 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
         api.updateMember(team.id, member.id, { card: '' });
       });
     await api.updateTeam(team?.id, { isLocked: false });
-    // toggleIsOpen(false);
   };
 
   const handleRemove = async (member: Member) => {
