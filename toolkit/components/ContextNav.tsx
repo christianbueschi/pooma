@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 type ContextNavProps = {
   TriggerComponent: JSX.Element;
+  children?: React.ReactNode;
 };
 
 export const ContextNav: React.FC<ContextNavProps> = ({

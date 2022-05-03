@@ -148,6 +148,7 @@ type ButtonProps = {
   isFullWidth?: boolean;
   css?: any;
   onClick?: (ev: React.FormEvent) => void;
+  children?: React.ReactNode;
 };
 
 export const Button: React.FC<ButtonProps> = ({

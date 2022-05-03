@@ -7,6 +7,7 @@ import { MQ } from './constants';
 type ModalProps = {
   title: string;
   handleClose?: () => void;
+  children?: React.ReactNode;
 };
 
 export const Modal: React.FC<ModalProps> = ({
