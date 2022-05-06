@@ -1,7 +1,5 @@
-import styled from '@emotion/styled';
-import { Body } from '../elements/Body';
-import { borderRadius } from '../theme/borderRadius';
-import { CARD_STYLES } from './TeamCards';
+import { Flex, Text } from '@chakra-ui/react';
+import { MQ } from './constants';
 
 type CardProps = {
   card: string;
@@ -18,59 +16,59 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const isActiveCard = card === activeCard;
 
+  const isLongText = card.length > 3;
+  const fontSize = [
+    isLongText ? '10px' : '14px',
+    isLongText ? '10px' : '14px',
+    isLongText ? '16px' : '22px',
+  ];
+  const lineHeight = [
+    isLongText ? '12px' : '18px',
+    isLongText ? '12px' : '18px',
+    isLongText ? '20px' : '26px',
+  ];
+
+  const emFontSize = ['24px', '24px', '42px'];
+
   return (
-    <StyledCard
+    <Flex
+      as='li'
       onClick={() => onClick(card)}
-      isActiveCard={isActiveCard}
-      isLocked={isLocked}
       data-testid='card'
+      h={['130px', '130px', '150px']}
+      borderRadius='8px'
+      backgroundColor={isActiveCard ? 'blue.700' : 'green.500'}
+      cursor={isLocked ? 'not-allowed' : 'pointer'}
+      transition='transform 0.25s ease-in-out'
+      color='white'
+      alignItems=' center'
+      justifyContent='center'
+      padding='12px'
+      textAlign='center'
+      _hover={{
+        transform: isLocked ? 'scale(1)' : 'scale(1.08)',
+      }}
+      css={{
+        aspectRatio: '120 / 150',
+      }}
     >
-      <CardTitle
-        isSmall={card.length > 3}
+      <Text
+        fontSize={fontSize}
+        lineHeight={lineHeight}
         dangerouslySetInnerHTML={{ __html: card }}
+        css={{
+          em: {
+            fontSize: '24px',
+
+            [MQ[1]]: {
+              fontSize: '32px',
+            },
+            [MQ[2]]: {
+              fontSize: '42px',
+            },
+          },
+        }}
       />
-    </StyledCard>
+    </Flex>
   );
 };
-
-const StyledCard = styled.li<{ isActiveCard: boolean; isLocked: boolean }>`
-  height: 150px;
-  border-radius: ${borderRadius[8]};
-  list-style: none;
-  background: ${({ theme, isActiveCard, isLocked }) =>
-    isActiveCard ? theme.colors.blue : theme.colors.green};
-  cursor: ${({ isLocked }) => (isLocked ? 'not-allowed' : 'pointer')};
-  transition: transform 0.25s ease-in-out;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacings[12]};
-  text-align: center;
-
-  &:before {
-    // content: '';
-    // padding-bottom: 100%;
-  }
-
-  &:hover {
-    transform: ${({ isLocked }) => (isLocked ? 'scale(1)' : 'scale(1.08)')};
-  }
-`;
-
-const CardTitle = styled(Body)<{ isSmall: boolean }>`
-  ${({ isSmall }) =>
-    isSmall
-      ? `
-        font-size: 16px;
-        line-height: 20px;
-    `
-      : `
-        font-size: 22px;
-        line-height: 26px;
-  `}
-
-  em {
-    font-size: 42px;
-  }
-`;

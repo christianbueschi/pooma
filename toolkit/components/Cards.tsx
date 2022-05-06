@@ -1,10 +1,9 @@
-import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
-import { spacings } from '../theme/spacings';
 import { api } from '../api/api';
 import { Member, Team } from '../api/apiHooks';
 import { Card } from './Card';
-import { CARDS, MQ } from './constants';
+import { CARDS } from './constants';
+import { Grid } from '@chakra-ui/react';
 
 type CardsProps = {
   member: Member;
@@ -35,7 +34,16 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
   return (
     <>
       {team && (
-        <CardList>
+        <Grid
+          as='ul'
+          templateColumns={[
+            'repeat(3, 1fr)',
+            'repeat(4, 1fr)',
+            'repeat(5, 1fr)',
+          ]}
+          gap={4}
+          margin={4}
+        >
           {CARDS[team.cardMode].map((card) => (
             <Card
               key={card}
@@ -45,22 +53,8 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
               isLocked={team.isLocked}
             />
           ))}
-        </CardList>
+        </Grid>
       )}
     </>
   );
 };
-
-const CardList = styled.ul`
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 0;
-  margin: ${spacings[12]};
-
-  ${MQ[1]} {
-    max-width: 632px; // 120px*5 + 4*8px
-    grid-template-columns: repeat(5, 1fr);
-  }
-`;

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-const LogoStyles = `
+export const LOGO_STYLES = `
 display: inline-block;
 font-family: 'Monoton', cursive;
 font-weight: normal;
@@ -24,7 +24,7 @@ export const Title = styled.h1`
 `;
 
 export const LogoTitle = styled.h3`
-  ${LogoStyles};
+  ${LOGO_STYLES};
 
   grid-column-start: 1;
   margin-right: auto;
@@ -33,7 +33,7 @@ export const LogoTitle = styled.h3`
 `;
 
 export const MainTitle = styled.h1`
-  ${LogoStyles};
+  ${LOGO_STYLES};
 
   text-align: center;
   font-size: 48px;

@@ -1,21 +1,31 @@
 import styled from '@emotion/styled';
 import { destroyCookie } from 'nookies';
 import { useMember, useTeam } from '../api/apiHooks';
-import { Flex } from '../elements/Flex';
 import { FiUser, FiExternalLink } from 'react-icons/fi';
 import { LogoTitle } from '../elements/Title';
 import { useRouter } from 'next/router';
-import { Body } from '../elements/Body';
-import { Button, LINK_STYLES } from '../elements/Button';
 import Link from 'next/link';
-import { ContextNav } from './ContextNav';
-import { colors } from '../theme/colors';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 import { api } from '../api/api';
-import { Modal } from './Modal';
 import { ShareLink } from './ShareLink';
 import { COOKIE_OPTIONS } from './constants';
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+import { Modal } from './Modal';
+import { colors } from '../theme/colors';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -60,151 +70,106 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   };
 
   return (
-    <StyledHeader>
+    <Grid
+      templateColumns=' 1fr auto 1fr'
+      columnGap={2}
+      minH='66px'
+      padding={4}
+      justifyItems='center'
+      w='100%'
+    >
       {!isHome && <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>}
 
-      <StyledNav>
-        <Flex horizontal css={{ alignItems: 'center' }} gap={24}>
-          <Flex
-            horizontal
-            css={{ alignItems: 'center', position: 'relative' }}
-            gap={4}
-          >
+      <GridItem as='nav' gridColumnStart={3} marginLeft='auto'>
+        <HStack alignItems='center'>
+          <HStack alignItems='center'>
             {isTeamSet && (
-              <Flex gap={24} horizontal css={{ alignItems: 'center' }}>
+              <HStack gap={24} alignItems='center'>
                 <Link href={`/team/${team.id}`} passHref>
-                  <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
-                    <FiExternalLink color={colors.green} size='24px' />
-                    <StyledLink>{team?.name}</StyledLink>
-                  </Flex>
+                  <a>
+                    <Button
+                      variant='ghost'
+                      colorScheme='green'
+                      leftIcon={
+                        <FiExternalLink color='green.500' size='24px' />
+                      }
+                    >
+                      <Text>{team?.name}</Text>
+                    </Button>
+                  </a>
                 </Link>
-              </Flex>
+              </HStack>
             )}
             {isMemberSet && (
-              <ContextNav
-                TriggerComponent={
-                  <StyledIconButton data-testid='user-context-menu-button'>
-                    <Flex horizontal css={{ alignItems: 'center' }} gap={4}>
-                      <FiUser color={colors.green} size='24px' />
-                      <Body
-                        css={{
-                          color: colors.green,
-                          textTransform: 'capitalize',
-                        }}
-                        ellipsis
-                      >
-                        {member?.name}
-                      </Body>
-                    </Flex>
-                  </StyledIconButton>
-                }
-              >
-                <Flex gap={24}>
-                  <Flex
-                    as='label'
-                    horizontal
-                    gap={8}
-                    css={{ alignItems: 'center' }}
-                  >
-                    <StyledToggle
-                      defaultChecked={member?.spectactorMode}
-                      onChange={handleToggleSpectactoreMode}
-                    />
-                    <Body css={{ color: 'white' }}>Spectactor Mode</Body>
-                  </Flex>
-                  <Flex gap={8}>
-                    <Body css={{ color: colors.white }} as='label'>
-                      Invite others:
-                    </Body>
-                    <ShareLink inverse />
-                  </Flex>
-                  <StyledLinkButton
-                    variant='link'
-                    onClick={handleLogout}
-                    data-testid='logout-button'
-                  >
-                    Logout
-                  </StyledLinkButton>
-                </Flex>
-              </ContextNav>
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant='ghost'
+                  colorScheme='green'
+                  rightIcon={<FiUser color='green.500' size='24px' />}
+                  data-testid='user-context-menu-button'
+                >
+                  <Text>{member?.name}</Text>
+                </MenuButton>
+                <MenuList backgroundColor='blue.700' p={4} border='none'>
+                  <VStack gap={4} alignItems='flex-start'>
+                    {!isHome && (
+                      <>
+                        <HStack as='label' gap={2} alignItems='center'>
+                          <StyledToggle
+                            defaultChecked={member?.spectactorMode}
+                            onChange={handleToggleSpectactoreMode}
+                          />
+                          <Text color='white'>Spectactor Mode</Text>
+                        </HStack>
+                        <VStack gap={2}>
+                          <ShareLink inverse />
+                        </VStack>
+                      </>
+                    )}
+                    <Button
+                      onClick={handleLogout}
+                      data-testid='logout-button'
+                      alignSelf='flex-end'
+                    >
+                      Logout
+                    </Button>
+                  </VStack>
+                </MenuList>
+              </Menu>
             )}
-          </Flex>
-        </Flex>
-      </StyledNav>
-      {member?.state === 'removed' && !isHome && (
-        <Modal title='You have been removed'>
-          <Body css={{ textAlign: 'center' }}>
+          </HStack>
+        </HStack>
+      </GridItem>
+
+      <Modal
+        title='You have been removed'
+        isOpen={member?.state === 'removed' && !isHome}
+        handleClose={handleMemberRemovedModalOk}
+      >
+        <VStack gap={4}>
+          <Text textAlign='center'>
             You have been removed from the team <b>{team?.name}</b>.
-          </Body>
-          <Flex gap={8}>
-            <Button variant='solid' onClick={handleMemberRemovedModalOk}>
-              Ok
-            </Button>
-          </Flex>
-        </Modal>
-      )}
-    </StyledHeader>
+          </Text>
+          <Button variant='solid' onClick={handleMemberRemovedModalOk}>
+            Ok
+          </Button>
+        </VStack>
+      </Modal>
+    </Grid>
   );
 };
 
-const StyledHeader = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  grid-column-gap: 5px;
-  justify-items: center;
-  padding: ${({ theme }) => theme.spacings[16]};
-  min-height: 66px;
-`;
-
-const StyledNav = styled.nav`
-  grid-column-start: 3;
-  margin-left: auto;
-`;
-
-const StyledIconButton = styled.button`
-  background: transparent;
-  border: none;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-`;
-
-const StyledLinkButton = styled(Button)`
-  color: ${({ theme }) => theme.colors.green};
-  font-size: 16px;
-  justify-content: start;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.green};
-    text-decoration: underline;
-  }
-`;
-
-export const StyledLink = styled.a`
-  padding: ${LINK_STYLES.default.padding};
-
-  border: none;
-  text-transform: capitalize;
-
-  color: ${LINK_STYLES.default.color};
-  cursor: pointer;
-  /* text-decoration: none; */
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const StyledToggle = styled(Toggle)`
   .react-toggle-track {
-    background-color: ${({ theme }) => theme.colors.grey40};
+    background-color: ${colors.grey[700]};
   }
 
   &.react-toggle--checked .react-toggle-track {
-    background-color: ${({ theme }) => theme.colors.green};
+    background-color: ${colors.grey[700]};
 
     &:hover {
-      background-color: ${({ theme }) => theme.colors.greenDark};
+      background-color: ${colors.grey[700]};
     }
   }
 `;

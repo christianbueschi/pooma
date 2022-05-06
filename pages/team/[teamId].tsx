@@ -1,3 +1,11 @@
+import {
+  Button,
+  Heading,
+  HStack,
+  Spinner,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { Timestamp } from '@firebase/firestore';
 import { NextPage, NextPageContext } from 'next';
 import Head from 'next/head';
@@ -14,14 +22,6 @@ import { Header } from '../../toolkit/components/Header';
 import { JoinModal } from '../../toolkit/components/JoinModal';
 import { Modal } from '../../toolkit/components/Modal';
 import { TeamCards } from '../../toolkit/components/TeamCards';
-import { Body } from '../../toolkit/elements/Body';
-
-import { Button } from '../../toolkit/elements/Button';
-import { Flex } from '../../toolkit/elements/Flex';
-
-import { Loading } from '../../toolkit/elements/Loading';
-import { Title } from '../../toolkit/elements/Title';
-import { spacings } from '../../toolkit/theme/spacings';
 
 type TeamProps = {
   teamId: string;
@@ -30,10 +30,10 @@ type TeamProps = {
 const Team: NextPage<TeamProps> = ({ teamId }) => {
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const [team, teamIsLoading, error] = useTeam(teamId);
+  const [team, teamIsLoading, error] = useTeam();
 
-  const [members, membersIsLoading] = useMembers(teamId);
-  const [member, memberIsLoading] = useMember(teamId);
+  const [members, membersIsLoading] = useMembers();
+  const [member, memberIsLoading] = useMember();
 
   const [memberToRemove, setMemberToRemove] = useState<Member>();
   const [removeMemberModal, toggleRemoveMemberModal] = useState(false);
@@ -93,68 +93,59 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
   }, [team?.isLocked]);
 
   return (
-    <Flex gap={48}>
+    <VStack gap={8} mb={12}>
       <Head>
         <title>POOMA - {team?.name}</title>
       </Head>
       <Header />
 
       {isLoading ? (
-        <Loading />
+        <Spinner />
       ) : members && member && team ? (
         <>
           {!member.spectactorMode && (
-            <Flex css={{ alignItems: 'center' }}>
+            <VStack css={{ alignItems: 'center' }}>
               <Cards member={member} team={team} />
-            </Flex>
+            </VStack>
           )}
-          <Title data-testid='title'>{team?.name}</Title>
+          <Heading data-testid='title'>{team?.name}</Heading>
           <TeamCards
             members={members}
             isOpen={isOpen}
             onRemove={handleRemove}
+            handleResolve={handleResolve}
           />
-          <Flex
-            horizontal
-            css={{ justifyContent: 'center', padding: spacings[12] }}
-          >
-            {!isLoading && members && members.length > 0 && (
-              <Button
-                variant='solid'
-                isActive={isOpen}
-                onClick={handleResolve}
-                data-testid='show-cards-button'
-              >
-                {isOpen ? 'Hide Cards' : 'Show Cards'}
-              </Button>
-            )}
-          </Flex>
         </>
       ) : (
-        <JoinModal teamId={teamId} title='Join this game' />
+        <JoinModal
+          teamId={teamId}
+          title='Join this game'
+          isOpen={(!members || !member || !team) && !isLoading}
+          preventClosing={true}
+        />
       )}
-      {removeMemberModal && memberToRemove && (
-        <Modal
-          title='Remove Member'
-          handleClose={() => toggleRemoveMemberModal(false)}
-        >
-          <Body css={{ textAlign: 'center' }}>
-            Are you sure you want to remove <b>{memberToRemove.name}</b>?
-          </Body>
-          <Flex gap={8}>
-            <Button variant='solid' onClick={onRemoveMember}>
-              Remove
-            </Button>
-            <Button
-              variant='ghost'
-              onClick={() => toggleRemoveMemberModal(false)}
-            >
-              Cancel
-            </Button>
-          </Flex>
-        </Modal>
-      )}
-    </Flex>
+
+      <Modal
+        title='Remove Member'
+        handleClose={() => toggleRemoveMemberModal(false)}
+        isOpen={!!removeMemberModal && !!memberToRemove}
+      >
+        <VStack gap={2}>
+          <Text css={{ textAlign: 'center' }}>
+            Are you sure you want to remove <b>{memberToRemove?.name}</b>?
+          </Text>
+          <Button variant='solid' onClick={onRemoveMember} colorScheme='red'>
+            Remove
+          </Button>
+          <Button
+            variant='ghost'
+            onClick={() => toggleRemoveMemberModal(false)}
+          >
+            Cancel
+          </Button>
+        </VStack>
+      </Modal>
+    </VStack>
   );
 };
 

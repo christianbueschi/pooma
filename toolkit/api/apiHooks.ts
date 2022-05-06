@@ -1,4 +1,5 @@
 import { collection, doc, onSnapshot, query, where } from '@firebase/firestore';
+import { useRouter } from 'next/router';
 import { destroyCookie, parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import db from './api';
@@ -12,9 +13,12 @@ export type Member = {
   spectactorMode?: boolean;
 };
 
-export const useMembers = (teamId?: string) => {
+export const useMembers = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
+  const teamId = router.query.teamId as string | undefined;
 
   useEffect(() => {
     const myTeamId = teamId || parseCookies(null).teamId;
@@ -53,12 +57,13 @@ export type Team = {
   isLocked: boolean;
 };
 
-export const useTeam = (
-  teamId?: string | null
-): [Team | undefined, boolean, string] => {
+export const useTeam = () => {
   const [team, setTeam] = useState<Team>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const router = useRouter();
+  const teamId = router.query.teamId as string | undefined;
 
   useEffect(() => {
     const cookies = parseCookies();
@@ -96,13 +101,13 @@ export const useTeam = (
     };
   }, [teamId]);
 
-  return [team, isLoading, error];
+  return [team, isLoading, error] as const;
 };
 
-export const useMember = (
-  teamId?: string,
-  memberId?: string
-): [Member | undefined, boolean] => {
+export const useMember = (memberId?: string) => {
+  const router = useRouter();
+  const teamId = router.query.teamId as string | undefined;
+
   const [member, setMember] = useState<Member>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -120,6 +125,14 @@ export const useMember = (
     const memberDoc = doc(db, 'teams', myTeamId, 'members', myMemberId);
 
     const unsubscribe = onSnapshot(memberDoc, (querySnapshot) => {
+      // if we don't get a member here means that there is a member cookie which belongs to another team
+      // therefore we need the user to register again
+      if (!querySnapshot.data()) {
+        destroyCookie(null, 'memberId');
+        setIsLoading(false);
+        return;
+      }
+
       const newMember = {
         id: querySnapshot.id,
         ...querySnapshot.data(),
@@ -134,5 +147,5 @@ export const useMember = (
     };
   }, [myTeamId, myMemberId]);
 
-  return [member, isLoading];
+  return [member, isLoading] as const;
 };

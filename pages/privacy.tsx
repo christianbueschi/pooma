@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { NextPage } from 'next';
 import { Header } from '../toolkit/components/Header';
+import { colors } from '../toolkit/theme/colors';
 
 const Privacy: NextPage = () => {
   return (
@@ -504,7 +505,7 @@ const Privacy: NextPage = () => {
 
 const StyledContent = styled.div`
   max-width: 600px;
-  padding: ${({ theme }) => theme.spacings[12]};
+  padding: 12px;
   margin: 0 auto;
 
   h1,
@@ -513,21 +514,21 @@ const StyledContent = styled.div`
   p,
   ul,
   li {
-    margin-bottom: ${({ theme }) => theme.spacings[8]};
+    margin-bottom: 8px;
   }
   h1 {
     font-size: 24px;
-    margin: ${({ theme }) => theme.spacings[24]} 0;
+    margin: 24px 0;
   }
 
   h2 {
     font-size: 20px;
-    margin: ${({ theme }) => theme.spacings[16]} 0;
+    margin: 16px 0;
   }
 
   h3 {
     font-size: 18px;
-    margin: ${({ theme }) => theme.spacings[16]} 0;
+    margin: 16px 0;
   }
 
   p,
@@ -536,7 +537,7 @@ const StyledContent = styled.div`
   }
 
   a {
-    color: ${({ theme }) => theme.colors.green};
+    color: ${colors.green[500]};
     word-break: break-all;
   }
 `;

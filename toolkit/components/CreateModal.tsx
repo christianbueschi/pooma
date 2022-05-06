@@ -1,14 +1,4 @@
-import { Body } from '../elements/Body';
-import { Button } from '../elements/Button';
-import { Flex } from '../elements/Flex';
-import {
-  ErrorInfo,
-  FormGrid,
-  Input,
-  Label,
-  StyledDropdown,
-} from '../elements/Form';
-import { Modal } from './Modal';
+import { StyledDropdown } from '../elements/Form';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
 import { api } from '../api/api';
@@ -16,6 +6,8 @@ import { useState } from 'react';
 import { Option } from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { COOKIE_OPTIONS } from './constants';
+import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
+import { Modal } from './Modal';
 
 const CARD_MODE_OPTIONS = [
   { value: 'fibonacci', label: 'Fibonacci' },
@@ -24,9 +16,13 @@ const CARD_MODE_OPTIONS = [
 
 type CreateModalProps = {
   handleClose: () => void;
+  isOpen: boolean;
 };
 
-export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
+export const CreateModal: React.FC<CreateModalProps> = ({
+  handleClose,
+  isOpen,
+}) => {
   const router = useRouter();
 
   const [team, setTeam] = useState('');
@@ -34,7 +30,6 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
   const [cardModeOption, setCardModeOption] = useState<Option>(
     CARD_MODE_OPTIONS[0]
   );
-  const [teamError, setTeamError] = useState('');
 
   const onCreateTeam = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -52,17 +47,11 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
   };
 
   return (
-    <Modal title='Start a new game' handleClose={handleClose}>
-      {teamError && (
-        <ErrorInfo>
-          <Body dangerouslySetInnerHTML={{ __html: teamError }} />
-        </ErrorInfo>
-      )}
-
+    <Modal title='Start a new game' handleClose={handleClose} isOpen={isOpen}>
       <form onSubmit={onCreateTeam}>
-        <Flex gap={24} css={{ alignItems: 'center' }}>
-          <FormGrid>
-            <Label>Team Name</Label>
+        <VStack gap={12}>
+          <Grid templateColumns='1fr 2fr' gridGap={2}>
+            <FormLabel>Team Name</FormLabel>
             <Input
               type='text'
               value={team}
@@ -70,7 +59,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
               data-testid='team-name-input'
             />
 
-            <Label>Member Name</Label>
+            <FormLabel>Member Name</FormLabel>
             <Input
               type='text'
               value={member}
@@ -78,26 +67,26 @@ export const CreateModal: React.FC<CreateModalProps> = ({ handleClose }) => {
               data-testid='member-name-input'
             />
 
-            <Label>Card Deck</Label>
+            <FormLabel>Card Deck</FormLabel>
             <StyledDropdown
               options={CARD_MODE_OPTIONS}
               onChange={(option) => setCardModeOption(option)}
               value={cardModeOption}
               placeholder='Select an option'
             />
-          </FormGrid>
+          </Grid>
 
           <Button
             variant='solid'
             type='submit'
             onClick={onCreateTeam}
-            isFullWidth
             isDisabled={!team || !member}
             data-testid='start-game-button'
+            colorScheme='green'
           >
             Start Game
           </Button>
-        </Flex>
+        </VStack>
       </form>
     </Modal>
   );

@@ -37,7 +37,9 @@ test.describe('New game', () => {
     // INVITE OTHERS
 
     // Get the share link
-    const shareLink = await page.locator('data-testid=share-link').innerText();
+    const shareLink = await page
+      .locator('data-testid=share-link >> visible=true')
+      .innerText();
 
     // Log the current user out
     await page.locator('data-testid=user-context-menu-button').click();

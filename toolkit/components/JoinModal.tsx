@@ -1,21 +1,28 @@
 import Link from 'next/link';
 import { useState } from 'react';
-import { Body } from '../elements/Body';
-import { Button } from '../elements/Button';
-import { Flex } from '../elements/Flex';
-import { ErrorInfo, FormGrid, Info, Input, Label } from '../elements/Form';
 import { api } from '../api/api';
 import { Member, useTeam } from '../api/apiHooks';
-import { StyledLink } from './Header';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
 import { COOKIE_OPTIONS } from './constants';
+import {
+  Box,
+  Button,
+  Flex,
+  FormLabel,
+  Grid,
+  Input,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 
 type JoinModalProps = {
   title: string;
-  handleClose?: () => void;
+  isOpen: boolean;
   teamId?: string;
+  preventClosing: boolean;
+  handleClose?: () => void;
 };
 
 export const JoinModal: React.FC<JoinModalProps> = (props) => {
@@ -62,76 +69,100 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
     if (!teamId) return;
     setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
     setCookie(null, 'memberId', memberId);
-    router.push(teamId);
+    router.push(`team/${teamId}`);
+  };
+
+  const handleClose = () => {
+    setTeamError('');
+    setTeamId(undefined);
+    setMemberName('');
+    setExistingMember(undefined);
+
+    props.handleClose && props.handleClose();
   };
 
   return (
-    <Modal title={props.title} handleClose={props.handleClose}>
-      {(teamError || error) && (
-        <ErrorInfo>
-          <Body dangerouslySetInnerHTML={{ __html: teamError || error }} />
-        </ErrorInfo>
-      )}
+    <Modal
+      title={props.title}
+      handleClose={handleClose}
+      isOpen={props.isOpen}
+      preventClosing={props.preventClosing}
+    >
+      <VStack gap={8}>
+        {(teamError || error) && (
+          <Box p={4} backgroundColor='red.400' borderRadius='8px'>
+            <Text dangerouslySetInnerHTML={{ __html: teamError || error }} />
+          </Box>
+        )}
 
-      {existingMember && (
-        <Flex gap={8}>
-          <ErrorInfo>
-            <Body
-              dangerouslySetInnerHTML={{
-                __html: `The member <b>${existingMember.name}</b> already exists.`,
-              }}
-            />
-          </ErrorInfo>
-          <Info color='blue'>
-            <Flex gap={8}>
-              <Body>
-                Is this you? Then you can just login. Otherwise please use a
-                different name.
-              </Body>
-              <Button onClick={() => loginAs(existingMember.id)}>
-                Login as {existingMember.name}
+        {existingMember && (
+          <Flex gap={8}>
+            <Box backgroundColor='blue.500' borderRadius='8px'>
+              <Text
+                color='white'
+                dangerouslySetInnerHTML={{
+                  __html: `The member <b>${existingMember.name}</b> already exists.`,
+                }}
+                backgroundColor='#ffffff20'
+                p={4}
+              />
+              <VStack gap={4} alignItems='start' p={4}>
+                <Text color='white'>
+                  Is this you? Then you can just login. Otherwise please use a
+                  different name.
+                </Text>
+                <Button
+                  onClick={() => loginAs(existingMember.id)}
+                  alignSelf='end'
+                >
+                  Login as {existingMember.name}
+                </Button>
+              </VStack>
+            </Box>
+          </Flex>
+        )}
+
+        <form onSubmit={onJoinTeam}>
+          <VStack gap={12}>
+            <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
+              <FormLabel>Team ID</FormLabel>
+              <Input
+                type='text'
+                value={teamId}
+                onChange={(ev) => setTeamId(ev.currentTarget.value)}
+                data-testid='team-name-input'
+              />
+              <FormLabel>Member Name</FormLabel>
+              <Input
+                type='text'
+                value={memberName}
+                onChange={(ev) => setMemberName(ev.currentTarget.value)}
+                data-testid='member-name-input'
+              />
+            </Grid>
+
+            <VStack gap={2}>
+              <Button
+                variant='solid'
+                type='submit'
+                onClick={onJoinTeam}
+                isDisabled={!teamId || !memberName}
+                data-testid='join-button'
+                colorScheme='green'
+              >
+                Join Game
               </Button>
-            </Flex>
-          </Info>
-        </Flex>
-      )}
-
-      <form onSubmit={onJoinTeam}>
-        <Flex gap={24} css={{ alignItems: 'center' }}>
-          <FormGrid>
-            <Label>Team ID</Label>
-            <Input
-              type='text'
-              value={teamId}
-              onChange={(ev) => setTeamId(ev.currentTarget.value)}
-              data-testid='team-name-input'
-            />
-            <Label>Member Name</Label>
-            <Input
-              type='text'
-              value={memberName}
-              onChange={(ev) => setMemberName(ev.currentTarget.value)}
-              data-testid='member-name-input'
-            />
-          </FormGrid>
-
-          <Button
-            variant='solid'
-            type='submit'
-            onClick={onJoinTeam}
-            isDisabled={!teamId || !memberName}
-            isFullWidth
-            data-testid='join-button'
-          >
-            Join Game
-          </Button>
-          {teamId && (
-            <Link href='/' passHref>
-              <StyledLink>Start over</StyledLink>
-            </Link>
-          )}
-        </Flex>
-      </form>
+              {/* {teamId && ( */}
+              <Link href='/' passHref>
+                <a onClick={handleClose}>
+                  <Text>Start over</Text>
+                </a>
+              </Link>
+              {/* )} */}
+            </VStack>
+          </VStack>
+        </form>
+      </VStack>
     </Modal>
   );
 };
