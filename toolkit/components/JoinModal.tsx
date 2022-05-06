@@ -26,7 +26,7 @@ type JoinModalProps = {
 };
 
 export const JoinModal: React.FC<JoinModalProps> = (props) => {
-  const [team, teamIsLoading, error] = useTeam(props.teamId);
+  const [team, teamIsLoading, error] = useTeam();
   const [teamId, setTeamId] = useState(props.teamId);
   const [memberName, setMemberName] = useState('');
   const [existingMember, setExistingMember] = useState<Member>();
