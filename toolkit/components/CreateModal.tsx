@@ -1,18 +1,24 @@
-import { StyledDropdown } from '../elements/Form';
 import { setCookie } from 'nookies';
-import { useRouter } from 'next/router';
-import { api } from '../api/api';
-import { useState } from 'react';
-import { Option } from 'react-dropdown';
-import 'react-dropdown/style.css';
-import { COOKIE_OPTIONS } from './constants';
 import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { CardMode } from '@prisma/client';
+import { COOKIE_OPTIONS } from './constants';
 import { Modal } from './Modal';
+import { trpc } from '../../src/utils/trpc';
+import { Controller, useForm } from 'react-hook-form';
+import { Select } from 'chakra-react-select';
 
 const CARD_MODE_OPTIONS = [
-  { value: 'fibonacci', label: 'Fibonacci' },
-  { value: 'tshirt', label: 'T-Shirt' },
+  { value: 'FIBONACCI', label: 'Fibonacci' },
+  { value: 'TSHIRT', label: 'T-Shirt' },
 ];
+
+type FormFields = {
+  team: string;
+  cardMode: CardMode;
+  member: string;
+  fdf: string;
+};
 
 type CreateModalProps = {
   handleClose: () => void;
@@ -25,64 +31,73 @@ export const CreateModal: React.FC<CreateModalProps> = ({
 }) => {
   const router = useRouter();
 
-  const [team, setTeam] = useState('');
-  const [member, setMember] = useState('');
-  const [cardModeOption, setCardModeOption] = useState<Option>(
-    CARD_MODE_OPTIONS[0]
-  );
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = useForm<FormFields>();
 
-  const onCreateTeam = async (ev: React.FormEvent) => {
-    ev.preventDefault();
+  const teamMutation = trpc.createTeam.useMutation();
+  const memberMutation = trpc.createMember.useMutation();
 
-    const teamId = await api.setTeam(team, cardModeOption.value);
+  const onCreateTeam = async (data: FormFields) => {
+    // 1. create a new team
+    const newTeam = await teamMutation.mutateAsync({
+      name: data.team,
+      cardMode: data.cardMode,
+    });
 
-    if (!teamId) return;
+    // 2. create a new member and connect it to the team
+    const newMember = await memberMutation.mutateAsync({
+      name: data.member,
+      teamId: newTeam.id,
+    });
 
-    const memberRes = await api.addMember(teamId, member);
+    setCookie(null, 'teamId', newTeam.id, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
 
-    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', memberRes.member.id, COOKIE_OPTIONS);
-
-    router.push('/team' + '/' + teamId);
+    router.push('/team' + '/' + newTeam.id);
   };
 
   return (
-    <Modal title='Start a new game' handleClose={handleClose} isOpen={isOpen}>
-      <form onSubmit={onCreateTeam}>
+    <Modal title='Start a new game' onClose={handleClose} isOpen={isOpen}>
+      <form onSubmit={handleSubmit(onCreateTeam)}>
         <VStack gap={12}>
           <Grid templateColumns='1fr 2fr' gridGap={2}>
             <FormLabel>Team Name</FormLabel>
             <Input
-              type='text'
-              value={team}
-              onChange={(ev) => setTeam(ev.currentTarget.value)}
+              {...register('team', { required: true })}
               data-testid='team-name-input'
             />
 
             <FormLabel>Member Name</FormLabel>
             <Input
-              type='text'
-              value={member}
-              onChange={(ev) => setMember(ev.currentTarget.value)}
+              {...register('member', { required: true })}
               data-testid='member-name-input'
             />
 
             <FormLabel>Card Deck</FormLabel>
-            <StyledDropdown
-              options={CARD_MODE_OPTIONS}
-              onChange={(option) => setCardModeOption(option)}
-              value={cardModeOption}
-              placeholder='Select an option'
+            <Controller
+              control={control}
+              name='cardMode'
+              rules={{ required: true }}
+              render={({ field: { ref, onChange } }) => (
+                <Select
+                  ref={ref}
+                  options={CARD_MODE_OPTIONS}
+                  onChange={(option) => onChange(option?.value)}
+                  placeholder='Select an option'
+                />
+              )}
             />
           </Grid>
 
           <Button
             variant='solid'
             type='submit'
-            onClick={onCreateTeam}
-            isDisabled={!team || !member}
+            isDisabled={!isValid}
             data-testid='start-game-button'
-            colorScheme='green'
           >
             Start Game
           </Button>

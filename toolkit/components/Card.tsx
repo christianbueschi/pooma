@@ -1,9 +1,9 @@
-import { Flex, Text } from '@chakra-ui/react';
+import { Flex, Text, useColorModeValue } from '@chakra-ui/react';
 import { MQ } from './constants';
 
 type CardProps = {
   card: string;
-  activeCard?: string;
+  activeCard?: string | null;
   isLocked: boolean;
   onClick: (card: string) => void;
 };
@@ -15,6 +15,9 @@ export const Card: React.FC<CardProps> = ({
   onClick,
 }) => {
   const isActiveCard = card === activeCard;
+
+  const cardColor = useColorModeValue('cyan.500', 'green.400');
+  const cardColorActive = useColorModeValue('green.400', 'cyan.500');
 
   const isLongText = card.length > 3;
   const fontSize = [
@@ -28,16 +31,14 @@ export const Card: React.FC<CardProps> = ({
     isLongText ? '20px' : '26px',
   ];
 
-  const emFontSize = ['24px', '24px', '42px'];
-
   return (
     <Flex
       as='li'
       onClick={() => onClick(card)}
       data-testid='card'
       h={['130px', '130px', '150px']}
-      borderRadius='8px'
-      backgroundColor={isActiveCard ? 'blue.700' : 'green.500'}
+      borderRadius='xl'
+      backgroundColor={isActiveCard ? cardColorActive : cardColor}
       cursor={isLocked ? 'not-allowed' : 'pointer'}
       transition='transform 0.25s ease-in-out'
       color='white'

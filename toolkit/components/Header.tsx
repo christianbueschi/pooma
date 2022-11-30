@@ -1,14 +1,11 @@
 import styled from '@emotion/styled';
 import { destroyCookie } from 'nookies';
-import { useMember, useTeam } from '../api/apiHooks';
-import { FiUser, FiExternalLink } from 'react-icons/fi';
-import { LogoTitle } from '../elements/Title';
+import { FiUser, FiUsers, FiMoon } from 'react-icons/fi';
+import { LogoTitle } from './Brand';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import { api } from '../api/api';
-import { ShareLink } from './ShareLink';
 import { COOKIE_OPTIONS } from './constants';
 import {
   Box,
@@ -19,13 +16,16 @@ import {
   HStack,
   Menu,
   MenuButton,
-  MenuItem,
   MenuList,
   Text,
+  useColorMode,
   VStack,
 } from '@chakra-ui/react';
 import { Modal } from './Modal';
 import { colors } from '../theme/colors';
+import { useTeam } from '../hooks/useTeam';
+import { useMember } from '../hooks/useMember';
+import { trpc } from '../../src/utils/trpc';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -36,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const [member] = useMember();
 
   const router = useRouter();
+
+  const { toggleColorMode } = useColorMode();
 
   const onClickLogo = () => {
     router.push('/');
@@ -55,11 +57,14 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     }
   };
 
+  const memberMutation = trpc.updateMember.useMutation();
+
   const handleToggleSpectactoreMode = (event: any) => {
     if (!team || !member) return;
 
-    api.updateMember(team?.id, member?.id, {
-      spectactorMode: event.currentTarget.checked,
+    memberMutation.mutateAsync({
+      id: member.id,
+      isSpectactorMode: event.currentTarget.checked,
     });
   };
 
@@ -77,6 +82,8 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
       padding={4}
       justifyItems='center'
       w='100%'
+      position='sticky'
+      top={0}
     >
       {!isHome && <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>}
 
@@ -86,17 +93,9 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
             {isTeamSet && (
               <HStack gap={24} alignItems='center'>
                 <Link href={`/team/${team.id}`} passHref>
-                  <a>
-                    <Button
-                      variant='ghost'
-                      colorScheme='green'
-                      leftIcon={
-                        <FiExternalLink color='green.500' size='24px' />
-                      }
-                    >
-                      <Text>{team?.name}</Text>
-                    </Button>
-                  </a>
+                  <Button variant='ghost' leftIcon={<FiUsers size='24px' />}>
+                    <Text>{team?.name}</Text>
+                  </Button>
                 </Link>
               </HStack>
             )}
@@ -105,26 +104,22 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 <MenuButton
                   as={Button}
                   variant='ghost'
-                  colorScheme='green'
-                  rightIcon={<FiUser color='green.500' size='24px' />}
+                  leftIcon={<FiUser color='green.500' size='24px' />}
                   data-testid='user-context-menu-button'
                 >
                   <Text>{member?.name}</Text>
                 </MenuButton>
-                <MenuList backgroundColor='blue.700' p={4} border='none'>
+                <MenuList p={4} border='none'>
                   <VStack gap={4} alignItems='flex-start'>
                     {!isHome && (
                       <>
                         <HStack as='label' gap={2} alignItems='center'>
                           <StyledToggle
-                            defaultChecked={member?.spectactorMode}
+                            defaultChecked={member?.isSpectactorMode}
                             onChange={handleToggleSpectactoreMode}
                           />
-                          <Text color='white'>Spectactor Mode</Text>
+                          <Text>Spectactor Mode</Text>
                         </HStack>
-                        <VStack gap={2}>
-                          <ShareLink inverse />
-                        </VStack>
                       </>
                     )}
                     <Button
@@ -138,14 +133,17 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 </MenuList>
               </Menu>
             )}
+            <HStack>
+              <FiMoon onClick={toggleColorMode} cursor='pointer' />
+            </HStack>
           </HStack>
         </HStack>
       </GridItem>
 
       <Modal
         title='You have been removed'
-        isOpen={member?.state === 'removed' && !isHome}
-        handleClose={handleMemberRemovedModalOk}
+        isOpen={member?.state === 'REMOVED' && !isHome}
+        onClose={handleMemberRemovedModalOk}
       >
         <VStack gap={4}>
           <Text textAlign='center'>
@@ -162,14 +160,14 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
 
 const StyledToggle = styled(Toggle)`
   .react-toggle-track {
-    background-color: ${colors.grey[700]};
+    background-color: ${colors.green[400]};
   }
 
   &.react-toggle--checked .react-toggle-track {
-    background-color: ${colors.grey[700]};
+    background-color: ${colors.green[400]};
 
     &:hover {
-      background-color: ${colors.grey[700]};
+      background-color: ${colors.green[400]};
     }
   }
 `;

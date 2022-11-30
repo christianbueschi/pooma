@@ -35,7 +35,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-/firebase-debug.log
 /firestore-debug.log
 test-results/
 playwright-report/
+/.env

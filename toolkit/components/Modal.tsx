@@ -5,6 +5,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  useColorModeValue,
 } from '@chakra-ui/react';
 
 type PModalProps = {
@@ -12,20 +13,26 @@ type PModalProps = {
   children: React.ReactNode;
   isOpen: boolean;
   preventClosing?: boolean;
-  handleClose: () => void;
+  onClose?: () => void;
 };
 
 export const Modal: React.FC<PModalProps> = ({
   title,
   isOpen,
   preventClosing,
-  handleClose,
+  onClose,
   children,
 }) => {
+  const backgroundColor = useColorModeValue('white', 'grey.400');
+
   return (
-    <ChakraModal size='2xl' onClose={handleClose} isOpen={isOpen}>
-      <ModalOverlay opacity='0.5' backgroundColor='blue.700' />
-      <ModalContent>
+    <ChakraModal
+      size='2xl'
+      onClose={onClose ? onClose : () => {}}
+      isOpen={isOpen}
+    >
+      <ModalOverlay />
+      <ModalContent backgroundColor={backgroundColor}>
         <ModalHeader textAlign='center'>{title}</ModalHeader>
         {!preventClosing && <ModalCloseButton />}
         <ModalBody p={12}>{children}</ModalBody>

@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/api';
-import { Member, Team } from '../api/apiHooks';
 import { Card } from './Card';
 import { CARDS } from './constants';
 import { Grid } from '@chakra-ui/react';
+import { Member, Team } from '@prisma/client';
+import { trpc } from '../../src/utils/trpc';
 
-type CardsProps = {
+type CardDeckProps = {
   member: Member;
   team: Team;
 };
 
-export const Cards: React.FC<CardsProps> = ({ team, member }) => {
-  const [activeCard, setActiveCard] = useState<string>();
+export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
+  const [activeCard, setActiveCard] = useState<string | null>();
+
+  const updateMemberMutation = trpc.updateMember.useMutation();
 
   const onClickCard = async (card: string) => {
     if (team.isLocked) return;
@@ -22,11 +24,13 @@ export const Cards: React.FC<CardsProps> = ({ team, member }) => {
     }
 
     setActiveCard(newCard);
-    await api.updateMember(team.id, member.id, { card: newCard });
+
+    await updateMemberMutation.mutateAsync({
+      id: member.id,
+      card: newCard,
+    });
   };
 
-  // reset card when changed via dashboard
-  // keep card in sync with FS
   useEffect(() => {
     setActiveCard(member.card);
   }, [member.card]);

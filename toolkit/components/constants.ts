@@ -35,8 +35,8 @@ type Cards = {
 };
 
 export const CARDS: Cards = {
-  fibonacci: FIBONACCI_NUMBERS,
-  tshirt: T_SHIRT_SIZES,
+  FIBONACCI: FIBONACCI_NUMBERS,
+  TSHIRT: T_SHIRT_SIZES,
 };
 
 const BREAKPOINTS = [375, 576, 768, 992, 1200];

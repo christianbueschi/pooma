@@ -1,7 +1,5 @@
 import Link from 'next/link';
-import { useState } from 'react';
-import { api } from '../api/api';
-import { Member, useTeam } from '../api/apiHooks';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
@@ -9,13 +7,23 @@ import { COOKIE_OPTIONS } from './constants';
 import {
   Box,
   Button,
-  Flex,
   FormLabel,
   Grid,
   Input,
+  InputGroup,
+  InputRightAddon,
+  Spinner,
   Text,
+  Tooltip,
   VStack,
 } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
+import { trpc } from '../../src/utils/trpc';
+import { useTeam } from '../hooks/useTeam';
+import { FiCheck, FiX } from 'react-icons/fi';
+import { ComponentWithTooltip } from './ComponentWithTooltip';
+
+type FormFields = { teamId: string; member: string };
 
 type JoinModalProps = {
   title: string;
@@ -25,118 +33,128 @@ type JoinModalProps = {
   handleClose?: () => void;
 };
 
-export const JoinModal: React.FC<JoinModalProps> = (props) => {
-  const [team, teamIsLoading, error] = useTeam();
-  const [teamId, setTeamId] = useState(props.teamId);
-  const [memberName, setMemberName] = useState('');
-  const [existingMember, setExistingMember] = useState<Member>();
+export const JoinModal: React.FC<JoinModalProps> = ({
+  title,
+  isOpen,
+  teamId,
+  preventClosing,
+  handleClose,
+}) => {
   const [teamError, setTeamError] = useState('');
 
   const router = useRouter();
 
-  const onJoinTeam = async (ev: React.FormEvent) => {
-    ev.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    watch,
+    formState: { isValid },
+  } = useForm<FormFields>({
+    defaultValues: {
+      teamId: teamId || '',
+    },
+  });
 
-    if (!teamId) return;
+  const memberMutation = trpc.createMember.useMutation();
 
-    // reroute to new teamId path if it doesn't exists
-    const teamExists = await api.doesTeamExists(teamId);
+  const [teamIdInternal, setTeamIdInternal] = useState(getValues().teamId);
 
-    if (!teamExists) {
-      setTeamError(
-        `Sorry, but we couldn't find the team <b>${teamId}</b>. <br> Please try a different team or create a new one.`
-      );
-      return;
-    }
+  const [team, teamIsLoading, refetch, error] = useTeam(teamIdInternal);
+
+  const [showTeamExistsBadge, setShowTeamExistsBadge] = useState(false);
+  const handleBlurTeamId = () => {
+    setTeamIdInternal(getValues().teamId);
+    setShowTeamExistsBadge(true);
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [teamIdInternal, refetch]);
+
+  const onJoinTeam = async (data: FormFields) => {
+    if (!data.teamId) return;
+
+    const newMember = await memberMutation.mutateAsync({
+      teamId: data.teamId,
+      name: data.member,
+    });
 
     setTeamError('');
 
-    // Otherwise we can try to add the member
-    const memberRes = await api.addMember(teamId, memberName);
+    setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
 
-    if (memberRes.type === 'EXISTING') {
-      setExistingMember(memberRes.member);
-      return;
-    }
-
-    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', memberRes.member.id, COOKIE_OPTIONS);
-
-    router.push('/team' + '/' + teamId);
+    router.push('/team' + '/' + data.teamId);
   };
 
-  const loginAs = (memberId: string) => {
-    if (!teamId) return;
-    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', memberId);
-    router.push(`team/${teamId}`);
-  };
+  useEffect(() => {
+    if (!team) return;
 
-  const handleClose = () => {
-    setTeamError('');
-    setTeamId(undefined);
-    setMemberName('');
-    setExistingMember(undefined);
+    setValue('teamId', team.id);
+  }, [team, setValue]);
 
-    props.handleClose && props.handleClose();
+  const onClose = () => {
+    setValue('teamId', '');
+    setValue('member', '');
+
+    if (handleClose) handleClose();
   };
 
   return (
     <Modal
-      title={props.title}
-      handleClose={handleClose}
-      isOpen={props.isOpen}
-      preventClosing={props.preventClosing}
+      title={title}
+      onClose={onClose}
+      isOpen={isOpen}
+      preventClosing={preventClosing}
     >
       <VStack gap={8}>
         {(teamError || error) && (
           <Box p={4} backgroundColor='red.400' borderRadius='8px'>
-            <Text dangerouslySetInnerHTML={{ __html: teamError || error }} />
+            <Text
+              dangerouslySetInnerHTML={{ __html: teamError || error || '' }}
+            />
           </Box>
         )}
 
-        {existingMember && (
-          <Flex gap={8}>
-            <Box backgroundColor='blue.500' borderRadius='8px'>
-              <Text
-                color='white'
-                dangerouslySetInnerHTML={{
-                  __html: `The member <b>${existingMember.name}</b> already exists.`,
-                }}
-                backgroundColor='#ffffff20'
-                p={4}
-              />
-              <VStack gap={4} alignItems='start' p={4}>
-                <Text color='white'>
-                  Is this you? Then you can just login. Otherwise please use a
-                  different name.
-                </Text>
-                <Button
-                  onClick={() => loginAs(existingMember.id)}
-                  alignSelf='end'
-                >
-                  Login as {existingMember.name}
-                </Button>
-              </VStack>
-            </Box>
-          </Flex>
-        )}
-
-        <form onSubmit={onJoinTeam}>
+        <form onSubmit={handleSubmit(onJoinTeam)}>
           <VStack gap={12}>
             <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
               <FormLabel>Team ID</FormLabel>
-              <Input
-                type='text'
-                value={teamId}
-                onChange={(ev) => setTeamId(ev.currentTarget.value)}
-                data-testid='team-name-input'
-              />
+              <InputGroup>
+                <Input
+                  {...register('teamId', { required: true })}
+                  data-testid='team-name-input'
+                  onBlur={handleBlurTeamId}
+                />
+                {(showTeamExistsBadge || team) && (
+                  <InputRightAddon
+                    bg={
+                      teamIsLoading
+                        ? 'grey.400'
+                        : team
+                        ? 'green.400'
+                        : 'red.400'
+                    }
+                  >
+                    {teamIsLoading ? (
+                      <Spinner color='white' size='sm' />
+                    ) : team ? (
+                      <FiCheck color='white' />
+                    ) : (
+                      <Tooltip label='No team found'>
+                        <ComponentWithTooltip>
+                          <FiX color='white' />
+                        </ComponentWithTooltip>
+                      </Tooltip>
+                    )}
+                  </InputRightAddon>
+                )}
+              </InputGroup>
               <FormLabel>Member Name</FormLabel>
               <Input
-                type='text'
-                value={memberName}
-                onChange={(ev) => setMemberName(ev.currentTarget.value)}
+                {...register('member', { required: true, minLength: 3 })}
                 data-testid='member-name-input'
               />
             </Grid>
@@ -145,20 +163,16 @@ export const JoinModal: React.FC<JoinModalProps> = (props) => {
               <Button
                 variant='solid'
                 type='submit'
-                onClick={onJoinTeam}
-                isDisabled={!teamId || !memberName}
+                isDisabled={!isValid || !team}
                 data-testid='join-button'
                 colorScheme='green'
               >
                 Join Game
               </Button>
-              {/* {teamId && ( */}
+
               <Link href='/' passHref>
-                <a onClick={handleClose}>
-                  <Text>Start over</Text>
-                </a>
+                <Text onClick={handleClose}>Cancel</Text>
               </Link>
-              {/* )} */}
             </VStack>
           </VStack>
         </form>

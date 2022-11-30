@@ -1,11 +1,15 @@
-import { NextPage } from 'next';
-import { Header } from '../toolkit/components/Header';
+import { NextPage, NextPageContext } from 'next';
 import { useState } from 'react';
-import { JoinModal } from '../toolkit/components/JoinModal';
-import { CreateModal } from '../toolkit/components/CreateModal';
-
 import { Button, Heading, VStack } from '@chakra-ui/react';
-import { LOGO_STYLES } from '../toolkit/elements/Title';
+import { configureAbly } from '@ably-labs/react-hooks';
+import { Header } from '../../toolkit/components/Header';
+import { JoinModal } from '../../toolkit/components/JoinModal';
+import { CreateModal } from '../../toolkit/components/CreateModal';
+import { Logo } from '../../toolkit/components/Brand';
+
+configureAbly({
+  authUrl: `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`,
+});
 
 const Home: NextPage = () => {
   const [showStartModal, setShowStartModal] = useState(false);
@@ -15,17 +19,7 @@ const Home: NextPage = () => {
     <VStack gap={12}>
       <Header isHome />
       <VStack justifyContent='center' alignItems='center' gap={2}>
-        <Heading
-          as='h1'
-          size='xl'
-          textAlign='center'
-          fontSize='48px'
-          css={{
-            LOGO_STYLES,
-          }}
-        >
-          POOMA
-        </Heading>
+        <Logo />
         <Heading
           as='h2'
           size='md'
@@ -35,12 +29,11 @@ const Home: NextPage = () => {
         >
           Scrum Planning Poker at it&apos;s finest!
           <br />
-          Virtually estimate your team stories with ease 🎉
+          Estimate virtually your team stories with ease 🎉
         </Heading>
         <VStack gap={2}>
           <Button
             variant='solid'
-            colorScheme='green'
             onClick={() => setShowStartModal(true)}
             data-testid='new-game-button'
           >
@@ -70,5 +63,13 @@ const Home: NextPage = () => {
     </VStack>
   );
 };
+
+export function getServerSideProps({ req }: NextPageContext) {
+  return {
+    props: {
+      cookies: req?.headers.cookie ?? '',
+    },
+  };
+}
 
 export default Home;

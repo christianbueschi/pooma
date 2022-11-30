@@ -1,29 +1,26 @@
-import { Box, HStack, Text, VStack } from '@chakra-ui/react';
+import { Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react';
 import Link from 'next/link';
+import { ShareLink } from './ShareLink';
 
 export const Footer: React.FC = () => {
+  const backgroundcolor = useColorModeValue('cyan.400', 'green.500');
+
   return (
-    <Box as='footer' backgroundColor='blue.700' color='white' p={6}>
-      <VStack alignItems='end'>
-        <Link
-          href="mailto:hello@pooma.app?subject=Missing feature&amp;body=Hi, I'm missing the following feature:"
-          passHref
-        >
-          <a>
-            <Text color='white'>Missing a feature?</Text>
-          </a>
+    <VStack
+      as='footer'
+      p={6}
+      bg={backgroundcolor}
+      justifyContent='space-between'
+    >
+      <ShareLink />
+      <Stack alignItems='end' flexDirection='row' gap={8}>
+        <Link href='/privacy' passHref>
+          <Text>Privacy Policy</Text>
         </Link>
         <Link href='mailto:hello@pooma.app' passHref>
-          <a>
-            <Text color='white'>hello@pooma.app</Text>
-          </a>
+          <Text>hello@pooma.app</Text>
         </Link>
-        <Link href='/privacy' passHref>
-          <a>
-            <Text>Privacy Policy</Text>
-          </a>
-        </Link>
-      </VStack>
-    </Box>
+      </Stack>
+    </VStack>
   );
 };
