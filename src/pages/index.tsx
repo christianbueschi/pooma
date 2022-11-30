@@ -7,8 +7,12 @@ import { JoinModal } from '../../toolkit/components/JoinModal';
 import { CreateModal } from '../../toolkit/components/CreateModal';
 import { Logo } from '../../toolkit/components/Brand';
 
+const authUrl = process.env.NEXT_PUBLIC_VERCEL_ENV
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`
+  : `http://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`;
+
 configureAbly({
-  authUrl: `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`,
+  authUrl,
 });
 
 const Home: NextPage = () => {
