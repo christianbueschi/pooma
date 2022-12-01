@@ -61,7 +61,7 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
                 size={100}
                 removeQrCodeBehindLogo={true}
               />
-              <Button onClick={onCopy} w='150px'>
+              <Button onClick={onCopy} w='150px' title={value}>
                 {hasCopied ? 'Copied' : 'Copy Link'}
               </Button>
             </HStack>

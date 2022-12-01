@@ -21,6 +21,8 @@ test.describe('New game', () => {
     // Create team and user
     await page.locator('data-testid=team-name-input').fill(TEAM);
     await page.locator('data-testid=member-name-input').fill(MEMBER_1);
+    await page.getByText('Select an option').click();
+    await page.getByRole('button', { name: 'Fibonacci' }).click();
     await page.locator('data-testid=start-game-button').click();
 
     // Make sure team is created with the right name
@@ -38,15 +40,15 @@ test.describe('New game', () => {
 
     // Get the share link
     const shareLink = await page
-      .locator('data-testid=share-link >> visible=true')
-      .innerText();
+      .getByRole('button', { name: 'Copy Link' })
+      .getAttribute('title');
 
     // Log the current user out
     await page.locator('data-testid=user-context-menu-button').click();
     await page.locator('data-testid=logout-button').click();
 
     // Navigate to the team via the share link
-    await page.goto(shareLink);
+    await page.goto(shareLink || '');
 
     // Join the game with a new member
     await page.locator('data-testid=member-name-input').fill(MEMBER_2);
