@@ -9,7 +9,7 @@ const NotFound: NextPage = () => {
     <VStack gap={12}>
       <Header isHome />
       <VStack justifyContent='center' alignItems='center' gap={2}>
-        <Logo text='4 OO 4' />
+        <Logo text='4O4' />
         <Heading
           as='h2'
           size='md'

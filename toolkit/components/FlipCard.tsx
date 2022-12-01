@@ -7,10 +7,9 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Member } from '@prisma/client';
-import { useRouter } from 'next/router';
 import { parseCookies } from 'nookies';
+import { useEffect, useState } from 'react';
 import { FiX } from 'react-icons/fi';
-import { useMember } from '../hooks/useMember';
 
 type FlipCardProps = {
   isOpen: boolean;
@@ -23,12 +22,12 @@ export const FlipCard: React.FC<FlipCardProps> = ({
   member,
   onRemove,
 }) => {
-  const router = useRouter();
+  const cookies = parseCookies();
+  const [isMe, setIsMe] = useState(false);
 
-  const teamId = router.query.teamId as string;
-  const [currentMember] = useMember({ id: member.id, teamId });
-
-  const isMe = currentMember?.id === member.id;
+  useEffect(() => {
+    setIsMe(cookies.memberId === member.id);
+  }, [cookies, member.id]);
 
   const cardHeight = ['130px', '130px', '150px'];
 
