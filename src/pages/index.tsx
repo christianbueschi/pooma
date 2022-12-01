@@ -1,4 +1,4 @@
-import { NextPage, NextPageContext } from 'next';
+import { GetServerSidePropsContext, NextPage } from 'next';
 import { useState } from 'react';
 import { Button, Heading, VStack } from '@chakra-ui/react';
 import { configureAbly } from '@ably-labs/react-hooks';
@@ -6,6 +6,10 @@ import { Header } from '../../toolkit/components/Header';
 import { JoinModal } from '../../toolkit/components/JoinModal';
 import { CreateModal } from '../../toolkit/components/CreateModal';
 import { Logo } from '../../toolkit/components/Brand';
+import { createProxySSGHelpers } from '@trpc/react-query/ssg';
+import { appRouter } from '../server/routers/_app';
+import superjson from 'superjson';
+import { Member, Team } from '@prisma/client';
 
 const authUrl = process.env.NEXT_PUBLIC_VERCEL_ENV
   ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`
@@ -15,13 +19,18 @@ configureAbly({
   authUrl,
 });
 
-const Home: NextPage = () => {
+type HopeProps = {
+  team?: Team;
+  member?: Member;
+};
+
+const Home: NextPage<HopeProps> = ({ team, member }) => {
   const [showStartModal, setShowStartModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
 
   return (
     <VStack gap={12}>
-      <Header isHome />
+      <Header isHome team={team} member={member} />
       <VStack justifyContent='center' alignItems='center' gap={2}>
         <Logo />
         <Heading
@@ -68,10 +77,27 @@ const Home: NextPage = () => {
   );
 };
 
-export function getServerSideProps({ req }: NextPageContext) {
+export async function getServerSideProps({ req }: GetServerSidePropsContext) {
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: {},
+    transformer: superjson,
+  });
+
+  const teamId = req.cookies.teamId || '';
+  const memberId = req.cookies.memberId || '';
+
+  let team = await ssg.team.fetch({ id: teamId });
+  const member = await ssg.member.fetch({ id: memberId });
+
+  // because createdAt date is not serializable
+  team = JSON.parse(JSON.stringify(team));
+
   return {
     props: {
       cookies: req?.headers.cookie ?? '',
+      team,
+      member,
     },
   };
 }

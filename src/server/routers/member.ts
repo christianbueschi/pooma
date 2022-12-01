@@ -24,12 +24,14 @@ export const memberRouter = router({
     .input(
       z.object({
         id: z.string(),
+        teamId: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
-      const member = await prisma.member.findUnique({
+      const member = await prisma.member.findFirst({
         where: {
           id: input.id,
+          teamId: input.teamId,
         },
       });
 

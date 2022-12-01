@@ -97,6 +97,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             variant='solid'
             type='submit'
             isDisabled={!isValid}
+            isLoading={teamMutation.isLoading || memberMutation.isLoading}
             data-testid='start-game-button'
           >
             Start Game

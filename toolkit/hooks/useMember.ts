@@ -1,13 +1,16 @@
-import { destroyCookie, parseCookies } from 'nookies';
+import { destroyCookie } from 'nookies';
 import { useEffect } from 'react';
 import { trpc } from '../../src/utils/trpc';
 
-export const useMember = () => {
-  const cookies = parseCookies();
-  const myMemberId = cookies.memberId;
+type UseMemberType = {
+  id: string;
+  teamId: string;
+};
 
+export const useMember = ({ id, teamId }: UseMemberType) => {
   const { data, isLoading, refetch, error } = trpc.member.useQuery({
-    id: myMemberId || '',
+    id,
+    teamId,
   });
 
   useEffect(() => {

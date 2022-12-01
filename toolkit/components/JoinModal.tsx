@@ -49,7 +49,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     handleSubmit,
     setValue,
     getValues,
-    watch,
     formState: { isValid },
   } = useForm<FormFields>({
     defaultValues: {
@@ -61,7 +60,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const [teamIdInternal, setTeamIdInternal] = useState(getValues().teamId);
 
-  const [team, teamIsLoading, refetch, error] = useTeam(teamIdInternal);
+  const [team, teamIsLoading, refetch, error] = useTeam({ id: teamIdInternal });
 
   const [showTeamExistsBadge, setShowTeamExistsBadge] = useState(false);
   const handleBlurTeamId = () => {
@@ -164,6 +163,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                 variant='solid'
                 type='submit'
                 isDisabled={!isValid || !team}
+                isLoading={memberMutation.isLoading}
                 data-testid='join-button'
                 colorScheme='green'
               >

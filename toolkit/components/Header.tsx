@@ -23,18 +23,16 @@ import {
 } from '@chakra-ui/react';
 import { Modal } from './Modal';
 import { colors } from '../theme/colors';
-import { useTeam } from '../hooks/useTeam';
-import { useMember } from '../hooks/useMember';
 import { trpc } from '../../src/utils/trpc';
+import { Member, Team } from '@prisma/client';
 
 type HeaderProps = {
+  team?: Team | null;
+  member?: Member | null;
   isHome?: boolean;
 };
 
-export const Header: React.FC<HeaderProps> = ({ isHome }) => {
-  const [team] = useTeam();
-  const [member] = useMember();
-
+export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
   const router = useRouter();
 
   const { toggleColorMode } = useColorMode();

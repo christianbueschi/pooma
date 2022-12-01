@@ -1,6 +1,6 @@
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
 import { Member } from '@prisma/client';
-import { NextPage, NextPageContext } from 'next';
+import { GetServerSidePropsContext, NextPage, NextPageContext } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
@@ -13,21 +13,31 @@ import Ably from 'ably/promises';
 import { useTeam } from '../../../toolkit/hooks/useTeam';
 import { useMembers } from '../../../toolkit/hooks/useMembers';
 import { useMember } from '../../../toolkit/hooks/useMember';
+import { useRouter } from 'next/router';
+import { createProxySSGHelpers } from '@trpc/react-query/ssg';
+import { appRouter } from '../../server/routers/_app';
+import superjson from 'superjson';
 
 type TeamProps = {
-  teamId: string;
+  id: string;
+  memberId: string;
 };
 
 export const ablyClient = new Ably.Realtime(
   process.env.NEXT_PUBLIC_ABLY_CLIENT_API_KEY || ''
 );
 
-const Team: NextPage<TeamProps> = ({ teamId }) => {
+const Team: NextPage<TeamProps> = ({ id, memberId }) => {
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const [team, teamIsLoading, refetchTeam] = useTeam();
-  const [members, membersIsLoading, refetchMembers] = useMembers();
-  const [member, memberIsLoading, refetchMember] = useMember();
+  const [team, teamIsLoading, refetchTeam] = useTeam({ id });
+  const [members, membersIsLoading, refetchMembers] = useMembers({
+    teamId: id,
+  });
+  const [member, memberIsLoading, refetchMember] = useMember({
+    id,
+    teamId: id,
+  });
 
   const [memberToRemove, setMemberToRemove] = useState<Member>();
   const [removeMemberModal, toggleRemoveMemberModal] = useState(false);
@@ -39,8 +49,8 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
   };
 
   useEffect(() => {
-    const membersChannel = ablyClient.channels.get(`${teamId}-members`);
-    const teamChannel = ablyClient.channels.get(`${teamId}-team`);
+    const membersChannel = ablyClient.channels.get(`${id}-members`);
+    const teamChannel = ablyClient.channels.get(`${id}-team`);
 
     membersChannel.subscribe(() => {
       refetchMembers();
@@ -50,7 +60,7 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
     teamChannel.subscribe(() => {
       refetchTeam();
     });
-  }, [teamId, refetchMembers, refetchMember, refetchTeam]);
+  }, [id, refetchMembers, refetchMember, refetchTeam]);
 
   const updateTeamMutation = trpc.updateTeam.useMutation();
   const updateMembersMutation = trpc.updateMembers.useMutation();
@@ -69,7 +79,7 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
     toggleIsOpen(false);
 
     updateMembersMutation.mutate({
-      teamId,
+      teamId: id,
       card: '',
     });
 
@@ -104,22 +114,31 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
     toggleRemoveMemberModal(false);
   };
 
+  const router = useRouter();
+
   useEffect(() => {
+    if (!teamIsLoading && !team) {
+      router.push('/404');
+    }
+
     toggleIsOpen(!!team?.isLocked);
-  }, [team?.isLocked]);
+  }, [team, teamIsLoading, router]);
 
   const title = `POOMA - ${team?.name}`;
+
+  const isMemberInTeam = members?.some((m) => m.id === member?.id);
 
   return (
     <VStack gap={8} mb={12}>
       <Head>
         <title>{title}</title>
       </Head>
-      <Header />
+
+      <Header team={team} member={member} />
 
       {isLoading ? (
         <Spinner />
-      ) : members && member && team ? (
+      ) : isMemberInTeam && members?.length && member && team ? (
         <>
           {!member.isSpectactorMode && (
             <VStack css={{ alignItems: 'center' }}>
@@ -136,9 +155,9 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
         </>
       ) : (
         <JoinModal
-          teamId={teamId}
+          teamId={id}
           title='Join this game'
-          isOpen={(!members || !member || !team) && !isLoading}
+          isOpen={!members?.length || !member || !team || !isMemberInTeam}
           preventClosing={true}
         />
       )}
@@ -167,13 +186,35 @@ const Team: NextPage<TeamProps> = ({ teamId }) => {
   );
 };
 
-export async function getServerSideProps({ req, query }: NextPageContext) {
+export async function getServerSideProps({
+  req,
+  query,
+}: GetServerSidePropsContext) {
   const teamId = `${query.teamId}`;
+
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: {},
+    transformer: superjson,
+  });
+
+  const memberId = req.cookies.memberId || '';
+
+  const team = await ssg.team.fetch({ id: teamId });
+  await ssg.member.fetch({ id: memberId, teamId });
+  await ssg.members.fetch({ teamId });
+
+  if (!team) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
-      teamId,
-      cookies: req?.headers.cookie ?? '',
+      trpcState: ssg.dehydrate(),
+      id: teamId,
+      memberId,
     },
   };
 }

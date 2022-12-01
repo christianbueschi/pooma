@@ -7,6 +7,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Member } from '@prisma/client';
+import { useRouter } from 'next/router';
+import { parseCookies } from 'nookies';
 import { FiX } from 'react-icons/fi';
 import { useMember } from '../hooks/useMember';
 
@@ -21,7 +23,10 @@ export const FlipCard: React.FC<FlipCardProps> = ({
   member,
   onRemove,
 }) => {
-  const [currentMember] = useMember();
+  const router = useRouter();
+
+  const teamId = router.query.teamId as string;
+  const [currentMember] = useMember({ id: member.id, teamId });
 
   const isMe = currentMember?.id === member.id;
 
@@ -88,7 +93,7 @@ const CardSite: React.FC<CardSiteProps> = ({ isFront, member, ...props }) => {
   const cardColorReady = useColorModeValue('green.400', 'cyan.500');
 
   const styles: FlexProps = {
-    backgroundColor: isFront && !!member.card ? cardColorReady : cardColor,
+    backgroundColor: !!member.card ? cardColorReady : cardColor,
     zIndex: isFront ? 1 : 2,
     transform: isFront ? 'rotateY(180deg)' : 'rotateY(0deg)',
     fontSize:
