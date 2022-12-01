@@ -191,14 +191,25 @@ export async function getServerSideProps({
   query,
 }: GetServerSidePropsContext) {
   const teamId = `${query.teamId}`;
+  const preventFetching = query.preventFetching;
+
+  const memberId = req.cookies.memberId || '';
+
+  if (preventFetching) {
+    return {
+      props: {
+        cookies: req.headers.cookie ?? '',
+        id: teamId,
+        memberId,
+      },
+    };
+  }
 
   const ssg = createProxySSGHelpers({
     router: appRouter,
     ctx: {},
     transformer: superjson,
   });
-
-  const memberId = req.cookies.memberId || '';
 
   const team = await ssg.team.fetch({ id: teamId });
   await ssg.member.fetch({ id: memberId, teamId });

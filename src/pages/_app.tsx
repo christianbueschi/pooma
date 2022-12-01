@@ -1,5 +1,4 @@
 import type { AppProps } from 'next/app';
-
 import Head from 'next/head';
 import CookieConsent from 'react-cookie-consent';
 import { Footer } from '../../toolkit/components/Footer';
