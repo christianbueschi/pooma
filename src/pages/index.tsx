@@ -95,7 +95,8 @@ export async function getServerSideProps({ req }: GetServerSidePropsContext) {
 
   return {
     props: {
-      cookies: req?.headers.cookie ?? '',
+      cookies: req.headers.cookie ?? '',
+      trpcState: ssg.dehydrate(),
       team,
       member,
     },

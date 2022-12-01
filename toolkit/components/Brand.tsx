@@ -12,7 +12,11 @@ background-clip: text;
 -webkit-text-fill-color: transparent;
 `;
 
-export const Logo: React.FC = () => {
+type LogoProps = {
+  text?: string;
+};
+
+export const Logo: React.FC<LogoProps> = ({ text }) => {
   return (
     <Heading
       as='h1'
@@ -23,7 +27,7 @@ export const Logo: React.FC = () => {
         LOGO_STYLES,
       }}
     >
-      POOMA
+      {text ? text : 'POOMA'}
     </Heading>
   );
 };

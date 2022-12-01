@@ -212,6 +212,7 @@ export async function getServerSideProps({
 
   return {
     props: {
+      cookies: req.headers.cookie ?? '',
       trpcState: ssg.dehydrate(),
       id: teamId,
       memberId,
