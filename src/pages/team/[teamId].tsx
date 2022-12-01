@@ -1,6 +1,6 @@
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
 import { Member } from '@prisma/client';
-import { GetServerSidePropsContext, NextPage, NextPageContext } from 'next';
+import { GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
@@ -35,7 +35,7 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
     teamId: id,
   });
   const [member, memberIsLoading, refetchMember] = useMember({
-    id,
+    id: memberId,
     teamId: id,
   });
 
