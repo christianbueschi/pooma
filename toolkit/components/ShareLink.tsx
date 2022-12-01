@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { QRCode } from 'react-qrcode-logo';
 
 type ShareLinkProps = {};
 
@@ -28,6 +29,8 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
 
   const color = useColorModeValue('cyan.400', 'grey.500');
   const backgroundColor = useColorModeValue('green.400', 'green.400');
+  const qrCodeBackgroundColor = useColorModeValue('#6ea0a2', '#2c4a52');
+  const qrCodeForegroundColor = useColorModeValue('#2C3333', '#A5C9CA');
 
   return (
     <>
@@ -49,15 +52,17 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
               Invite others to this team
             </Heading>
             <HStack p={2}>
-              <Text
-                noOfLines={1}
-                maxW={['200px', '200px', '300px']}
-                data-testid='share-link'
-              >
-                {value}
-              </Text>
-              <Button onClick={onCopy} ml={2} w='80px'>
-                {hasCopied ? 'Copied' : 'Copy'}
+              <QRCode
+                value={value}
+                qrStyle='dots'
+                eyeRadius={8}
+                fgColor={qrCodeForegroundColor}
+                bgColor={qrCodeBackgroundColor}
+                size={100}
+                removeQrCodeBehindLogo={true}
+              />
+              <Button onClick={onCopy} w='150px'>
+                {hasCopied ? 'Copied' : 'Copy Link'}
               </Button>
             </HStack>
           </VStack>

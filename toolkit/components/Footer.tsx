@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ShareLink } from './ShareLink';
 
 export const Footer: React.FC = () => {
-  const backgroundcolor = useColorModeValue('cyan.400', 'green.500');
+  const backgroundcolor = useColorModeValue('cyan.500', 'green.500');
 
   return (
     <VStack
