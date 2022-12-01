@@ -57,7 +57,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     setCookie(null, 'teamId', newTeam.id, COOKIE_OPTIONS);
     setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
 
-    router.push('/team' + '/' + newTeam.id);
+    router.push('/team' + '/' + newTeam.id, undefined, { shallow: true });
   };
 
   return (
