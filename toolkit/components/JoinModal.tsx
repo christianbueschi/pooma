@@ -22,7 +22,7 @@ import { trpc } from '../../src/utils/trpc';
 import { useTeam } from '../hooks/useTeam';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 type FormFields = { teamId: string; member: string };
 
@@ -41,6 +41,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   preventClosing,
   handleClose,
 }) => {
+  const { t } = useTranslation(['common']);
+
   const [teamError, setTeamError] = useState('');
 
   const router = useRouter();

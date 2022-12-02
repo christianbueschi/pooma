@@ -7,7 +7,7 @@ import { Modal } from './Modal';
 import { trpc } from '../../src/utils/trpc';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
@@ -30,6 +30,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   handleClose,
   isOpen,
 }) => {
+  const { t } = useTranslation(['common']);
+
   const router = useRouter();
 
   const {

@@ -203,6 +203,7 @@ export async function getServerSideProps({
   if (preventFetching) {
     return {
       props: {
+        ...(await serverSideTranslations(locale || 'en', ['common'])),
         cookies: req.headers.cookie ?? '',
         id: teamId,
         memberId,
