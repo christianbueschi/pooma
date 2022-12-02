@@ -51,7 +51,7 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
           </Button>
         </>
       ) : (
-        <Flex gap={8} css={{ alignItems: 'center' }}>
+        <Flex gap={8} css={{ alignItems: 'center' }} px={4}>
           <Text>
             No players here. That&apos;s sad 😢. You can invite others..
           </Text>

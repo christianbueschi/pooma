@@ -110,7 +110,7 @@ const CardSite: React.FC<CardSiteProps> = ({ isFront, member, ...props }) => {
     boxShadow: '0px 5px 20px -5px rgb(0, 0, 0)',
     sx: {
       backfaceVisibility: 'hidden',
-      aspectRatio: '120 / 150',
+      aspectRatio: '4/5',
     },
     ...props,
   };

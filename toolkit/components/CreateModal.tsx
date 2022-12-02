@@ -70,7 +70,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     <Modal title='Start a new game' onClose={handleClose} isOpen={isOpen}>
       <form onSubmit={handleSubmit(onCreateTeam)}>
         <VStack gap={12}>
-          <Grid templateColumns='1fr 2fr' gridGap={2}>
+          <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
             <FormLabel>Team Name</FormLabel>
             <Input
               {...register('team', { required: true })}

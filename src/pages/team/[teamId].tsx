@@ -129,7 +129,7 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
   const isMemberInTeam = members?.some((m) => m.id === member?.id);
 
   return (
-    <VStack gap={8} mb={12}>
+    <VStack gap={[2, 4, 8]} mb={12}>
       <Head>
         <title>{title}</title>
       </Head>

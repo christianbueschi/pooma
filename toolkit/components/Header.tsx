@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
       templateColumns=' 1fr auto 1fr'
       columnGap={2}
       minH='66px'
-      padding={4}
+      padding={[4]}
       justifyItems='center'
       w='100%'
       position='sticky'

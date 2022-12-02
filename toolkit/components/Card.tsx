@@ -36,7 +36,7 @@ export const Card: React.FC<CardProps> = ({
       as='li'
       onClick={() => onClick(card)}
       data-testid='card'
-      h={['130px', '130px', '150px']}
+      h={['100px', '130px', '150px']}
       borderRadius='xl'
       backgroundColor={isActiveCard ? cardColorActive : cardColor}
       cursor={isLocked ? 'not-allowed' : 'pointer'}
@@ -50,7 +50,7 @@ export const Card: React.FC<CardProps> = ({
         transform: isLocked ? 'scale(1)' : 'scale(1.08)',
       }}
       css={{
-        aspectRatio: '120 / 150',
+        aspectRatio: '4/5',
       }}
     >
       <Text

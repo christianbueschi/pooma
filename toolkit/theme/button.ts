@@ -9,7 +9,7 @@ export const buttonStyles: ComponentStyleConfig = {
   sizes: {
     md: {
       fontSize: 'md',
-      px: 6,
+      px: [2, 4, 6],
       py: 4,
     },
   },
@@ -25,7 +25,7 @@ export const buttonStyles: ComponentStyleConfig = {
         },
       },
       _focus: {
-        bg: 'green.500',
+        bg: mode('green.500', 'cyan.400')(props),
         color: mode('cyan.400', 'cyan.400')(props),
       },
       _disabled: {

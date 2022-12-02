@@ -32,10 +32,10 @@ export const Modal: React.FC<PModalProps> = ({
       isOpen={isOpen}
     >
       <ModalOverlay />
-      <ModalContent backgroundColor={backgroundColor}>
+      <ModalContent backgroundColor={backgroundColor} mx={[4]}>
         <ModalHeader textAlign='center'>{title}</ModalHeader>
         {!preventClosing && <ModalCloseButton />}
-        <ModalBody p={12}>{children}</ModalBody>
+        <ModalBody p={[4, 6, 12]}>{children}</ModalBody>
       </ModalContent>
     </ChakraModal>
   );
