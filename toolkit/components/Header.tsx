@@ -19,12 +19,14 @@ import {
   MenuList,
   Text,
   useColorMode,
+  useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
 import { Modal } from './Modal';
 import { colors } from '../theme/colors';
 import { trpc } from '../../src/utils/trpc';
 import { Member, Team } from '@prisma/client';
+import { useScrollPosition } from '../hooks/useScrollPosition';
 
 type HeaderProps = {
   team?: Team | null;
@@ -72,6 +74,10 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
     router.push('/');
   };
 
+  const backgrounColor = useColorModeValue('white.400', 'grey.400');
+
+  const scrollPosition = useScrollPosition();
+
   return (
     <Grid
       templateColumns=' 1fr auto 1fr'
@@ -82,6 +88,8 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
       w='100%'
       position='sticky'
       top={0}
+      bg={scrollPosition > 30 ? backgrounColor : 'transparent'}
+      transition='background 0.3s ease-in-out'
     >
       {!isHome && <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>}
 

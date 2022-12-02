@@ -29,9 +29,10 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
             data-testid='team-card-list'
             justifyContent='center'
             flexWrap='wrap'
-            gap={4}
-            paddingLeft={0}
+            gap={[4, 2, 4]}
+            px={2}
             paddingBottom={4}
+            as='ul'
           >
             {filteredMembers.map((member, index) => (
               <FlipCard

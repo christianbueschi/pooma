@@ -29,13 +29,12 @@ export const FlipCard: React.FC<FlipCardProps> = ({
     setIsMe(cookies.memberId === member.id);
   }, [cookies, member.id]);
 
-  const cardHeight = ['130px', '130px', '150px'];
+  const cardHeight = ['100px', '130px', '150px'];
 
   return (
     <VStack
       as='li'
       data-testid={`team-card-${member.name}`}
-      p={2}
       position='relative'
       _hover={{
         borderRadius: 'xl',
@@ -96,7 +95,9 @@ const CardSite: React.FC<CardSiteProps> = ({ isFront, member, ...props }) => {
     zIndex: isFront ? 1 : 2,
     transform: isFront ? 'rotateY(180deg)' : 'rotateY(0deg)',
     fontSize:
-      isFront && member.card && member.card.length > 3 ? '16px' : '22px',
+      isFront && member.card && member.card.length > 3
+        ? '16px'
+        : ['18px', '20px', '22px'],
     lineHeight:
       isFront && member.card && member.card.length > 3 ? '20px' : '26px',
     borderRadius: 'xl',
@@ -108,6 +109,7 @@ const CardSite: React.FC<CardSiteProps> = ({ isFront, member, ...props }) => {
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0px 5px 20px -5px rgb(0, 0, 0)',
+    width: '100%',
     sx: {
       backfaceVisibility: 'hidden',
       aspectRatio: '4/5',

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
@@ -101,6 +101,9 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     if (handleClose) handleClose();
   };
 
+  const memberRef = useRef<HTMLInputElement>(null);
+  teamId && memberRef.current?.focus();
+
   return (
     <Modal
       title={title}
@@ -154,6 +157,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
               <FormLabel>Member Name</FormLabel>
               <Input
                 {...register('member', { required: true, minLength: 3 })}
+                ref={memberRef}
                 data-testid='member-name-input'
               />
             </Grid>

@@ -16,8 +16,14 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const isActiveCard = card === activeCard;
 
-  const cardColor = useColorModeValue('cyan.500', 'green.400');
-  const cardColorActive = useColorModeValue('green.400', 'cyan.500');
+  const cardColor = useColorModeValue(
+    isLocked ? 'cyan.400' : 'cyan.500',
+    isLocked ? 'grey.400' : 'green.400'
+  );
+  const cardColorActive = useColorModeValue(
+    isLocked ? 'green.500' : 'green.400',
+    isLocked ? 'cyan.500' : 'cyan.500'
+  );
 
   const isLongText = card.length > 3;
   const fontSize = [
@@ -41,8 +47,8 @@ export const Card: React.FC<CardProps> = ({
       backgroundColor={isActiveCard ? cardColorActive : cardColor}
       cursor={isLocked ? 'not-allowed' : 'pointer'}
       transition='transform 0.25s ease-in-out'
-      color='white'
-      alignItems=' center'
+      color={isLocked ? 'grey.300' : 'white'}
+      alignItems='center'
       justifyContent='center'
       padding='12px'
       textAlign='center'

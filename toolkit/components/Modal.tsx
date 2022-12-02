@@ -30,6 +30,7 @@ export const Modal: React.FC<PModalProps> = ({
       size='2xl'
       onClose={onClose ? onClose : () => {}}
       isOpen={isOpen}
+      closeOnOverlayClick={!preventClosing}
     >
       <ModalOverlay />
       <ModalContent backgroundColor={backgroundColor} mx={[4]}>

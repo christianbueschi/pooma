@@ -25,7 +25,7 @@ export const buttonStyles: ComponentStyleConfig = {
         },
       },
       _focus: {
-        bg: mode('green.500', 'cyan.400')(props),
+        bg: mode('green.500', 'green.500')(props),
         color: mode('cyan.400', 'cyan.400')(props),
       },
       _disabled: {
@@ -38,12 +38,14 @@ export const buttonStyles: ComponentStyleConfig = {
       color: mode('green.400', 'cyan.400')(props),
       _hover: {
         bg: mode('cyan.400', 'green.400')(props),
+        color: mode('green.500', 'cyan.400')(props),
         _disabled: {
           bg: 'transparent',
         },
       },
       _focus: {
-        bg: 'green.500',
+        bg: mode('cyan.400', 'green.400')(props),
+        color: mode('green.500', 'cyan.400')(props),
       },
       _disabled: {
         bg: 'green.500',
