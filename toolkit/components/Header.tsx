@@ -8,9 +8,7 @@ import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 import { COOKIE_OPTIONS } from './constants';
 import {
-  Box,
   Button,
-  Flex,
   Grid,
   GridItem,
   HStack,
@@ -22,11 +20,11 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { Modal } from './Modal';
 import { colors } from '../theme/colors';
 import { trpc } from '../../src/utils/trpc';
 import { Member, Team } from '@prisma/client';
 import { useScrollPosition } from '../hooks/useScrollPosition';
+import { useTranslation } from 'react-i18next';
 
 type HeaderProps = {
   team?: Team | null;
@@ -35,6 +33,8 @@ type HeaderProps = {
 };
 
 export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
+  const { t } = useTranslation(['common']);
+
   const router = useRouter();
 
   const { toggleColorMode } = useColorMode();
@@ -68,12 +68,6 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
     });
   };
 
-  const handleMemberRemovedModalOk = () => {
-    destroyCookie(null, 'teamId', COOKIE_OPTIONS);
-    destroyCookie(null, 'memberId', COOKIE_OPTIONS);
-    router.push('/');
-  };
-
   const backgrounColor = useColorModeValue('white.400', 'grey.400');
 
   const scrollPosition = useScrollPosition();
@@ -91,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
       bg={scrollPosition > 30 ? backgrounColor : 'transparent'}
       transition='background 0.3s ease-in-out'
     >
-      {!isHome && <LogoTitle onClick={onClickLogo}>POOMA</LogoTitle>}
+      {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
 
       <GridItem as='nav' gridColumnStart={3} marginLeft='auto'>
         <HStack alignItems='center'>
@@ -124,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
                             defaultChecked={member?.isSpectactorMode}
                             onChange={handleToggleSpectactoreMode}
                           />
-                          <Text>Spectactor Mode</Text>
+                          <Text>{t('spectactorMode')}</Text>
                         </HStack>
                       </>
                     )}
@@ -133,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
                       data-testid='logout-button'
                       alignSelf='flex-end'
                     >
-                      Logout
+                      {t('logout')}
                     </Button>
                   </VStack>
                 </MenuList>
@@ -145,21 +139,6 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
           </HStack>
         </HStack>
       </GridItem>
-
-      <Modal
-        title='You have been removed'
-        isOpen={member?.state === 'REMOVED' && !isHome}
-        onClose={handleMemberRemovedModalOk}
-      >
-        <VStack gap={4}>
-          <Text textAlign='center'>
-            You have been removed from the team <b>{team?.name}</b>.
-          </Text>
-          <Button variant='solid' onClick={handleMemberRemovedModalOk}>
-            Ok
-          </Button>
-        </VStack>
-      </Modal>
     </Grid>
   );
 };

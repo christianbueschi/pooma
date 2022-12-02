@@ -10,6 +10,8 @@ import { createProxySSGHelpers } from '@trpc/react-query/ssg';
 import { appRouter } from '../server/routers/_app';
 import superjson from 'superjson';
 import { Member, Team } from '@prisma/client';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { Trans, useTranslation } from 'react-i18next';
 
 const authUrl = process.env.NEXT_PUBLIC_VERCEL_ENV
   ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/ably/createTokenRequest`
@@ -25,6 +27,8 @@ type HopeProps = {
 };
 
 const Home: NextPage<HopeProps> = ({ team, member }) => {
+  const { t } = useTranslation(['common']);
+
   const [showStartModal, setShowStartModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
 
@@ -40,9 +44,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
           textAlign='center'
           padding={12}
         >
-          Scrum Planning Poker at it&apos;s finest!
-          <br />
-          Estimate virtually your team stories with ease 🎉
+          <Trans i18nKey={t('heading')} />
         </Heading>
         <VStack gap={2}>
           <Button
@@ -50,14 +52,14 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
             onClick={() => setShowStartModal(true)}
             data-testid='new-game-button'
           >
-            Start New Game
+            {t('startButton')}
           </Button>
           <Button
             variant='link'
             onClick={() => setShowJoinModal(true)}
             data-testid='join-game-button'
           >
-            Join Game
+            {t('joinButton')}
           </Button>
         </VStack>
 
@@ -67,7 +69,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
         />
 
         <JoinModal
-          title='Join A Game'
+          title={t('joinModalTitle')}
           handleClose={() => setShowJoinModal(false)}
           isOpen={showJoinModal}
           preventClosing={false}
@@ -77,7 +79,10 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
   );
 };
 
-export async function getServerSideProps({ req }: GetServerSidePropsContext) {
+export async function getServerSideProps({
+  req,
+  locale,
+}: GetServerSidePropsContext) {
   const ssg = createProxySSGHelpers({
     router: appRouter,
     ctx: {},
@@ -95,6 +100,7 @@ export async function getServerSideProps({ req }: GetServerSidePropsContext) {
 
   return {
     props: {
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
       cookies: req.headers.cookie ?? '',
       trpcState: ssg.dehydrate(),
       team,

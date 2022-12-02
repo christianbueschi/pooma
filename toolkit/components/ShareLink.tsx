@@ -3,18 +3,20 @@ import {
   Flex,
   Heading,
   HStack,
-  Text,
   useClipboard,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QRCode } from 'react-qrcode-logo';
 
 type ShareLinkProps = {};
 
 export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
+  const { t } = useTranslation(['common']);
+
   const router = useRouter();
 
   const { hasCopied, onCopy, setValue, value } = useClipboard('');
@@ -49,7 +51,7 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
               p={2}
               borderRadius='8px 8px 0 0'
             >
-              Invite others to this team
+              {t('inviteOthers')}
             </Heading>
             <HStack p={2}>
               <QRCode

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
@@ -22,6 +22,7 @@ import { trpc } from '../../src/utils/trpc';
 import { useTeam } from '../hooks/useTeam';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
+import { t } from 'i18next';
 
 type FormFields = { teamId: string; member: string };
 
@@ -125,7 +126,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
         <form onSubmit={handleSubmit(onJoinTeam)}>
           <VStack gap={12}>
             <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-              <FormLabel>Team ID</FormLabel>
+              <FormLabel>{t('teamId')}</FormLabel>
               <InputGroup>
                 <Input
                   {...register('teamId', { required: true })}
@@ -156,7 +157,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                   </InputRightAddon>
                 )}
               </InputGroup>
-              <FormLabel>Member Name</FormLabel>
+              <FormLabel>{t('memberName')}</FormLabel>
               <Input
                 {...register('member', { required: true, minLength: 3 })}
                 data-testid='member-name-input'
@@ -172,11 +173,11 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                 data-testid='join-button'
                 colorScheme='green'
               >
-                Join Game
+                {t('joinButton')}
               </Button>
 
               <Link href='/' passHref>
-                <Text onClick={handleClose}>Cancel</Text>
+                <Text onClick={handleClose}>{t('cancel')}</Text>
               </Link>
             </VStack>
           </VStack>

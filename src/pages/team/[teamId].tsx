@@ -17,6 +17,8 @@ import { useRouter } from 'next/router';
 import { createProxySSGHelpers } from '@trpc/react-query/ssg';
 import { appRouter } from '../../server/routers/_app';
 import superjson from 'superjson';
+import { useTranslation } from 'react-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type TeamProps = {
   id: string;
@@ -28,6 +30,8 @@ export const ablyClient = new Ably.Realtime(
 );
 
 const Team: NextPage<TeamProps> = ({ id, memberId }) => {
+  const { t } = useTranslation(['common']);
+
   const [isOpen, toggleIsOpen] = useState(false);
 
   const [team, teamIsLoading, refetchTeam] = useTeam({ id });
@@ -124,7 +128,7 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
     toggleIsOpen(!!team?.isLocked);
   }, [team, teamIsLoading, router]);
 
-  const title = `POOMA - ${team?.name}`;
+  const title = `${t('title')} - ${team?.name}`;
 
   const isMemberInTeam = members?.some((m) => m.id === member?.id);
 
@@ -156,29 +160,29 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
       ) : (
         <JoinModal
           teamId={id}
-          title='Join this game'
+          title={t('joinModalTitle')}
           isOpen={!members?.length || !member || !team || !isMemberInTeam}
           preventClosing={true}
         />
       )}
 
       <Modal
-        title='Remove Member'
+        title={t('removeMemberModalTitle')}
         onClose={() => toggleRemoveMemberModal(false)}
         isOpen={!!removeMemberModal && !!memberToRemove}
       >
         <VStack gap={2}>
           <Text css={{ textAlign: 'center' }}>
-            Are you sure you want to remove <b>{memberToRemove?.name}</b>?
+            {t('removeMemberHint', { name: memberToRemove?.name })}
           </Text>
           <Button variant='solid' onClick={onRemoveMember} colorScheme='red'>
-            Remove
+            {t('removeButton')}
           </Button>
           <Button
             variant='ghost'
             onClick={() => toggleRemoveMemberModal(false)}
           >
-            Cancel
+            {t('cancelButton')}
           </Button>
         </VStack>
       </Modal>
@@ -189,6 +193,7 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
 export async function getServerSideProps({
   req,
   query,
+  locale,
 }: GetServerSidePropsContext) {
   const teamId = `${query.teamId}`;
   const preventFetching = query.preventFetching;
@@ -223,6 +228,7 @@ export async function getServerSideProps({
 
   return {
     props: {
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
       cookies: req.headers.cookie ?? '',
       trpcState: ssg.dehydrate(),
       id: teamId,

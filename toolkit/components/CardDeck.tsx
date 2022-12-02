@@ -4,6 +4,7 @@ import { CARDS } from './constants';
 import { Grid } from '@chakra-ui/react';
 import { Member, Team } from '@prisma/client';
 import { trpc } from '../../src/utils/trpc';
+import { useTranslation } from 'react-i18next';
 
 type CardDeckProps = {
   member: Member;
@@ -11,6 +12,8 @@ type CardDeckProps = {
 };
 
 export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
+  const { t } = useTranslation(['common']);
+
   const [activeCard, setActiveCard] = useState<string | null>();
 
   const updateMemberMutation = trpc.updateMember.useMutation();
@@ -49,7 +52,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
           ml={[2, 2, 4]}
           mr={[2, 2, 4]}
         >
-          {CARDS[team.cardMode].map((card) => (
+          {CARDS(t)[team.cardMode].map((card) => (
             <Card
               key={card}
               card={card}

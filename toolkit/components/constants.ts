@@ -1,7 +1,6 @@
-export const Background =
-  'linear-gradient(115.05359506937327deg, rgba(2, 27, 62,1) 7.867559523809524%,rgba(81, 119, 149,1) 47.874007936507944%,rgba(2, 27, 62,1) 89.23660714285714%)';
+import { TFunction } from 'next-i18next';
 
-export const FIBONACCI_NUMBERS = [
+export const FIBONACCI_NUMBERS = (t: TFunction) => [
   '0',
   '1',
   '2',
@@ -14,30 +13,26 @@ export const FIBONACCI_NUMBERS = [
   '55',
   '89',
   '144',
-  "<em>🤷‍♀️</em><br>I don't know",
-  "<em>🙅</em><br>Impossible, we don't do that!",
-  '<em>☕</em> <br>I need a break',
+  `<em>🤷‍♀️</em><br>${t('cardIdk')}`,
+  `<em>🙅</em><br>${t('cardImpossible')}`,
+  `<em>☕</em> <br>${t('cardBreak')}`,
 ];
 
-export const T_SHIRT_SIZES = [
-  '<em>🐭</em><br>Too small',
+export const T_SHIRT_SIZES = (t: TFunction) => [
+  `<em>🐭</em><br>${t('cardTooBig')}`,
   'XS',
   'S',
   'M',
   'L',
   'XL',
-  '<em>🐘</em><br>Too big',
-  '<em>☕</em><br>I need a break',
+  `<em>🐘</em><br>${t('cardTooBig')}`,
+  `<em>☕</em> <br>${t('cardBreak')}`,
 ];
 
-type Cards = {
-  [key: string]: string[];
-};
-
-export const CARDS: Cards = {
-  FIBONACCI: FIBONACCI_NUMBERS,
-  TSHIRT: T_SHIRT_SIZES,
-};
+export const CARDS = (t: TFunction) => ({
+  FIBONACCI: FIBONACCI_NUMBERS(t),
+  TSHIRT: T_SHIRT_SIZES(t),
+});
 
 const BREAKPOINTS = [375, 576, 768, 992, 1200];
 

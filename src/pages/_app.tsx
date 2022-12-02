@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { appWithTranslation, useTranslation } from 'next-i18next';
 import CookieConsent from 'react-cookie-consent';
 import { Footer } from '../../toolkit/components/Footer';
 import { Grid, GridItem } from '@chakra-ui/react';
@@ -9,17 +10,18 @@ import { colors } from '../../toolkit/theme/colors';
 import { trpc } from '../utils/trpc';
 import { Chakra } from '../../toolkit/components/Chakra';
 import { theme } from '../../toolkit/theme';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { NextPageContext } from 'next';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
+  const { t } = useTranslation(['common']);
+
   return (
     <>
       <Head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-        <title>POOMA</title>
-        <meta
-          name='description'
-          content='Dead simple planning poker for your scrum team!'
-        />
+        <title>{t('title')}</title>
+        <meta name='description' content={t('metaDescription') || ''} />
       </Head>
 
       <Chakra cookies={pageProps.cookies}>
@@ -31,7 +33,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
             <Footer />
             <CookieConsent
               location='bottom'
-              buttonText='Ok'
+              buttonText={t('cookieButton')}
               cookieName='poomaCookieConsent'
               style={{ background: colors.green[400] }}
               buttonStyle={{
@@ -42,7 +44,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
               }}
               expires={150}
             >
-              This website uses cookies to enhance the user experience.
+              {t('cookieText')}
             </CookieConsent>
           </GridItem>
         </Grid>
@@ -51,4 +53,12 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
   );
 };
 
-export default trpc.withTRPC(MyApp);
+export const getServerSideProps = async ({ locale }: NextPageContext) => {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
+    },
+  };
+};
+
+export default trpc.withTRPC(appWithTranslation(MyApp));

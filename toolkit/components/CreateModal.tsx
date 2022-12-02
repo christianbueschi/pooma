@@ -7,6 +7,7 @@ import { Modal } from './Modal';
 import { trpc } from '../../src/utils/trpc';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
+import { t } from 'i18next';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
@@ -67,23 +68,23 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   return (
-    <Modal title='Start a new game' onClose={handleClose} isOpen={isOpen}>
+    <Modal title={t('startModalTitle')} onClose={handleClose} isOpen={isOpen}>
       <form onSubmit={handleSubmit(onCreateTeam)}>
         <VStack gap={12}>
           <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-            <FormLabel>Team Name</FormLabel>
+            <FormLabel>{t('teamName')}</FormLabel>
             <Input
               {...register('team', { required: true })}
               data-testid='team-name-input'
             />
 
-            <FormLabel>Member Name</FormLabel>
+            <FormLabel>{t('memberName')}</FormLabel>
             <Input
               {...register('member', { required: true })}
               data-testid='member-name-input'
             />
 
-            <FormLabel>Card Deck</FormLabel>
+            <FormLabel>{t('cardDeck')}</FormLabel>
             <Controller
               control={control}
               name='cardMode'
@@ -93,7 +94,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
                   ref={ref}
                   options={CARD_MODE_OPTIONS}
                   onChange={(option) => onChange(option?.value)}
-                  placeholder='Select an option'
+                  placeholder={t('selectOptionPlaceholder')}
                 />
               )}
             />
@@ -106,7 +107,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             isLoading={teamMutation.isLoading || memberMutation.isLoading}
             data-testid='start-game-button'
           >
-            Start Game
+            {t('startGame')}
           </Button>
         </VStack>
       </form>

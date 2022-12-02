@@ -1,0 +1,39 @@
+{
+  "title": "POOMA",
+  "heading": "Scrum Planning Poker at it's finest!<br />Estimate virtually your team stories with ease 🎉",
+  "metaDescription": "Dead simple planning poker for your scrum team!",
+  "cookieButton": "Ok",
+  "cookieText": "This website uses cookies to enhance the user experience.",
+
+  "startButton": "Start New Game",
+  "joinButton": "Join Game",
+
+  "startModalTitle": "Start a new game",
+  "joinModalTitle": "Join this game",
+  "removeMemberModalTitle": "Remove Member",
+  "removeMemberHint": "Are you sure you want to remove {{name}}?",
+  "removeButton": "Remove",
+  "cancelButton": "Cancel",
+
+  "cardIdk": "I don't know",
+  "cardImpossible": "Impossible, we don't do that!",
+  "cardBreak": "I need a break",
+  "cardToSmall": "Too small",
+  "cardToBig": "Too big",
+
+  "teamName": "Team Name",
+  "memberName": "Member Name",
+  "cardDeck": "Card Deck",
+  "selectOptionPlaceholder": "Select an option",
+  "startGame": "Start Game",
+
+  "privacyPolicyLink": "Privacy Policy",
+  "email": "hello@pooma.app",
+
+  "spectactorMode": "Spectactor Mode",
+  "logout": "Logout",
+  "teamId": "Team ID",
+
+  "inviteOthers": "Invite others to this team",
+  "noPlayersText": "No players here. That's sad 😢. You can invite others.."
+}

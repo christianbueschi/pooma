@@ -1,5 +1,6 @@
 import { Heading } from '@chakra-ui/react';
 import styled from '@emotion/styled';
+import { useTranslation } from 'react-i18next';
 
 const LOGO_STYLES = `
 display: inline-block;
@@ -17,6 +18,8 @@ type LogoProps = {
 };
 
 export const Logo: React.FC<LogoProps> = ({ text }) => {
+  const { t } = useTranslation(['common']);
+
   return (
     <Heading
       as='h1'
@@ -27,7 +30,7 @@ export const Logo: React.FC<LogoProps> = ({ text }) => {
         LOGO_STYLES,
       }}
     >
-      {text ? text : 'POOMA'}
+      {text ? text : t('title')}
     </Heading>
   );
 };

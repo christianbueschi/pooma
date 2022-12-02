@@ -1,5 +1,6 @@
 import { Button, Flex, Text, VStack } from '@chakra-ui/react';
 import { Member } from '@prisma/client';
+import { useTranslation } from 'react-i18next';
 import { FlipCard } from './FlipCard';
 
 type TeamCardsProps = {
@@ -15,6 +16,8 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   onRemove,
   handleResolve,
 }) => {
+  const { t } = useTranslation(['common']);
+
   const sortedMembers = members.sort((a, b) => (a.name > b.name ? 1 : -1));
 
   const filteredMembers = sortedMembers.filter(
@@ -53,9 +56,7 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
         </>
       ) : (
         <Flex gap={8} css={{ alignItems: 'center' }} px={4}>
-          <Text>
-            No players here. That&apos;s sad 😢. You can invite others..
-          </Text>
+          <Text>{t('noPlayersText')}</Text>
         </Flex>
       )}
     </VStack>
