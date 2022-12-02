@@ -49,6 +49,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     handleSubmit,
     setValue,
     getValues,
+    setFocus,
     formState: { isValid },
   } = useForm<FormFields>({
     defaultValues: {
@@ -92,7 +93,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     if (!team) return;
 
     setValue('teamId', team.id);
-  }, [team, setValue]);
+    setFocus('member');
+  }, [team, setValue, setFocus]);
 
   const onClose = () => {
     setValue('teamId', '');
@@ -100,9 +102,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
     if (handleClose) handleClose();
   };
-
-  const memberRef = useRef<HTMLInputElement>(null);
-  teamId && memberRef.current?.focus();
 
   return (
     <Modal
@@ -157,7 +156,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
               <FormLabel>Member Name</FormLabel>
               <Input
                 {...register('member', { required: true, minLength: 3 })}
-                ref={memberRef}
                 data-testid='member-name-input'
               />
             </Grid>
