@@ -86,7 +86,10 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
     setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
 
-    router.push('/team' + '/' + data.teamId);
+    router.push({
+      pathname: '/team' + '/' + data.teamId,
+      query: { preventFetching: true },
+    });
   };
 
   useEffect(() => {
