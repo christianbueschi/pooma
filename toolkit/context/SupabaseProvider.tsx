@@ -62,11 +62,11 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
 }) => {
   const router = useRouter();
 
-  const cookies = parseCookies();
-
   if (router.query.teamId) {
     setCookie(null, 'teamId', router.query.teamId as string);
   }
+
+  const cookies = parseCookies();
 
   const [teamId, setTeamId] = useState(cookies.teamId);
   const [memberId, setMemberId] = useState<string>(cookies.memberId);
