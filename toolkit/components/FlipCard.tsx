@@ -6,10 +6,10 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { Member } from '@prisma/client';
 import { parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import { FiX } from 'react-icons/fi';
+import { Member } from '../types';
 
 type FlipCardProps = {
   isOpen: boolean;

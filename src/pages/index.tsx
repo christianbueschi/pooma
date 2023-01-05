@@ -19,7 +19,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
   const { t } = useTranslation(['common']);
 
   const [showStartModal, setShowStartModal] = useState(false);
-  const { showJoinModal, setShowJoinModal } = useContext(SupabaseContext);
+  const { setShowJoinModal } = useContext(SupabaseContext);
 
   return (
     <>
@@ -68,7 +68,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
   );
 };
 
-export async function getServerSideProps({ req, locale }: NextPageContext) {
+export async function getServerSideProps({ locale }: NextPageContext) {
   return {
     props: {
       ...(await serverSideTranslations(locale || 'en', ['common'])),

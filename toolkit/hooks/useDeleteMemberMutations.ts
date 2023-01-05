@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { client } from '../context/SupabaseProvider';
+import { client } from '../supabase/client';
 import { Member } from '../types';
 
 export const useDeleteMemberMutations = () => {
