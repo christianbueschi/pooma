@@ -26,6 +26,8 @@ const Team: NextPage<TeamProps> = () => {
     useContext(SupabaseContext);
 
   const [team, isTeamLoading, _, fetchTeam] = useTeamContext();
+  console.log('🚀 ~ file: [teamId].tsx:29 ~ isTeamLoading', isTeamLoading);
+  console.log('🚀 ~ file: [teamId].tsx:29 ~ team', team);
   const [member, isMemberLoading] = useMemberContext();
 
   const isMemberInTeam = team?.members?.some((m) => {
@@ -37,10 +39,10 @@ const Team: NextPage<TeamProps> = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !team) {
+    if (!isTeamLoading && !team) {
       router.push('/404');
     }
-  }, [team, isLoading, router]);
+  }, [team, isTeamLoading, router]);
 
   useEffect(() => {
     if (isLoading) return;
