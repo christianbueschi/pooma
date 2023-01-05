@@ -21,10 +21,10 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { colors } from '../theme/colors';
-import { trpc } from '../../src/utils/trpc';
-import { Member, Team } from '@prisma/client';
 import { useScrollPosition } from '../hooks/useScrollPosition';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
+import { Member, Team } from '../types';
+import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
 
 type HeaderProps = {
   team?: Team | null;
@@ -57,12 +57,12 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
     }
   };
 
-  const memberMutation = trpc.updateMember.useMutation();
+  const [mutateMember] = useUpdateMemberMutations();
 
   const handleToggleSpectactoreMode = (event: any) => {
     if (!team || !member) return;
 
-    memberMutation.mutateAsync({
+    mutateMember({
       id: member.id,
       isSpectactorMode: event.currentTarget.checked,
     });
@@ -84,6 +84,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
       top={0}
       bg={scrollPosition > 30 ? backgrounColor : 'transparent'}
       transition='background 0.3s ease-in-out'
+      zIndex={100}
     >
       {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
 
@@ -115,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
                       <>
                         <HStack as='label' gap={2} alignItems='center'>
                           <StyledToggle
-                            defaultChecked={member?.isSpectactorMode}
+                            defaultChecked={member?.isSpectactorMode || false}
                             onChange={handleToggleSpectactoreMode}
                           />
                           <Text>{t('spectactorMode')}</Text>

@@ -1,6 +1,6 @@
 import { Heading } from '@chakra-ui/react';
 import styled from '@emotion/styled';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const LOGO_STYLES = `
 display: inline-block;

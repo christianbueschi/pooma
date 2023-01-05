@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Card } from './Card';
 import { CARDS } from './constants';
 import { Grid } from '@chakra-ui/react';
-import { Member, Team } from '@prisma/client';
-import { trpc } from '../../src/utils/trpc';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
+import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
+import { Member, Team } from '../types';
 
 type CardDeckProps = {
   member: Member;
@@ -16,7 +16,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
 
   const [activeCard, setActiveCard] = useState<string | null>();
 
-  const updateMemberMutation = trpc.updateMember.useMutation();
+  const [memberMutation] = useUpdateMemberMutations();
 
   const onClickCard = async (card: string) => {
     if (team.isLocked) return;
@@ -28,7 +28,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
 
     setActiveCard(newCard);
 
-    await updateMemberMutation.mutateAsync({
+    await memberMutation({
       id: member.id,
       card: newCard,
     });
@@ -37,6 +37,10 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
   useEffect(() => {
     setActiveCard(member.card);
   }, [member.card]);
+
+  const cardMode = team.cardMode as 'FIBONACCI' | 'TSHIRT';
+
+  const cards = CARDS(t)[cardMode];
 
   return (
     <>
@@ -52,13 +56,13 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
           ml={[2, 2, 4]}
           mr={[2, 2, 4]}
         >
-          {CARDS(t)[team.cardMode].map((card) => (
+          {cards.map((card) => (
             <Card
               key={card}
               card={card}
               onClick={onClickCard}
               activeCard={activeCard}
-              isLocked={team.isLocked}
+              isLocked={team.isLocked || false}
             />
           ))}
         </Grid>

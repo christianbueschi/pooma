@@ -1,18 +1,20 @@
 import { setCookie } from 'nookies';
 import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { CardMode } from '@prisma/client';
 import { COOKIE_OPTIONS } from './constants';
 import { Modal } from './Modal';
-import { trpc } from '../../src/utils/trpc';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
+import { useContext } from 'react';
+import { SupabaseContext } from '../context/SupabaseProvider';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
   { value: 'TSHIRT', label: 'T-Shirt' },
 ];
+
+export type CardMode = 'FIBONACCI' | 'TSHIRT';
 
 type FormFields = {
   team: string;
@@ -41,31 +43,40 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     formState: { isValid },
   } = useForm<FormFields>();
 
-  const teamMutation = trpc.createTeam.useMutation();
-  const memberMutation = trpc.createMember.useMutation();
+  const { useCreateTeam, useCreateMember } = useContext(SupabaseContext);
+  const { createTeam, teamCreating } = useCreateTeam();
+  const { createMember, memberCreating } = useCreateMember();
 
   const onCreateTeam = async (data: FormFields) => {
     // 1. create a new team
-    const newTeam = await teamMutation.mutateAsync({
+    const [team, teamError] = await createTeam({
       name: data.team,
       cardMode: data.cardMode,
     });
 
+    if (!team || teamError) {
+      return;
+    }
+
     // 2. create a new member and connect it to the team
-    const newMember = await memberMutation.mutateAsync({
+    const [member, memberError] = await createMember({
       name: data.member,
-      teamId: newTeam.id,
+      teamId: team.id,
     });
 
-    setCookie(null, 'teamId', newTeam.id, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
+    if (!member || memberError) {
+      return;
+    }
+
+    setCookie(null, 'teamId', team.id, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
     router.push(
       {
-        pathname: '/team' + '/' + newTeam.id,
+        pathname: '/team' + '/' + team.id,
         query: { preventFetching: true },
       },
-      '/team' + '/' + newTeam.id
+      '/team' + '/' + team.id
     );
   };
 
@@ -106,7 +117,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             variant='solid'
             type='submit'
             isDisabled={!isValid}
-            isLoading={teamMutation.isLoading || memberMutation.isLoading}
+            isLoading={teamCreating || memberCreating}
             data-testid='start-game-button'
           >
             {t('startGame')}

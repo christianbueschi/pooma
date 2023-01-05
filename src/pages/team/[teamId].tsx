@@ -1,79 +1,72 @@
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
-import { Member } from '@prisma/client';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
 import { Header } from '../../../toolkit/components/Header';
-import { JoinModal } from '../../../toolkit/components/JoinModal';
 import { Modal } from '../../../toolkit/components/Modal';
 import { TeamCards } from '../../../toolkit/components/TeamCards';
-import { trpc } from '../../utils/trpc';
-import Ably from 'ably/promises';
-import { useTeam } from '../../../toolkit/hooks/useTeam';
-import { useMembers } from '../../../toolkit/hooks/useMembers';
-import { useMember } from '../../../toolkit/hooks/useMember';
 import { useRouter } from 'next/router';
-import { createProxySSGHelpers } from '@trpc/react-query/ssg';
-import { appRouter } from '../../server/routers/_app';
-import superjson from 'superjson';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useUpdateTeamMutations } from '../../../toolkit/hooks/useUpdateTeamMutations';
+import { useUpdateMemberMutations } from '../../../toolkit/hooks/useUpdateMemberMutations';
+import { SupabaseContext } from '../../../toolkit/context/SupabaseProvider';
+import { Member } from '../../../toolkit/types';
+import { useDeleteMemberMutations } from '../../../toolkit/hooks/useDeleteMemberMutations';
 
-type TeamProps = {
-  id: string;
-  memberId: string;
-};
+type TeamProps = {};
 
-export const ablyClient = new Ably.Realtime(
-  process.env.NEXT_PUBLIC_ABLY_CLIENT_API_KEY || ''
-);
-
-const Team: NextPage<TeamProps> = ({ id, memberId }) => {
+const Team: NextPage<TeamProps> = () => {
   const { t } = useTranslation(['common']);
 
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const [team, teamIsLoading, refetchTeam] = useTeam({ id });
-  const [members, membersIsLoading, refetchMembers] = useMembers({
-    teamId: id,
+  const { useTeamContext, useMemberContext, setShowJoinModal } =
+    useContext(SupabaseContext);
+
+  const [team, isTeamLoading, _, fetchTeam] = useTeamContext();
+  const [member, isMemberLoading] = useMemberContext();
+
+  const isMemberInTeam = team?.members?.some((m) => {
+    return m.id === member?.id;
   });
-  const [member, memberIsLoading, refetchMember] = useMember({
-    id: memberId,
-    teamId: id,
-  });
+
+  const isLoading = isTeamLoading || isMemberLoading;
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !team) {
+      router.push('/404');
+    }
+  }, [team, isLoading, router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!team || !member || !isMemberInTeam) {
+      setShowJoinModal(true);
+    } else {
+      setShowJoinModal(false);
+    }
+  }, [team, member, isMemberInTeam, setShowJoinModal, isLoading]);
 
   const [memberToRemove, setMemberToRemove] = useState<Member>();
   const [removeMemberModal, toggleRemoveMemberModal] = useState(false);
-
-  const isLoading = teamIsLoading || membersIsLoading || memberIsLoading;
 
   const handleResolve = () => {
     isOpen ? clear() : resolve();
   };
 
-  useEffect(() => {
-    const membersChannel = ablyClient.channels.get(`${id}-members`);
-    const teamChannel = ablyClient.channels.get(`${id}-team`);
-
-    membersChannel.subscribe(() => {
-      refetchMembers();
-      refetchMember();
-    });
-
-    teamChannel.subscribe(() => {
-      refetchTeam();
-    });
-  }, [id, refetchMembers, refetchMember, refetchTeam]);
-
-  const updateTeamMutation = trpc.updateTeam.useMutation();
-  const updateMembersMutation = trpc.updateMembers.useMutation();
+  const [mutateTeam] = useUpdateTeamMutations();
+  const [mutateMember] = useUpdateMemberMutations();
 
   const resolve = () => {
     toggleIsOpen(true);
     if (!team?.id) return;
 
-    updateTeamMutation.mutate({
+    mutateTeam({
       id: team.id,
       isLocked: true,
     });
@@ -82,16 +75,18 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
   const clear = async () => {
     toggleIsOpen(false);
 
-    updateMembersMutation.mutate({
-      teamId: id,
-      card: '',
-    });
-
     if (!team?.id) return;
 
-    updateTeamMutation.mutate({
+    await mutateTeam({
       id: team.id,
       isLocked: false,
+    });
+
+    team.members?.forEach(async (member) => {
+      await mutateMember({
+        id: member.id,
+        card: '',
+      });
     });
   };
 
@@ -103,34 +98,28 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
     toggleRemoveMemberModal(true);
   };
 
-  const deleteMemberMutation = trpc.deleteMember.useMutation();
+  const [deleteMemberMutation] = useDeleteMemberMutations();
 
-  const onRemoveMember = () => {
+  const onRemoveMember = async () => {
     if (!team || !memberToRemove) {
       toggleRemoveMemberModal(false);
       return;
     }
 
-    deleteMemberMutation.mutateAsync({
+    await deleteMemberMutation({
       id: memberToRemove.id,
     });
+
+    fetchTeam(team.id);
 
     toggleRemoveMemberModal(false);
   };
 
-  const router = useRouter();
-
   useEffect(() => {
-    if (!teamIsLoading && !team) {
-      router.push('/404');
-    }
-
     toggleIsOpen(!!team?.isLocked);
-  }, [team, teamIsLoading, router]);
+  }, [team, router, isLoading]);
 
-  const title = `${t('title')} - ${team?.name}`;
-
-  const isMemberInTeam = members?.some((m) => m.id === member?.id);
+  const title = `${t('title')} ${team ? ' - ' + team?.name : ''}`;
 
   return (
     <VStack gap={[2, 4, 8]} mb={12}>
@@ -142,7 +131,7 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
 
       {isLoading ? (
         <Spinner />
-      ) : isMemberInTeam && members?.length && member && team ? (
+      ) : isMemberInTeam && team?.members?.length && member && team ? (
         <>
           {!member.isSpectactorMode && (
             <VStack css={{ alignItems: 'center' }}>
@@ -151,19 +140,14 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
           )}
           <Heading data-testid='title'>{team?.name}</Heading>
           <TeamCards
-            members={members}
+            members={team.members}
             isOpen={isOpen}
             onRemove={handleRemove}
             handleResolve={handleResolve}
           />
         </>
       ) : (
-        <JoinModal
-          teamId={id}
-          title={t('joinModalTitle')}
-          isOpen={!members?.length || !member || !team || !isMemberInTeam}
-          preventClosing={true}
-        />
+        <></>
       )}
 
       <Modal
@@ -191,49 +175,11 @@ const Team: NextPage<TeamProps> = ({ id, memberId }) => {
 };
 
 export async function getServerSideProps({
-  req,
-  query,
   locale,
 }: GetServerSidePropsContext) {
-  const teamId = `${query.teamId}`;
-  const preventFetching = query.preventFetching;
-
-  const memberId = req.cookies.memberId || '';
-
-  if (preventFetching) {
-    return {
-      props: {
-        ...(await serverSideTranslations(locale || 'en', ['common'])),
-        cookies: req.headers.cookie ?? '',
-        id: teamId,
-        memberId,
-      },
-    };
-  }
-
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: {},
-    transformer: superjson,
-  });
-
-  const team = await ssg.team.fetch({ id: teamId });
-  await ssg.member.fetch({ id: memberId, teamId });
-  await ssg.members.fetch({ teamId });
-
-  if (!team) {
-    return {
-      notFound: true,
-    };
-  }
-
   return {
     props: {
       ...(await serverSideTranslations(locale || 'en', ['common'])),
-      cookies: req.headers.cookie ?? '',
-      trpcState: ssg.dehydrate(),
-      id: teamId,
-      memberId,
     },
   };
 }

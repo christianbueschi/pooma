@@ -1,11 +1,9 @@
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
 import { COOKIE_OPTIONS } from './constants';
 import {
-  Box,
   Button,
   FormLabel,
   Grid,
@@ -18,112 +16,96 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { trpc } from '../../src/utils/trpc';
-import { useTeam } from '../hooks/useTeam';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
+import { SupabaseContext } from '../context/SupabaseProvider';
 
 type FormFields = { teamId: string; member: string };
 
 type JoinModalProps = {
   title: string;
-  isOpen: boolean;
-  teamId?: string;
-  preventClosing: boolean;
-  handleClose?: () => void;
+  preventClosing?: boolean;
 };
 
 export const JoinModal: React.FC<JoinModalProps> = ({
   title,
-  isOpen,
-  teamId,
   preventClosing,
-  handleClose,
 }) => {
   const { t } = useTranslation(['common']);
 
-  const [teamError, setTeamError] = useState('');
-
   const router = useRouter();
+
+  const { useCreateMember, useTeamContext, showJoinModal, setShowJoinModal } =
+    useContext(SupabaseContext);
+
+  const [team, teamIsLoading, _, fetchTeam] = useTeamContext();
 
   const {
     register,
     handleSubmit,
     setValue,
-    getValues,
     setFocus,
     formState: { isValid },
-  } = useForm<FormFields>({
-    defaultValues: {
-      teamId: teamId || '',
-    },
-  });
-
-  const memberMutation = trpc.createMember.useMutation();
-
-  const [teamIdInternal, setTeamIdInternal] = useState(getValues().teamId);
-
-  const [team, teamIsLoading, refetch, error] = useTeam({ id: teamIdInternal });
+    watch,
+  } = useForm<FormFields>({});
 
   const [showTeamExistsBadge, setShowTeamExistsBadge] = useState(false);
   const handleBlurTeamId = () => {
-    setTeamIdInternal(getValues().teamId);
     setShowTeamExistsBadge(true);
+    fetchTeam(teamIdInternal);
   };
 
+  const { createMember, memberCreating } = useCreateMember();
+
+  const teamIdInternal = watch('teamId');
+
   useEffect(() => {
-    refetch();
-  }, [teamIdInternal, refetch]);
+    if (!team) return;
+
+    setValue('teamId', team.id);
+  }, [team, setValue]);
 
   const onJoinTeam = async (data: FormFields) => {
     if (!data.teamId) return;
 
-    const newMember = await memberMutation.mutateAsync({
-      teamId: data.teamId,
+    const [member, error] = await createMember({
       name: data.member,
+      teamId: data.teamId,
     });
 
-    setTeamError('');
+    if (!member || error) {
+      return;
+    }
 
     setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', newMember.id, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
     router.push({
       pathname: '/team' + '/' + data.teamId,
-      query: { preventFetching: true },
     });
   };
 
   useEffect(() => {
     if (!team) return;
 
-    setValue('teamId', team.id);
     setFocus('member');
   }, [team, setValue, setFocus]);
 
-  const onClose = () => {
-    setValue('teamId', '');
-    setValue('member', '');
-
-    if (handleClose) handleClose();
+  const handleClose = () => {
+    setShowJoinModal(false);
+    router.push('/');
   };
 
   return (
     <Modal
       title={title}
-      onClose={onClose}
-      isOpen={isOpen}
+      onClose={handleClose}
+      isOpen={showJoinModal}
       preventClosing={preventClosing}
     >
       <VStack gap={8}>
-        {(teamError || error) && (
-          <Box p={4} backgroundColor='red.400' borderRadius='8px'>
-            <Text
-              dangerouslySetInnerHTML={{ __html: teamError || error || '' }}
-            />
-          </Box>
-        )}
+        <Text>{team?.name}</Text>
 
         <form onSubmit={handleSubmit(onJoinTeam)}>
           <VStack gap={12}>
@@ -171,16 +153,16 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                 variant='solid'
                 type='submit'
                 isDisabled={!isValid || !team}
-                isLoading={memberMutation.isLoading}
+                isLoading={memberCreating}
                 data-testid='join-button'
                 colorScheme='green'
               >
                 {t('joinButton')}
               </Button>
 
-              <Link href='/' passHref>
-                <Text onClick={handleClose}>{t('cancel')}</Text>
-              </Link>
+              <Button variant='ghost' onClick={handleClose}>
+                {t('cancelButton')}
+              </Button>
             </VStack>
           </VStack>
         </form>

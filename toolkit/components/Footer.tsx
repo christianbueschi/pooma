@@ -1,7 +1,6 @@
 import { Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react';
-
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { ShareLink } from './ShareLink';
 
 export const Footer: React.FC = () => {

@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { QRCode } from 'react-qrcode-logo';
 
 type ShareLinkProps = {};

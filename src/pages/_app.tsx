@@ -1,17 +1,16 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { appWithTranslation, useTranslation } from 'next-i18next';
-import CookieConsent from 'react-cookie-consent';
-import { Footer } from '../../toolkit/components/Footer';
 import { Grid, GridItem } from '@chakra-ui/react';
 import '@fontsource/monoton/400.css';
 import '@fontsource/montserrat/400.css';
-import { colors } from '../../toolkit/theme/colors';
-import { trpc } from '../utils/trpc';
 import { Chakra } from '../../toolkit/components/Chakra';
+import { SupabaseProvider } from '../../toolkit/context/SupabaseProvider';
+import { appWithTranslation, useTranslation } from 'next-i18next';
+import { Footer } from '../../toolkit/components/Footer';
+import CookieConsent from 'react-cookie-consent';
+import { colors } from '../../toolkit/theme/colors';
 import { theme } from '../../toolkit/theme';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { NextPageContext } from 'next';
+import { JoinModal } from '../../toolkit/components/JoinModal';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   const { t } = useTranslation(['common']);
@@ -20,14 +19,15 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     <>
       <Head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-        <title>{t('title')}</title>
-        <meta name='description' content={t('metaDescription') || ''} />
       </Head>
 
       <Chakra cookies={pageProps.cookies}>
         <Grid gridTemplateRows='1fr auto' height='100vh'>
           <GridItem>
-            <Component {...pageProps} />
+            <SupabaseProvider>
+              <Component {...pageProps} />
+              <JoinModal title={t('joinModalTitle')} />
+            </SupabaseProvider>
           </GridItem>
           <GridItem>
             <Footer />
@@ -53,12 +53,4 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
   );
 };
 
-export const getServerSideProps = async ({ locale }: NextPageContext) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale || 'en', ['common'])),
-    },
-  };
-};
-
-export default trpc.withTRPC(appWithTranslation(MyApp));
+export default appWithTranslation(MyApp);

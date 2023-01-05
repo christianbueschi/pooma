@@ -1,6 +1,6 @@
 import { Button, Flex, Text, VStack } from '@chakra-ui/react';
-import { Member } from '@prisma/client';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
+import { Member } from '../types';
 import { FlipCard } from './FlipCard';
 
 type TeamCardsProps = {
@@ -18,7 +18,11 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
 }) => {
   const { t } = useTranslation(['common']);
 
-  const sortedMembers = members.sort((a, b) => (a.name > b.name ? 1 : -1));
+  const sortedMembers = members.sort((a, b) => {
+    if(!a.name || !b.name) return 0;
+    
+    return a.name > b.name ? 1 : -1
+  });
 
   const filteredMembers = sortedMembers.filter(
     (member) => !member.isSpectactorMode
