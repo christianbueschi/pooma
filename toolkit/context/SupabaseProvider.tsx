@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { parseCookies, setCookie } from 'nookies';
+import { parseCookies } from 'nookies';
 import {
   createContext,
   Dispatch,
@@ -62,13 +62,9 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
 }) => {
   const router = useRouter();
 
-  if (router.query.teamId) {
-    setCookie(null, 'teamId', router.query.teamId as string);
-  }
-
   const cookies = parseCookies();
 
-  const [teamId, setTeamId] = useState(cookies.teamId);
+  const [teamId, setTeamId] = useState(router.query.teamId as string);
   const [memberId, setMemberId] = useState<string>(cookies.memberId);
 
   useEffect(() => {

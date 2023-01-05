@@ -71,13 +71,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     setCookie(null, 'teamId', team.id, COOKIE_OPTIONS);
     setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
-    router.push(
-      {
-        pathname: '/team' + '/' + team.id,
-        query: { preventFetching: true },
-      },
-      '/team' + '/' + team.id
-    );
+    router.push('/team' + '/' + team.id);
   };
 
   return (

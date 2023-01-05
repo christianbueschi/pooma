@@ -1,8 +1,9 @@
-import { NextPage } from 'next';
+import { GetServerSidePropsContext, NextPage } from 'next';
 import { Button, Heading, VStack } from '@chakra-ui/react';
 import { Header } from '../../toolkit/components/Header';
 import { Logo } from '../../toolkit/components/Brand';
 import Link from 'next/link';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const NotFound: NextPage = () => {
   return (
@@ -28,5 +29,13 @@ const NotFound: NextPage = () => {
     </VStack>
   );
 };
+
+export async function getStaticProps({ locale }: GetServerSidePropsContext) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
+    },
+  };
+}
 
 export default NotFound;
