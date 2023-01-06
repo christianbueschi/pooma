@@ -52,7 +52,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
             'repeat(4, 1fr)',
             'repeat(5, 1fr)',
           ]}
-          gap={4}
+          gap={[2, 2, 4]}
           ml={[2, 2, 4]}
           mr={[2, 2, 4]}
         >
