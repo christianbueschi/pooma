@@ -16,6 +16,7 @@ import { useDeleteMemberMutations } from '../../../toolkit/hooks/useDeleteMember
 import { useTeam } from '../../../toolkit/hooks/useTeam';
 import { useMember } from '../../../toolkit/hooks/useMember';
 import { useSupabaseContext } from '../../../toolkit/context/SupabaseProvider';
+import { client } from '../../../toolkit/supabase/client';
 
 type TeamProps = {};
 
@@ -36,12 +37,6 @@ const Team: NextPage<TeamProps> = () => {
   const isLoading = isTeamLoading || isMemberLoading;
 
   const router = useRouter();
-
-  useEffect(() => {
-    if (!isTeamLoading && !team) {
-      router.push('/404');
-    }
-  }, [team, isTeamLoading, router]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -177,7 +172,22 @@ const Team: NextPage<TeamProps> = () => {
 
 export async function getServerSideProps({
   locale,
+  query,
 }: GetServerSidePropsContext) {
+  const teamId = query.teamId as string;
+
+  const { data } = await client
+    .from('teams')
+    .select()
+    .eq('id', teamId)
+    .single();
+
+  if (!data) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     props: {
       ...(await serverSideTranslations(locale || 'en', ['common'])),

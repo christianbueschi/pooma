@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { parseCookies, setCookie } from 'nookies';
+import { destroyCookie, parseCookies, setCookie } from 'nookies';
 import {
   createContext,
   Dispatch,
@@ -73,10 +73,18 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
   useEffect(() => {
     if (teamId) {
       setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
+    } else {
+      destroyCookie(null, 'teamId', COOKIE_OPTIONS);
+      setTeam(undefined);
+      destroyCookie(null, 'memberId', COOKIE_OPTIONS);
+      setMember(undefined);
     }
 
     if (memberId) {
       setCookie(null, 'memberId', memberId, COOKIE_OPTIONS);
+    } else {
+      destroyCookie(null, 'memberId', COOKIE_OPTIONS);
+      setMember(undefined);
     }
   }, [teamId, memberId]);
 

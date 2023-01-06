@@ -1,12 +1,10 @@
 import styled from '@emotion/styled';
-import { destroyCookie } from 'nookies';
 import { FiUser, FiUsers, FiMoon } from 'react-icons/fi';
 import { LogoTitle } from './Brand';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import { COOKIE_OPTIONS } from './constants';
 import {
   Button,
   Grid,
@@ -26,6 +24,7 @@ import { useTranslation } from 'next-i18next';
 import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
 import { useTeam } from '../hooks/useTeam';
 import { useMember } from '../hooks/useMember';
+import { useSupabaseContext } from '../context/SupabaseProvider';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -45,18 +44,18 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const [team] = useTeam();
   const [member] = useMember();
 
+  const { setTeamId, setMemberId } = useSupabaseContext();
+
   const isTeamSet = team?.id;
   const isMemberSet = member?.id;
 
-  const handleLogout = () => {
-    destroyCookie(null, 'teamId', COOKIE_OPTIONS);
-    destroyCookie(null, 'memberId', COOKIE_OPTIONS);
+  const handleLogout = async () => {
+    await router.push('/');
 
-    if (router.pathname === '/') {
-      location.reload();
-    } else {
-      router.push('/');
-    }
+    setTeamId(undefined);
+    setMemberId(undefined);
+
+    location.reload();
   };
 
   const [mutateMember] = useUpdateMemberMutations();
@@ -86,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
       top={0}
       bg={scrollPosition > 30 ? backgrounColor : 'transparent'}
       transition='background 0.3s ease-in-out'
-      zIndex={100}
+      zIndex={999999}
     >
       {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
 
