@@ -6,8 +6,8 @@ import { Modal } from './Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
 import { useTranslation } from 'next-i18next';
-import { useContext } from 'react';
-import { SupabaseContext } from '../context/SupabaseProvider';
+import { useCreateTeam } from '../hooks/useCreateTeam';
+import { useCreateMember } from '../hooks/useCreateMember';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
@@ -43,7 +43,6 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     formState: { isValid },
   } = useForm<FormFields>();
 
-  const { useCreateTeam, useCreateMember } = useContext(SupabaseContext);
   const { createTeam, teamCreating } = useCreateTeam();
   const { createMember, memberCreating } = useCreateMember();
 

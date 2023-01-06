@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
@@ -19,7 +19,9 @@ import { useForm } from 'react-hook-form';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
 import { useTranslation } from 'next-i18next';
-import { SupabaseContext } from '../context/SupabaseProvider';
+import { useCreateMember } from '../hooks/useCreateMember';
+import { useTeam } from '../hooks/useTeam';
+import { useSupabaseContext } from '../context/SupabaseProvider';
 
 type FormFields = { teamId: string; member: string };
 
@@ -36,10 +38,9 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const router = useRouter();
 
-  const { useCreateMember, useTeamContext, showJoinModal, setShowJoinModal } =
-    useContext(SupabaseContext);
+  const { showJoinModal, setShowJoinModal } = useSupabaseContext();
 
-  const [team, teamIsLoading, _, fetchTeam] = useTeamContext();
+  const [team, teamIsLoading, _, fetchTeam] = useTeam();
 
   const {
     register,

@@ -1,7 +1,7 @@
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
 import { Header } from '../../../toolkit/components/Header';
 import { Modal } from '../../../toolkit/components/Modal';
@@ -11,9 +11,11 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useUpdateTeamMutations } from '../../../toolkit/hooks/useUpdateTeamMutations';
 import { useUpdateMemberMutations } from '../../../toolkit/hooks/useUpdateMemberMutations';
-import { SupabaseContext } from '../../../toolkit/context/SupabaseProvider';
 import { Member } from '../../../toolkit/types';
 import { useDeleteMemberMutations } from '../../../toolkit/hooks/useDeleteMemberMutations';
+import { useTeam } from '../../../toolkit/hooks/useTeam';
+import { useMember } from '../../../toolkit/hooks/useMember';
+import { useSupabaseContext } from '../../../toolkit/context/SupabaseProvider';
 
 type TeamProps = {};
 
@@ -22,11 +24,10 @@ const Team: NextPage<TeamProps> = () => {
 
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const { useTeamContext, useMemberContext, setShowJoinModal } =
-    useContext(SupabaseContext);
+  const { setShowJoinModal } = useSupabaseContext();
 
-  const [team, isTeamLoading, _, fetchTeam] = useTeamContext();
-  const [member, isMemberLoading] = useMemberContext();
+  const [team, isTeamLoading, _, fetchTeam] = useTeam();
+  const [member, isMemberLoading] = useMember();
 
   const isMemberInTeam = team?.members?.some((m) => {
     return m.id === member?.id;

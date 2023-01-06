@@ -1,5 +1,5 @@
 import { NextPage, NextPageContext } from 'next';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Button, Heading, VStack } from '@chakra-ui/react';
 import { Header } from '../../toolkit/components/Header';
 import { CreateModal } from '../../toolkit/components/CreateModal';
@@ -8,7 +8,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Trans, useTranslation } from 'next-i18next';
 import Head from 'next/head';
 import { Member, Team } from '../../toolkit/types';
-import { SupabaseContext } from '../../toolkit/context/SupabaseProvider';
+import { useSupabaseContext } from '../../toolkit/context/SupabaseProvider';
 
 type HopeProps = {
   team?: Team;
@@ -19,7 +19,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
   const { t } = useTranslation(['common']);
 
   const [showStartModal, setShowStartModal] = useState(false);
-  const { setShowJoinModal } = useContext(SupabaseContext);
+  const { setShowJoinModal } = useSupabaseContext();
 
   return (
     <>
@@ -30,6 +30,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
 
       <VStack gap={12}>
         <Header isHome team={team} member={member} />
+
         <VStack justifyContent='center' alignItems='center' gap={2}>
           <Logo />
           <Heading

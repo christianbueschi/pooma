@@ -4,57 +4,47 @@ import {
   createContext,
   Dispatch,
   SetStateAction,
+  useContext,
   useEffect,
   useState,
 } from 'react';
-import { CardMode } from '../components/CreateModal';
-import { useCreateMember } from '../hooks/useCreateMember';
-import { useCreateTeam } from '../hooks/useCreateTeam';
-import { useMember } from '../hooks/useMember';
-import { useTeam } from '../hooks/useTeam';
 import { Member, Team } from '../types';
 
-export const SupabaseContext = createContext<SupabaseContextType>(null!);
+export const SupabaseContext = createContext<SupabaseContextType>({
+  team: null,
+  member: null,
+  teamId: undefined,
+  memberId: undefined,
+  setTeam: () => {},
+  setMember: () => {},
+  showJoinModal: false,
+  setShowJoinModal: () => {},
+});
 
 type SupabaseContextType = {
-  useTeamContext: () => readonly [
-    Team | null | undefined,
-    boolean,
-    any,
-    (id: string) => Promise<void>
-  ];
-  useMemberContext: () => readonly [Member | null | undefined, boolean, any];
-  useCreateTeam: () => {
-    createTeam: ({
-      name,
-      cardMode,
-    }: {
-      name: string;
-      cardMode: CardMode;
-    }) => Promise<
-      readonly [team: Team, error: null] | readonly [team: null, error: any]
-    >;
-    teamCreating: boolean;
-  };
-  useCreateMember: () => {
-    createMember: ({
-      name,
-      teamId,
-    }: {
-      name: string;
-      teamId: string;
-    }) => Promise<
-      | readonly [member: Member, error: null]
-      | readonly [member: null, error: any]
-    >;
-    memberCreating: boolean;
-  };
+  team: Team | null | undefined;
+  member: Member | null | undefined;
+  teamId: string | undefined;
+  setTeam: Dispatch<SetStateAction<Team | null | undefined>>;
+  memberId: string | undefined;
+  setMember: Dispatch<SetStateAction<Member | null | undefined>>;
   showJoinModal: boolean;
   setShowJoinModal: Dispatch<SetStateAction<boolean>>;
 };
 
 type SupabaseProviderProps = {
   children: React.ReactNode;
+};
+
+export const useSupabaseContext = () => {
+  const context = useContext(SupabaseContext);
+
+  if (context === undefined) {
+    throw new Error(
+      'useSupabaseContext must be used within a SupabaseProvider'
+    );
+  }
+  return context;
 };
 
 export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
@@ -64,45 +54,35 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
 
   const cookies = parseCookies();
 
-  const [teamId, setTeamId] = useState(router.query.teamId as string);
-  const [memberId, setMemberId] = useState<string>(cookies.memberId);
+  const [teamId, setTeamId] = useState<string>(router.query.teamId as string);
+  const [memberId, setMemberId] = useState<string>();
+
+  const [team, setTeam] = useState<Team | null>();
+  const [member, setMember] = useState<Member | null>();
 
   useEffect(() => {
-    if (!cookies) return;
-
-    if (cookies.teamId) {
+    if (router.query.teamId) {
+      setTeamId(router.query.teamId as string);
+    } else if (cookies.teamId) {
       setTeamId(cookies.teamId);
     }
 
     if (cookies.memberId) {
       setMemberId(cookies.memberId);
     }
-  }, [cookies]);
-
-  // NB: We can not just pass the hooks to the context, because the provider needs to be aware of the changes.
-  // There we create new consts here and pass those to the context.
-  const [team, isTeamLoading, isTeamError, fetchTeam] = useTeam(teamId);
-  const [member, isMemberLoading, isMemberError] = useMember(memberId);
-
-  const useTeamHook = () => {
-    return [team, isTeamLoading, isTeamError, fetchTeam] as const;
-  };
-
-  const useMemberHook = () => {
-    return [member, isMemberLoading, isMemberError] as const;
-  };
+  }, [router.query.teamId, cookies.teamId, cookies.memberId, router]);
 
   const [showJoinModal, setShowJoinModal] = useState(false);
 
   const contextValue = {
-    teamId,
-    memberId,
     showJoinModal,
     setShowJoinModal,
-    useTeamContext: useTeamHook,
-    useMemberContext: useMemberHook,
-    useCreateTeam,
-    useCreateMember,
+    teamId,
+    team,
+    setTeam,
+    memberId,
+    member,
+    setMember,
   };
 
   return (
