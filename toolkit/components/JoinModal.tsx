@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
-import { setCookie } from 'nookies';
 import { useRouter } from 'next/router';
-import { COOKIE_OPTIONS } from './constants';
 import {
   Button,
   FormLabel,
@@ -59,6 +57,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const { createMember, memberCreating } = useCreateMember();
 
+  const { setTeamId, setMemberId } = useSupabaseContext();
+
   const teamIdInternal = watch('teamId');
 
   useEffect(() => {
@@ -79,8 +79,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
       return;
     }
 
-    setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
+    setTeamId(team.id);
+    setMemberId(member.id);
 
     router.push({
       pathname: '/team' + '/' + data.teamId,

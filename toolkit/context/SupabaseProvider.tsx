@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { parseCookies } from 'nookies';
+import { parseCookies, setCookie } from 'nookies';
 import {
   createContext,
   Dispatch,
@@ -8,6 +8,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { COOKIE_OPTIONS } from '../components/constants';
 import { Member, Team } from '../types';
 
 export const SupabaseContext = createContext<SupabaseContextType>({
@@ -16,7 +17,9 @@ export const SupabaseContext = createContext<SupabaseContextType>({
   teamId: undefined,
   memberId: undefined,
   setTeam: () => {},
+  setTeamId: () => {},
   setMember: () => {},
+  setMemberId: () => {},
   showJoinModal: false,
   setShowJoinModal: () => {},
 });
@@ -26,8 +29,10 @@ type SupabaseContextType = {
   member: Member | null | undefined;
   teamId: string | undefined;
   setTeam: Dispatch<SetStateAction<Team | null | undefined>>;
+  setTeamId: Dispatch<SetStateAction<string | undefined>>;
   memberId: string | undefined;
   setMember: Dispatch<SetStateAction<Member | null | undefined>>;
+  setMemberId: Dispatch<SetStateAction<string | undefined>>;
   showJoinModal: boolean;
   setShowJoinModal: Dispatch<SetStateAction<boolean>>;
 };
@@ -54,23 +59,26 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
 
   const cookies = parseCookies();
 
-  const [teamId, setTeamId] = useState<string>(router.query.teamId as string);
-  const [memberId, setMemberId] = useState<string>();
+  const [teamId, setTeamId] = useState<string | undefined>(
+    router.query.teamId as string | undefined
+  );
+
+  const [memberId, setMemberId] = useState<string | undefined>(
+    cookies.memberId || undefined
+  );
 
   const [team, setTeam] = useState<Team | null>();
   const [member, setMember] = useState<Member | null>();
 
   useEffect(() => {
-    if (router.query.teamId) {
-      setTeamId(router.query.teamId as string);
-    } else if (cookies.teamId) {
-      setTeamId(cookies.teamId);
+    if (teamId) {
+      setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
     }
 
-    if (cookies.memberId) {
-      setMemberId(cookies.memberId);
+    if (memberId) {
+      setCookie(null, 'memberId', memberId, COOKIE_OPTIONS);
     }
-  }, [router.query.teamId, cookies.teamId, cookies.memberId, router]);
+  }, [teamId, memberId]);
 
   const [showJoinModal, setShowJoinModal] = useState(false);
 
@@ -80,9 +88,11 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({
     teamId,
     team,
     setTeam,
+    setTeamId,
     memberId,
     member,
     setMember,
+    setMemberId,
   };
 
   return (

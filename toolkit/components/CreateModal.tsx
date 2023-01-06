@@ -1,13 +1,12 @@
-import { setCookie } from 'nookies';
 import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { COOKIE_OPTIONS } from './constants';
 import { Modal } from './Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
 import { useTranslation } from 'next-i18next';
 import { useCreateTeam } from '../hooks/useCreateTeam';
 import { useCreateMember } from '../hooks/useCreateMember';
+import { useSupabaseContext } from '../context/SupabaseProvider';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
@@ -46,6 +45,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const { createTeam, teamCreating } = useCreateTeam();
   const { createMember, memberCreating } = useCreateMember();
 
+  const { setTeamId, setMemberId } = useSupabaseContext();
+
   const onCreateTeam = async (data: FormFields) => {
     // 1. create a new team
     const [team, teamError] = await createTeam({
@@ -67,8 +68,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       return;
     }
 
-    setCookie(null, 'teamId', team.id, COOKIE_OPTIONS);
-    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
+    setTeamId(team.id);
+    setMemberId(member.id);
 
     router.push('/team' + '/' + team.id);
   };
