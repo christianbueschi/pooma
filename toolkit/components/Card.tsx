@@ -42,7 +42,7 @@ export const Card: React.FC<CardProps> = ({
       as='li'
       onClick={() => onClick(card)}
       data-testid='card'
-      h={['100px', '130px', '150px']}
+      h={['80px', '130px', '150px']}
       borderRadius='xl'
       backgroundColor={isActiveCard ? cardColorActive : cardColor}
       cursor={isLocked ? 'not-allowed' : 'pointer'}
@@ -63,6 +63,7 @@ export const Card: React.FC<CardProps> = ({
     >
       <Text
         fontSize={fontSize}
+        wordBreak='break-word'
         lineHeight={lineHeight}
         dangerouslySetInnerHTML={{ __html: card }}
         css={{

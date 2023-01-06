@@ -3,6 +3,7 @@ import { GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
+import { Header } from '../../../toolkit/components/Header';
 import { Modal } from '../../../toolkit/components/Modal';
 import { TeamCards } from '../../../toolkit/components/TeamCards';
 import { useRouter } from 'next/router';
@@ -127,7 +128,7 @@ const Team: NextPage<TeamProps> = () => {
         <title>{title}</title>
       </Head>
 
-      {/* <Header team={team} member={member} /> */}
+      <Header team={team} member={member} />
 
       {isLoading ? (
         <Spinner />
