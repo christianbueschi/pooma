@@ -79,7 +79,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
       return;
     }
 
-    setTeamId(team.id);
+    setTeamId(data.teamId);
     setMemberId(member.id);
 
     router.push({
