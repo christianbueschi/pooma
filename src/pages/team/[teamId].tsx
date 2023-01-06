@@ -128,7 +128,7 @@ const Team: NextPage<TeamProps> = () => {
         <title>{title}</title>
       </Head>
 
-      <Header team={team} member={member} />
+      <Header />
 
       {isLoading ? (
         <Spinner />

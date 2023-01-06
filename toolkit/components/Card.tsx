@@ -42,7 +42,7 @@ export const Card: React.FC<CardProps> = ({
       as='li'
       onClick={() => onClick(card)}
       data-testid='card'
-      h={['80px', '130px', '150px']}
+      h={['100px', '130px', '150px']}
       borderRadius='xl'
       backgroundColor={isActiveCard ? cardColorActive : cardColor}
       cursor={isLocked ? 'not-allowed' : 'pointer'}

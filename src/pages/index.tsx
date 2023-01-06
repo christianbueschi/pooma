@@ -7,15 +7,9 @@ import { Logo } from '../../toolkit/components/Brand';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Trans, useTranslation } from 'next-i18next';
 import Head from 'next/head';
-import { Member, Team } from '../../toolkit/types';
 import { useSupabaseContext } from '../../toolkit/context/SupabaseProvider';
 
-type HopeProps = {
-  team?: Team;
-  member?: Member;
-};
-
-const Home: NextPage<HopeProps> = ({ team, member }) => {
+const Home: NextPage = () => {
   const { t } = useTranslation(['common']);
 
   const [showStartModal, setShowStartModal] = useState(false);
@@ -29,7 +23,7 @@ const Home: NextPage<HopeProps> = ({ team, member }) => {
       </Head>
 
       <VStack gap={12}>
-        <Header isHome team={team} member={member} />
+        <Header isHome />
 
         <VStack justifyContent='center' alignItems='center' gap={2}>
           <Logo />

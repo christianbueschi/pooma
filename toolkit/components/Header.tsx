@@ -23,16 +23,15 @@ import {
 import { colors } from '../theme/colors';
 import { useScrollPosition } from '../hooks/useScrollPosition';
 import { useTranslation } from 'next-i18next';
-import { Member, Team } from '../types';
 import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
+import { useTeam } from '../hooks/useTeam';
+import { useMember } from '../hooks/useMember';
 
 type HeaderProps = {
-  team?: Team | null;
-  member?: Member | null;
   isHome?: boolean;
 };
 
-export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
+export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const { t } = useTranslation(['common']);
 
   const router = useRouter();
@@ -42,6 +41,9 @@ export const Header: React.FC<HeaderProps> = ({ team, member, isHome }) => {
   const onClickLogo = () => {
     router.push('/');
   };
+
+  const [team] = useTeam();
+  const [member] = useMember();
 
   const isTeamSet = team?.id;
   const isMemberSet = member?.id;
