@@ -53,7 +53,9 @@ export const Card: React.FC<CardProps> = ({
       padding='12px'
       textAlign='center'
       _hover={{
-        transform: isLocked ? 'scale(1)' : 'scale(1.08)',
+        transform: isLocked
+          ? 'scale(1) translateZ(1px);'
+          : 'scale(1.08) translateZ(1px);',
       }}
       css={{
         aspectRatio: '4/5',

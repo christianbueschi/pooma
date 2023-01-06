@@ -3,6 +3,7 @@ import {
   Flex,
   Heading,
   HStack,
+  useBreakpointValue,
   useClipboard,
   useColorModeValue,
   VStack,
@@ -34,6 +35,8 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
   const qrCodeBackgroundColor = useColorModeValue('#6ea0a2', '#2c4a52');
   const qrCodeForegroundColor = useColorModeValue('#2C3333', '#A5C9CA');
 
+  const isMedium = useBreakpointValue({ base: false, md: true });
+
   return (
     <>
       {value && (
@@ -53,16 +56,18 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
             >
               {t('inviteOthers')}
             </Heading>
-            <HStack p={2}>
-              <QRCode
-                value={value}
-                qrStyle='dots'
-                eyeRadius={8}
-                fgColor={qrCodeForegroundColor}
-                bgColor={qrCodeBackgroundColor}
-                size={100}
-                removeQrCodeBehindLogo={true}
-              />
+            <HStack p={2} justifyContent='center'>
+              {isMedium && (
+                <QRCode
+                  value={value}
+                  qrStyle='dots'
+                  eyeRadius={8}
+                  fgColor={qrCodeForegroundColor}
+                  bgColor={qrCodeBackgroundColor}
+                  size={100}
+                  removeQrCodeBehindLogo={true}
+                />
+              )}
               <Button onClick={onCopy} w='150px' title={value}>
                 {hasCopied ? 'Copied' : 'Copy Link'}
               </Button>
