@@ -15,16 +15,18 @@ import {
   MenuList,
   Text,
   useColorMode,
-  useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
 import { colors } from '../theme/colors';
-import { useScrollPosition } from '../hooks/useScrollPosition';
 import { useTranslation } from 'next-i18next';
-import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
-import { useTeam } from '../hooks/useTeam';
-import { useMember } from '../hooks/useMember';
-import { useSupabaseContext } from '../context/SupabaseProvider';
+import { useSelect } from '../hooks/useSelect';
+import { useEffect, useState } from 'react';
+import { destroyCookie, parseCookies } from 'nookies';
+import { Member, Team } from '../types';
+import { teamSelectProps } from '../constants';
+import { useUpdate } from '../hooks/useUpdate';
+import { COOKIE_OPTIONS } from './constants';
+import { StickyHeader } from './StickyHeader';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -41,107 +43,127 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     router.push('/');
   };
 
-  const [team] = useTeam();
-  const [member] = useMember();
+  const teamId = router.query.teamId as string;
 
-  const { setTeamId, setMemberId } = useSupabaseContext();
+  const cookies = parseCookies();
+
+  const [filter] = useState(['id', 'eq', teamId || cookies.teamId]);
+
+  const [teams] = useSelect<Team>('teams', {
+    props: teamSelectProps,
+    filter,
+  });
+
+  const team = teams?.[0];
+
+  const [memberFilter, setMemberFilter] = useState([
+    'id',
+    'eq',
+    cookies.memberId,
+  ]);
+
+  useEffect(() => {
+    if (!cookies.memberId) return;
+
+    setMemberFilter(['id', 'eq', cookies.memberId]);
+  }, [cookies.memberId]);
+
+  const [members] = useSelect<Member>('members', {
+    filter: memberFilter,
+  });
+
+  const member = members?.[0];
 
   const isTeamSet = team?.id;
   const isMemberSet = member?.id;
 
   const handleLogout = async () => {
+    destroyCookie(null, 'teamId', COOKIE_OPTIONS);
+    destroyCookie(null, 'memberId', COOKIE_OPTIONS);
+
+    if (router.pathname === '/') {
+      location.reload();
+    }
+
     await router.push('/');
-
-    setTeamId(undefined);
-    setMemberId(undefined);
-
-    location.reload();
   };
 
-  const [mutateMember] = useUpdateMemberMutations();
+  const [updateMember] = useUpdate<Member>('members');
 
   const handleToggleSpectactoreMode = (event: any) => {
     if (!team || !member) return;
 
-    mutateMember({
+    updateMember({
       id: member.id,
       isSpectactorMode: event.currentTarget.checked,
     });
   };
 
-  const backgrounColor = useColorModeValue('white.400', 'grey.400');
-
-  const scrollPosition = useScrollPosition();
-
   return (
-    <Grid
-      templateColumns=' 1fr auto 1fr'
-      columnGap={2}
-      minH='66px'
-      padding={[4]}
-      justifyItems='center'
-      w='100%'
-      position='sticky'
-      top={0}
-      bg={scrollPosition > 30 ? backgrounColor : 'transparent'}
-      transition='background 0.3s ease-in-out'
-      zIndex={999999}
-    >
-      {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
+    <StickyHeader>
+      <Grid
+        templateColumns=' 1fr auto 1fr'
+        columnGap={2}
+        padding={[4]}
+        justifyItems='center'
+        w='100%'
+      >
+        {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
 
-      <GridItem as='nav' gridColumnStart={3} marginLeft='auto'>
-        <HStack alignItems='center'>
+        <GridItem as='nav' gridColumnStart={3} marginLeft='auto'>
           <HStack alignItems='center'>
-            {isTeamSet && (
-              <HStack gap={24} alignItems='center'>
-                <Link href={`/team/${team.id}`} passHref>
-                  <Button variant='ghost' leftIcon={<FiUsers size='24px' />}>
-                    <Text>{team?.name}</Text>
-                  </Button>
-                </Link>
-              </HStack>
-            )}
-            {isMemberSet && (
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  variant='ghost'
-                  leftIcon={<FiUser color='green.500' size='24px' />}
-                  data-testid='user-context-menu-button'
-                >
-                  <Text>{member?.name}</Text>
-                </MenuButton>
-                <MenuList p={4} border='none'>
-                  <VStack gap={4} alignItems='flex-start'>
-                    {!isHome && (
-                      <>
-                        <HStack as='label' gap={2} alignItems='center'>
-                          <StyledToggle
-                            defaultChecked={member?.isSpectactorMode || false}
-                            onChange={handleToggleSpectactoreMode}
-                          />
-                          <Text>{t('spectactorMode')}</Text>
-                        </HStack>
-                      </>
-                    )}
-                    <Button
-                      onClick={handleLogout}
-                      data-testid='logout-button'
-                      alignSelf='flex-end'
-                    >
-                      {t('logout')}
+            <HStack alignItems='center'>
+              {isTeamSet && (
+                <HStack gap={24} alignItems='center'>
+                  <Link href={`/team/${team.id}`} passHref>
+                    <Button variant='ghost' leftIcon={<FiUsers size='24px' />}>
+                      <Text>{team?.name}</Text>
                     </Button>
-                  </VStack>
-                </MenuList>
-              </Menu>
-            )}
-            <HStack>
-              <FiMoon onClick={toggleColorMode} cursor='pointer' />
+                  </Link>
+                </HStack>
+              )}
+              {isMemberSet && (
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    variant='ghost'
+                    leftIcon={<FiUser color='green.500' size='24px' />}
+                    data-testid='user-context-menu-button'
+                  >
+                    <Text>{member?.name}</Text>
+                  </MenuButton>
+                  <MenuList p={4} border='none'>
+                    <VStack gap={4} alignItems='flex-start'>
+                      {!isHome && (
+                        <>
+                          <HStack as='label' gap={2} alignItems='center'>
+                            <StyledToggle
+                              defaultChecked={member?.isSpectactorMode || false}
+                              onChange={handleToggleSpectactoreMode}
+                            />
+                            <Text>{t('spectactorMode')}</Text>
+                          </HStack>
+                        </>
+                      )}
+                      <Button
+                        onClick={handleLogout}
+                        data-testid='logout-button'
+                        alignSelf='flex-end'
+                      >
+                        {t('logout')}
+                      </Button>
+                    </VStack>
+                  </MenuList>
+                </Menu>
+              )}
+              <HStack>
+                <FiMoon onClick={toggleColorMode} cursor='pointer' />
+              </HStack>
             </HStack>
           </HStack>
-        </HStack>
-      </GridItem>
-    </Grid>
+        </GridItem>
+      </Grid>
+    </StickyHeader>
   );
 };
 

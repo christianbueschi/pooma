@@ -4,9 +4,10 @@ import { Modal } from './Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
 import { useTranslation } from 'next-i18next';
-import { useCreateTeam } from '../hooks/useCreateTeam';
-import { useCreateMember } from '../hooks/useCreateMember';
-import { useSupabaseContext } from '../context/SupabaseProvider';
+import { useInsert } from '../hooks/useInsert';
+import { MemberInsert, TeamInsert } from '../types';
+import { setCookie } from 'nookies';
+import { COOKIE_OPTIONS } from './constants';
 
 const CARD_MODE_OPTIONS = [
   { value: 'FIBONACCI', label: 'Fibonacci' },
@@ -42,34 +43,32 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     formState: { isValid },
   } = useForm<FormFields>();
 
-  const { createTeam, teamCreating } = useCreateTeam();
-  const { createMember, memberCreating } = useCreateMember();
-
-  const { setTeamId, setMemberId } = useSupabaseContext();
+  const [createTeam, teamCreating] = useInsert<TeamInsert>();
+  const [createMember, memberCreating] = useInsert<MemberInsert>();
 
   const onCreateTeam = async (data: FormFields) => {
     // 1. create a new team
-    const [team, teamError] = await createTeam({
+    const [team, teamError] = await createTeam('teams', {
       name: data.team,
       cardMode: data.cardMode,
     });
 
-    if (!team || teamError) {
+    if (!team?.id || teamError) {
       return;
     }
 
     // 2. create a new member and connect it to the team
-    const [member, memberError] = await createMember({
+    const [member, memberError] = await createMember('members', {
       name: data.member,
       teamId: team.id,
     });
 
-    if (!member || memberError) {
+    if (!member?.id || memberError) {
       return;
     }
 
-    setTeamId(team.id);
-    setMemberId(member.id);
+    setCookie(null, 'teamId', team.id, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
     router.push('/team' + '/' + team.id);
   };

@@ -7,13 +7,13 @@ import { Logo } from '../../toolkit/components/Brand';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Trans, useTranslation } from 'next-i18next';
 import Head from 'next/head';
-import { useSupabaseContext } from '../../toolkit/context/SupabaseProvider';
+import { useModalContext } from '../../toolkit/context/ModalProvider';
 
 const Home: NextPage = () => {
   const { t } = useTranslation(['common']);
 
   const [showStartModal, setShowStartModal] = useState(false);
-  const { setShowJoinModal } = useSupabaseContext();
+  const { setShowJoinModal } = useModalContext();
 
   return (
     <>

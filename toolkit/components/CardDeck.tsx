@@ -3,8 +3,8 @@ import { Card } from './Card';
 import { CARDS } from './constants';
 import { Grid } from '@chakra-ui/react';
 import { useTranslation } from 'next-i18next';
-import { useUpdateMemberMutations } from '../hooks/useUpdateMemberMutations';
 import { Member, Team } from '../types';
+import { useUpdate } from '../hooks/useUpdate';
 
 type CardDeckProps = {
   member: Member;
@@ -16,7 +16,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
 
   const [activeCard, setActiveCard] = useState<string | null>();
 
-  const [memberMutation] = useUpdateMemberMutations();
+  const [updateMember] = useUpdate<Member>('members');
 
   const onClickCard = async (card: string) => {
     if (team.isLocked) return;
@@ -28,13 +28,14 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
 
     setActiveCard(newCard);
 
-    await memberMutation({
+    await updateMember({
       id: member.id,
       card: newCard,
     });
   };
 
   useEffect(() => {
+    console.log('EFFECT CardDeck.tsx:40');
     setActiveCard(member.card);
   }, [member.card]);
 

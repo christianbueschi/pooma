@@ -26,7 +26,8 @@ export const FlipCard: React.FC<FlipCardProps> = ({
   const [isMe, setIsMe] = useState(false);
 
   useEffect(() => {
-    setIsMe(cookies.memberId === member.id);
+    console.log('EFFECT FlipCard.tsx:30'),
+      setIsMe(cookies.memberId === member.id);
   }, [cookies, member.id]);
 
   const cardHeight = ['100px', '130px', '150px'];

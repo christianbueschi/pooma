@@ -1,7 +1,7 @@
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
 import { Header } from '../../../toolkit/components/Header';
 import { Modal } from '../../../toolkit/components/Modal';
@@ -9,14 +9,14 @@ import { TeamCards } from '../../../toolkit/components/TeamCards';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useUpdateTeamMutations } from '../../../toolkit/hooks/useUpdateTeamMutations';
-import { useUpdateMemberMutations } from '../../../toolkit/hooks/useUpdateMemberMutations';
-import { Member } from '../../../toolkit/types';
-import { useDeleteMemberMutations } from '../../../toolkit/hooks/useDeleteMemberMutations';
-import { useTeam } from '../../../toolkit/hooks/useTeam';
-import { useMember } from '../../../toolkit/hooks/useMember';
-import { useSupabaseContext } from '../../../toolkit/context/SupabaseProvider';
+import { Member, Team } from '../../../toolkit/types';
+import { useDelete } from '../../../toolkit/hooks/useDelete';
+import { useModalContext } from '../../../toolkit/context/ModalProvider';
 import { client } from '../../../toolkit/supabase/client';
+import { useSelect } from '../../../toolkit/hooks/useSelect';
+import { parseCookies } from 'nookies';
+import { teamSelectProps } from '../../../toolkit/constants';
+import { useUpdate } from '../../../toolkit/hooks/useUpdate';
 
 type TeamProps = {};
 
@@ -25,20 +25,46 @@ const Team: NextPage<TeamProps> = () => {
 
   const [isOpen, toggleIsOpen] = useState(false);
 
-  const { setShowJoinModal } = useSupabaseContext();
-
-  const [team, isTeamLoading, _, fetchTeam] = useTeam();
-  const [member, isMemberLoading] = useMember();
-
-  const isMemberInTeam = team?.members?.some((m) => {
-    return m.id === member?.id;
-  });
-
-  const isLoading = isTeamLoading || isMemberLoading;
+  const { setShowJoinModal } = useModalContext();
 
   const router = useRouter();
 
+  const teamId = (router.query.teamId as string) || '';
+
+  const cookies = parseCookies();
+
+  const teamFilter = useRef(['id', 'eq', teamId]);
+  const membersFilter = useRef(['teamId', 'eq', teamId]);
+
+  const [teams, isTeamLoading] = useSelect<Team>('teams', {
+    props: teamSelectProps,
+    filter: teamFilter.current,
+    shouldSubscribe: true,
+  });
+  console.log('🚀 ~ file: [teamId].tsx:44 ~ teams', teams);
+
+  const team = teams?.[0];
+
+  const [members, isMembersLoading] = useSelect<Member>('members', {
+    filter: membersFilter.current,
+    shouldSubscribe: true,
+  });
+  console.log('🚀 ~ file: [teamId].tsx:51 ~ members', members);
+
+  const member = members?.find((m) => {
+    return m.id === cookies.memberId;
+  });
+  console.log('🚀 ~ file: [teamId].tsx:55 ~ member ~ member', member);
+
+  const isMemberInTeam = members?.some((m) => {
+    return m.id === member?.id;
+  });
+
+  const isLoading = isTeamLoading || isMembersLoading;
+
   useEffect(() => {
+    console.log('EFFECT [teamId].tsx:68');
+
     if (isLoading) return;
 
     if (!team || !member || !isMemberInTeam) {
@@ -55,14 +81,14 @@ const Team: NextPage<TeamProps> = () => {
     isOpen ? clear() : resolve();
   };
 
-  const [mutateTeam] = useUpdateTeamMutations();
-  const [mutateMember] = useUpdateMemberMutations();
+  const [updateTeam] = useUpdate<Team>('teams');
+  const [mutateMember] = useUpdate<Member>('members');
 
   const resolve = () => {
     toggleIsOpen(true);
     if (!team?.id) return;
 
-    mutateTeam({
+    updateTeam({
       id: team.id,
       isLocked: true,
     });
@@ -73,12 +99,12 @@ const Team: NextPage<TeamProps> = () => {
 
     if (!team?.id) return;
 
-    await mutateTeam({
+    await updateTeam({
       id: team.id,
       isLocked: false,
     });
 
-    team.members?.forEach(async (member) => {
+    members?.forEach(async (member) => {
       await mutateMember({
         id: member.id,
         card: '',
@@ -94,7 +120,7 @@ const Team: NextPage<TeamProps> = () => {
     toggleRemoveMemberModal(true);
   };
 
-  const [deleteMemberMutation] = useDeleteMemberMutations();
+  const [deleteMember] = useDelete();
 
   const onRemoveMember = async () => {
     if (!team || !memberToRemove) {
@@ -102,16 +128,15 @@ const Team: NextPage<TeamProps> = () => {
       return;
     }
 
-    await deleteMemberMutation({
-      id: memberToRemove.id,
-    });
+    await deleteMember('members', memberToRemove.id);
 
-    fetchTeam(team.id);
+    // refetchMembers();
 
     toggleRemoveMemberModal(false);
   };
 
   useEffect(() => {
+    console.log('EFFECT [teamId].tsx:135');
     toggleIsOpen(!!team?.isLocked);
   }, [team, router, isLoading]);
 
@@ -127,7 +152,7 @@ const Team: NextPage<TeamProps> = () => {
 
       {isLoading ? (
         <Spinner />
-      ) : isMemberInTeam && team?.members?.length && member && team ? (
+      ) : isMemberInTeam && members?.length && member && team ? (
         <>
           {!member.isSpectactorMode && (
             <VStack css={{ alignItems: 'center' }}>
@@ -136,7 +161,7 @@ const Team: NextPage<TeamProps> = () => {
           )}
           <Heading data-testid='title'>{team?.name}</Heading>
           <TeamCards
-            members={team.members}
+            members={members}
             isOpen={isOpen}
             onRemove={handleRemove}
             handleResolve={handleResolve}

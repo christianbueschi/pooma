@@ -10,7 +10,15 @@ import CookieConsent from 'react-cookie-consent';
 import { colors } from '../../toolkit/theme/colors';
 import { theme } from '../../toolkit/theme';
 import { JoinModal } from '../../toolkit/components/JoinModal';
-import { SupabaseProvider } from '../../toolkit/context/SupabaseProvider';
+import { createClient } from '@supabase/supabase-js';
+import { SupabaseQueryProvider } from '../../toolkit/context/SupabaseQueryProvider';
+import { Database } from '../../supabase/types';
+import { ModalProvider } from '../../toolkit/context/ModalProvider';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
+
+const client = createClient<Database>(supabaseUrl, supabaseKey);
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   const { t } = useTranslation(['common']);
@@ -22,32 +30,34 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
       </Head>
 
       <Chakra cookies={pageProps.cookies}>
-        <SupabaseProvider>
-          <Grid gridTemplateRows='1fr auto' height='100vh'>
-            <GridItem>
-              <Component {...pageProps} />
-              <JoinModal title={t('joinModalTitle')} />
-            </GridItem>
-            <GridItem>
-              <Footer />
-              <CookieConsent
-                location='bottom'
-                buttonText={t('cookieButton')}
-                cookieName='poomaCookieConsent'
-                style={{ background: colors.green[400] }}
-                buttonStyle={{
-                  background: colors.green[500],
-                  color: theme.colors.white,
-                  fontSize: '13px',
-                  borderRadius: '8px',
-                }}
-                expires={150}
-              >
-                {t('cookieText')}
-              </CookieConsent>
-            </GridItem>
-          </Grid>
-        </SupabaseProvider>
+        <SupabaseQueryProvider client={client}>
+          <ModalProvider>
+            <Grid gridTemplateRows='1fr auto' height='100vh'>
+              <GridItem>
+                <Component {...pageProps} />
+                <JoinModal title={t('joinModalTitle')} />
+              </GridItem>
+              <GridItem>
+                <Footer />
+                <CookieConsent
+                  location='bottom'
+                  buttonText={t('cookieButton')}
+                  cookieName='poomaCookieConsent'
+                  style={{ background: colors.green[400] }}
+                  buttonStyle={{
+                    background: colors.green[500],
+                    color: theme.colors.white,
+                    fontSize: '13px',
+                    borderRadius: '8px',
+                  }}
+                  expires={150}
+                >
+                  {t('cookieText')}
+                </CookieConsent>
+              </GridItem>
+            </Grid>
+          </ModalProvider>
+        </SupabaseQueryProvider>
       </Chakra>
     </>
   );

@@ -17,9 +17,13 @@ import { useForm } from 'react-hook-form';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
 import { useTranslation } from 'next-i18next';
-import { useCreateMember } from '../hooks/useCreateMember';
-import { useTeam } from '../hooks/useTeam';
-import { useSupabaseContext } from '../context/SupabaseProvider';
+import { useModalContext } from '../context/ModalProvider';
+import { useSelect } from '../hooks/useSelect';
+import { MemberInsert, Team } from '../types';
+import { teamSelectProps } from '../constants';
+import { setCookie } from 'nookies';
+import { COOKIE_OPTIONS } from './constants';
+import { useInsert } from '../hooks/useInsert';
 
 type FormFields = { teamId: string; member: string };
 
@@ -36,9 +40,18 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const router = useRouter();
 
-  const { showJoinModal, setShowJoinModal } = useSupabaseContext();
+  const { showJoinModal, setShowJoinModal } = useModalContext();
 
-  const [team, teamIsLoading, _, fetchTeam] = useTeam();
+  const teamId = router.query.teamId as string;
+
+  const [filter] = useState(['id', 'eq', teamId]);
+
+  const [teams, teamIsLoading, _, fetchTeam] = useSelect<Team>('teams', {
+    props: teamSelectProps,
+    filter,
+  });
+
+  const team = teams?.[0];
 
   const {
     register,
@@ -46,22 +59,18 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     setValue,
     setFocus,
     formState: { isValid },
-    watch,
   } = useForm<FormFields>({});
 
   const [showTeamExistsBadge, setShowTeamExistsBadge] = useState(false);
   const handleBlurTeamId = () => {
     setShowTeamExistsBadge(true);
-    fetchTeam(teamIdInternal);
+    fetchTeam();
   };
 
-  const { createMember, memberCreating } = useCreateMember();
-
-  const { setTeamId, setMemberId } = useSupabaseContext();
-
-  const teamIdInternal = watch('teamId');
+  const [createMember, memberCreating] = useInsert<MemberInsert>();
 
   useEffect(() => {
+    console.log('EFFECT JoinModal.tsx:78');
     if (!team) return;
 
     setValue('teamId', team.id);
@@ -70,17 +79,17 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   const onJoinTeam = async (data: FormFields) => {
     if (!data.teamId) return;
 
-    const [member, error] = await createMember({
+    const [member, error] = await createMember('members', {
       name: data.member,
       teamId: data.teamId,
     });
 
-    if (!member || error) {
+    if (!member?.id || error) {
       return;
     }
 
-    setTeamId(data.teamId);
-    setMemberId(member.id);
+    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
+    setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
     router.push({
       pathname: '/team' + '/' + data.teamId,
@@ -88,6 +97,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   };
 
   useEffect(() => {
+    console.log('EFFECT JoinModal.tsx:105');
     if (!team) return;
 
     setFocus('member');
