@@ -1,6 +1,6 @@
-# POOMA
+![hero](./docs/images/hero-visual.png)
 
-POOMA is a clean web app for playing scrum poker built with Next.js, Supabase, and Chakra UI.
+POOMA is a clean scrum poker web app built with Next.js, Supabase, and Chakra UI.
 
 > POOMA stands for `pull out of my a**`
 
