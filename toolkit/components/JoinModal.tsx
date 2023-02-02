@@ -42,29 +42,33 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const { showJoinModal, setShowJoinModal } = useModalContext();
 
-  const teamId = router.query.teamId as string;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setFocus,
+    getValues,
+    formState: { isValid },
+  } = useForm<FormFields>({
+    defaultValues: {
+      teamId: router.query.teamId as string,
+    },
+  });
 
-  const [filter] = useState(['id', 'eq', teamId]);
+  const [filter, setFilter] = useState(['id', 'eq', getValues('teamId')]);
 
-  const [teams, teamIsLoading, _, fetchTeam] = useSelect<Team>('teams', {
+  const [teams, teamIsLoading] = useSelect<Team>('teams', {
     props: teamSelectProps,
     filter,
   });
 
   const team = teams?.[0];
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    setFocus,
-    formState: { isValid },
-  } = useForm<FormFields>({});
-
   const [showTeamExistsBadge, setShowTeamExistsBadge] = useState(false);
+
   const handleBlurTeamId = () => {
     setShowTeamExistsBadge(true);
-    fetchTeam();
+    setFilter(['id', 'eq', getValues('teamId')]);
   };
 
   const [createMember, memberCreating] = useInsert<MemberInsert>();
@@ -88,7 +92,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
       return;
     }
 
-    setCookie(null, 'teamId', teamId, COOKIE_OPTIONS);
+    setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
     setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
     router.push({

@@ -157,7 +157,9 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 </Menu>
               )}
               <HStack>
-                <FiMoon onClick={toggleColorMode} cursor='pointer' />
+                <Button variant='ghost' onClick={toggleColorMode}>
+                  <FiMoon />
+                </Button>
               </HStack>
             </HStack>
           </HStack>
