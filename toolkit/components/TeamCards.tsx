@@ -6,7 +6,7 @@ import { FlipCard } from './FlipCard';
 type TeamCardsProps = {
   members: Member[];
   isOpen: boolean;
-  onRemove: (member: Member) => void;
+  onRemove: (_member: Member) => void;
   handleResolve: () => void;
 };
 
@@ -19,9 +19,9 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   const { t } = useTranslation(['common']);
 
   const sortedMembers = members.sort((a, b) => {
-    if(!a.name || !b.name) return 0;
-    
-    return a.name > b.name ? 1 : -1
+    if (!a.name || !b.name) return 0;
+
+    return a.name > b.name ? 1 : -1;
   });
 
   const filteredMembers = sortedMembers.filter(

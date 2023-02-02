@@ -1,6 +1,7 @@
 import { PostgrestResponse } from '@supabase/supabase-js';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { SupabaseQueryContext } from '../context/SupabaseQueryProvider';
+import { client } from '../supabase/client';
 
 type Options = {
   filter?: Filter;
@@ -21,13 +22,8 @@ export const useSelect = <T extends { id: string }>(
   )}`;
   console.log('🚀 ~ file: useSelect.ts:18 ~ key ~ key', key);
 
-  const {
-    client,
-    queryKeys,
-    setQueryKeys,
-    activePromises,
-    activeSubscriptions,
-  } = useContext(SupabaseQueryContext);
+  const { queryKeys, setQueryKeys, activePromises, activeSubscriptions } =
+    useContext(SupabaseQueryContext);
 
   const { filter, props, shouldSubscribe } = options || {};
 

@@ -1,11 +1,9 @@
 import { PostgrestResponse } from '@supabase/supabase-js';
-import { useContext, useState } from 'react';
-import { SupabaseQueryContext } from '../context/SupabaseQueryProvider';
+import { useState } from 'react';
+import { client } from '../supabase/client';
 
 export const useInsert = <T>() => {
   const [isLoading, setIsLoading] = useState(false);
-
-  const { client } = useContext(SupabaseQueryContext);
 
   const insert = async (table: string, payload: any) => {
     setIsLoading(true);

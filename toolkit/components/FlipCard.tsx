@@ -14,7 +14,7 @@ import { Member } from '../types';
 type FlipCardProps = {
   isOpen: boolean;
   member: Member;
-  onRemove: (member: Member) => void;
+  onRemove: (_member: Member) => void;
 };
 
 export const FlipCard: React.FC<FlipCardProps> = ({

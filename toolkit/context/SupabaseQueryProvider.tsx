@@ -1,4 +1,4 @@
-import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import {
   createContext,
   Dispatch,
@@ -7,12 +7,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Database } from '../../supabase/types';
 
 export const SupabaseQueryContext = createContext<SupabaseQueryContextType>({
   queryKeys: [],
   setQueryKeys: () => {},
-  client: {} as SupabaseClient,
   activePromises: {},
   activeSubscriptions: {},
 });
@@ -20,13 +18,11 @@ export const SupabaseQueryContext = createContext<SupabaseQueryContextType>({
 type SupabaseQueryContextType = {
   queryKeys: { [key: string]: any };
   setQueryKeys: Dispatch<SetStateAction<{ [key: string]: any }>>;
-  client: SupabaseClient<Database>;
   activePromises: { [key: string]: Promise<any> | boolean };
   activeSubscriptions: { [key: string]: RealtimeChannel };
 };
 
 type SupabaseQueryProviderProps = {
-  client: SupabaseClient<Database>;
   children: React.ReactNode;
 };
 
@@ -42,7 +38,6 @@ export const useSupabaseQueryContext = () => {
 };
 
 export const SupabaseQueryProvider: React.FC<SupabaseQueryProviderProps> = ({
-  client,
   children,
 }) => {
   const [queryKeys, setQueryKeys] = useState<{ [key: string]: any }>({});
@@ -62,7 +57,6 @@ export const SupabaseQueryProvider: React.FC<SupabaseQueryProviderProps> = ({
     setQueryKeys,
     activePromises: activePromisesRef.current,
     activeSubscriptions: activeSubscriptionsRef.current,
-    client,
   };
 
   return (

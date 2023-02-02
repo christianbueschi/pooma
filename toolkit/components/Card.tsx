@@ -5,7 +5,7 @@ type CardProps = {
   card: string;
   activeCard?: string | null;
   isLocked: boolean;
-  onClick: (card: string) => void;
+  onClick: (_card: string) => void;
 };
 
 export const Card: React.FC<CardProps> = ({
