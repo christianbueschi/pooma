@@ -23,7 +23,6 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
   const { hasCopied, onCopy, setValue, value } = useClipboard('');
 
   useEffect(() => {
-    console.log('EFFECT ShareLink.tsx:27');
     if (router.pathname === '/team/[teamId]') {
       setValue(window.location.href);
     } else {

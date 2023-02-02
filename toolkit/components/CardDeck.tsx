@@ -35,7 +35,6 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
   };
 
   useEffect(() => {
-    console.log('EFFECT CardDeck.tsx:40');
     setActiveCard(member.card);
   }, [member.card]);
 

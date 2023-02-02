@@ -33,15 +33,24 @@ const Team: NextPage<TeamProps> = () => {
 
   const cookies = parseCookies();
 
-  const teamFilter = useRef(['id', 'eq', teamId]);
-  const membersFilter = useRef(['teamId', 'eq', teamId]);
+  // Those filters need to be in a ref, otherwise it will cause an infinite loop
+  const teamFilter = useRef({
+    prop: 'id',
+    operator: 'eq',
+    value: teamId,
+  });
+
+  const membersFilter = useRef({
+    prop: 'teamId',
+    operator: 'eq',
+    value: teamId,
+  });
 
   const [teams, isTeamLoading] = useSelect<Team>('teams', {
     props: teamSelectProps,
     filter: teamFilter.current,
     shouldSubscribe: true,
   });
-  console.log('🚀 ~ file: [teamId].tsx:44 ~ teams', teams);
 
   const team = teams?.[0];
 
@@ -49,12 +58,10 @@ const Team: NextPage<TeamProps> = () => {
     filter: membersFilter.current,
     shouldSubscribe: true,
   });
-  console.log('🚀 ~ file: [teamId].tsx:51 ~ members', members);
 
   const member = members?.find((m) => {
     return m.id === cookies.memberId;
   });
-  console.log('🚀 ~ file: [teamId].tsx:55 ~ member ~ member', member);
 
   const isMemberInTeam = members?.some((m) => {
     return m.id === member?.id;
@@ -63,8 +70,6 @@ const Team: NextPage<TeamProps> = () => {
   const isLoading = isTeamLoading || isMembersLoading;
 
   useEffect(() => {
-    console.log('EFFECT [teamId].tsx:68');
-
     if (isLoading) return;
 
     if (!team || !member || !isMemberInTeam) {
@@ -136,7 +141,6 @@ const Team: NextPage<TeamProps> = () => {
   };
 
   useEffect(() => {
-    console.log('EFFECT [teamId].tsx:135');
     toggleIsOpen(!!team?.isLocked);
   }, [team, router, isLoading]);
 

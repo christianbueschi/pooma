@@ -41,17 +41,12 @@ export const SupabaseQueryProvider: React.FC<SupabaseQueryProviderProps> = ({
   children,
 }) => {
   const [queryKeys, setQueryKeys] = useState<{ [key: string]: any }>({});
-  console.log('🚀 ~ file: SupabaseQueryProvider.tsx:38 ~ queryKeys', queryKeys);
 
   const activePromisesRef = useRef<{ [key: string]: Promise<any> | false }>({});
   const activeSubscriptionsRef = useRef<{
     [key: string]: RealtimeChannel;
   }>({});
 
-  console.log(
-    '🚀 ~ file: SupabaseQueryProvider.tsx:52 ~ activeSubscriptionsRef',
-    activeSubscriptionsRef
-  );
   const contextValue = {
     queryKeys,
     setQueryKeys,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { useRouter } from 'next/router';
 import {
@@ -55,11 +55,15 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     },
   });
 
-  const [filter, setFilter] = useState(['id', 'eq', getValues('teamId')]);
+  const filter = useRef({
+    prop: 'id',
+    operator: 'eq',
+    value: getValues('teamId'),
+  });
 
   const [teams, teamIsLoading] = useSelect<Team>('teams', {
     props: teamSelectProps,
-    filter,
+    filter: filter.current,
   });
 
   const team = teams?.[0];
@@ -68,13 +72,12 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const handleBlurTeamId = () => {
     setShowTeamExistsBadge(true);
-    setFilter(['id', 'eq', getValues('teamId')]);
+    filter.current = { prop: 'id', operator: 'eq', value: getValues('teamId') };
   };
 
   const [createMember, memberCreating] = useInsert<MemberInsert>();
 
   useEffect(() => {
-    console.log('EFFECT JoinModal.tsx:78');
     if (!team) return;
 
     setValue('teamId', team.id);
@@ -101,7 +104,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   };
 
   useEffect(() => {
-    console.log('EFFECT JoinModal.tsx:105');
     if (!team) return;
 
     setFocus('member');

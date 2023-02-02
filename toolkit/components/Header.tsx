@@ -20,7 +20,7 @@ import {
 import { colors } from '../theme/colors';
 import { useTranslation } from 'next-i18next';
 import { useSelect } from '../hooks/useSelect';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { destroyCookie, parseCookies } from 'nookies';
 import { Member, Team } from '../types';
 import { teamSelectProps } from '../constants';
@@ -47,29 +47,37 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
 
   const cookies = parseCookies();
 
-  const [filter] = useState(['id', 'eq', teamId || cookies.teamId]);
+  const filter = useRef({
+    prop: 'id',
+    operator: 'eq',
+    value: teamId || cookies.teamId,
+  });
 
   const [teams] = useSelect<Team>('teams', {
     props: teamSelectProps,
-    filter,
+    filter: filter.current,
   });
 
   const team = teams?.[0];
 
-  const [memberFilter, setMemberFilter] = useState([
-    'id',
-    'eq',
-    cookies.memberId,
-  ]);
+  const memberFilter = useRef({
+    prop: 'id',
+    operator: 'eq',
+    value: cookies.memberId,
+  });
 
   useEffect(() => {
     if (!cookies.memberId) return;
 
-    setMemberFilter(['id', 'eq', cookies.memberId]);
+    memberFilter.current = {
+      prop: 'id',
+      operator: 'eq',
+      value: cookies.memberId,
+    };
   }, [cookies.memberId]);
 
   const [members] = useSelect<Member>('members', {
-    filter: memberFilter,
+    filter: memberFilter.current,
   });
 
   const member = members?.[0];

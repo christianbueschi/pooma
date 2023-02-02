@@ -2,66 +2,32 @@ import { PostgrestResponse } from '@supabase/supabase-js';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { SupabaseQueryContext } from '../context/SupabaseQueryProvider';
 import { client } from '../supabase/client';
+import { getKey, handleMutation } from '../utils';
 
-type Options = {
+export type Options = {
   filter?: Filter;
   props?: string;
   shouldSubscribe?: boolean;
 };
 
-export type FilterOptions = 'eq';
-
-type Filter = string[];
+type Filter = {
+  prop: string;
+  operator: string;
+  value: string;
+};
 
 export const useSelect = <T extends { id: string }>(
   table: string,
   options: Options
 ) => {
-  const key = `${table}-${JSON.stringify(options.filter)}-${JSON.stringify(
-    options.props
-  )}`;
+  const key = getKey(table, options);
+
   console.log('🚀 ~ file: useSelect.ts:18 ~ key ~ key', key);
 
   const { queryKeys, setQueryKeys, activePromises, activeSubscriptions } =
     useContext(SupabaseQueryContext);
 
   const { filter, props, shouldSubscribe } = options || {};
-
-  const handleMutation = useCallback(
-    (
-      type: 'INSERT' | 'UPDATE' | 'DELETE',
-      currentData: T[] | null | undefined,
-      newData: T,
-      oldData: T
-    ) => {
-      let newItems;
-
-      if (type === 'INSERT') {
-        newItems = [...(currentData || []), newData];
-        console.log('🚀 ~ file: useSelect.ts:45 ~ currentData', currentData);
-        console.log('🚀 ~ file: useSelect.ts:45 ~ newItems', newItems);
-      } else if (type === 'UPDATE') {
-        newItems = currentData?.map((item) => {
-          if (item.id === newData.id) {
-            return {
-              ...item,
-              ...newData,
-            };
-          }
-          return item;
-        });
-      }
-
-      if (type === 'DELETE') {
-        newItems = currentData?.filter((item) => {
-          return item.id !== oldData.id;
-        });
-      }
-
-      return newItems;
-    },
-    []
-  );
 
   const subscribeToUpdates = useCallback(() => {
     console.log('subscribing');
@@ -73,7 +39,7 @@ export const useSelect = <T extends { id: string }>(
           event: '*',
           schema: 'public',
           table,
-          filter: filter && `${filter[0]}=${filter[1]}.${filter[2]}`,
+          filter: filter && `${filter.prop}=${filter.operator}.${filter.value}`,
         },
         async (payload) => {
           const old = payload.old as T;
@@ -120,7 +86,7 @@ export const useSelect = <T extends { id: string }>(
         }
       )
       .subscribe();
-  }, [client, table, filter, key, setQueryKeys, handleMutation]);
+  }, [table, filter, key, setQueryKeys]);
 
   useEffect(() => {
     console.log('EFFECT useSelect.ts:74');
@@ -143,42 +109,42 @@ export const useSelect = <T extends { id: string }>(
     if (activePromises[key]) return;
 
     // If we don't have a property to filter for we don't need to fetch anything
-    if (filter && !filter[2]) return;
+    if (!filter?.value) return;
 
-    if (filter) {
-      activePromises[key] = (async () => {
-        try {
-          const res = (await client
-            .from(table)
-            .select(props)
-            .filter(filter[0], filter[1], filter[2])) as PostgrestResponse<T>;
+    activePromises[key] = (async () => {
+      try {
+        const res = (await client
+          .from(table)
+          .select(props)
+          .filter(
+            filter.prop,
+            filter.operator,
+            filter.value
+          )) as PostgrestResponse<T>;
 
-          const { data, error } = res;
+        const { data, error } = res;
 
-          console.log(
-            '🚀 ~ file: useSelect.ts:167 ~ activePromises[key]= ~ setSelectState'
-          );
-          setSelectState({
-            data: data as T[],
-            error,
-            isLoading: false,
-          });
+        console.log(
+          '🚀 ~ file: useSelect.ts:167 ~ activePromises[key]= ~ setSelectState'
+        );
+        setSelectState({
+          data: data as T[],
+          error,
+          isLoading: false,
+        });
 
-          setQueryKeys((prev) => {
-            return {
-              ...prev,
-              [key]: data,
-            };
-          });
-        } catch (error) {
-        } finally {
-          activePromises[key] = false;
-        }
-      })();
-    } else {
-      // activePromises.current = await client.from(table).select().single();
-    }
-  }, [client, props, key, filter, setQueryKeys, table, activePromises]);
+        setQueryKeys((prev) => {
+          return {
+            ...prev,
+            [key]: data,
+          };
+        });
+      } catch (error) {
+      } finally {
+        activePromises[key] = false;
+      }
+    })();
+  }, [props, key, filter, setQueryKeys, table, activePromises]);
 
   useEffect(() => {
     console.log('EFFECT useSelect.ts:127');
