@@ -74,7 +74,12 @@ export const FlipCard: React.FC<FlipCardProps> = ({
             cursor='pointer'
             display='none'
           >
-            <FiX size={24} onClick={() => onRemove(member)} color='grey.400' />
+            <FiX
+              size={24}
+              onClick={() => onRemove(member)}
+              color='grey.400'
+              data-testid='card-remove-button'
+            />
           </Box>
         )}
       </Box>

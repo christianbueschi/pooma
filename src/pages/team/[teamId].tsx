@@ -180,7 +180,12 @@ const Team: NextPage<TeamProps> = () => {
           <Text css={{ textAlign: 'center' }}>
             {t('removeMemberHint', { name: memberToRemove?.name })}
           </Text>
-          <Button variant='solid' onClick={onRemoveMember} colorScheme='red'>
+          <Button
+            variant='solid'
+            onClick={onRemoveMember}
+            colorScheme='red'
+            data-testid='modal-remove-button'
+          >
             {t('removeButton')}
           </Button>
           <Button
