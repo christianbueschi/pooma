@@ -22,15 +22,12 @@ export const useSelect = <T extends { id: string }>(
 ) => {
   const key = getKey(table, options);
 
-  console.log('🚀 ~ file: useSelect.ts:18 ~ key ~ key', key);
-
   const { queryKeys, setQueryKeys, activePromises, activeSubscriptions } =
     useContext(SupabaseQueryContext);
 
   const { filter, props, shouldSubscribe } = options || {};
 
   const subscribeToUpdates = useCallback(() => {
-    console.log('subscribing');
     return client
       .channel(`public:${table}:update`)
       .on(
@@ -45,13 +42,7 @@ export const useSelect = <T extends { id: string }>(
           const old = payload.old as T;
           const changed = payload.new as T;
 
-          console.log('🚀 ~ file: useSelect.ts:48 ~ payload', payload);
-
           setSelectState((prev) => {
-            console.log(
-              '🚀 ~ file: useSelect.ts:87 ~ setSelectState ~ prev',
-              prev
-            );
             const mutation = handleMutation(
               payload.eventType,
               prev.data,
@@ -67,10 +58,6 @@ export const useSelect = <T extends { id: string }>(
           });
 
           setQueryKeys((prev) => {
-            console.log(
-              '🚀 ~ file: useSelect.ts:106 ~ setQueryKeys ~ prev',
-              prev
-            );
             const mutation = handleMutation(
               payload.eventType,
               prev[key],
@@ -89,7 +76,6 @@ export const useSelect = <T extends { id: string }>(
   }, [table, filter, key, setQueryKeys]);
 
   useEffect(() => {
-    console.log('EFFECT useSelect.ts:74');
     if (!shouldSubscribe || activeSubscriptions[key]) return;
 
     activeSubscriptions[key] = subscribeToUpdates();
@@ -124,9 +110,6 @@ export const useSelect = <T extends { id: string }>(
 
         const { data, error } = res;
 
-        console.log(
-          '🚀 ~ file: useSelect.ts:167 ~ activePromises[key]= ~ setSelectState'
-        );
         setSelectState({
           data: data as T[],
           error,
@@ -147,7 +130,6 @@ export const useSelect = <T extends { id: string }>(
   }, [props, key, filter, setQueryKeys, table, activePromises]);
 
   useEffect(() => {
-    console.log('EFFECT useSelect.ts:127');
     if (queryKeys.hasOwnProperty(key)) {
       const item = Object.entries(queryKeys).find(([entriesKey, _]) => {
         if (entriesKey === key) {
@@ -156,8 +138,6 @@ export const useSelect = <T extends { id: string }>(
       });
 
       if (!item) return;
-
-      console.log('🚀 ~ file: useSelect.ts:196 ~ useEffect ~ setSelectState');
 
       setSelectState({
         data: item[1] as T[],
@@ -171,6 +151,5 @@ export const useSelect = <T extends { id: string }>(
 
   const { data, error, isLoading } = selectState;
 
-  console.log('🚀 ~ file: useSelect.ts:153 ~ useSelect ~ data', data);
   return [data, isLoading, error, fetch] as const;
 };
