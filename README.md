@@ -1,34 +1,84 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# POOMA
 
-## Getting Started
+POOMA is a clean web app for playing scrum poker built with Next.js, Supabase, and Chakra UI.
 
-First, run the development server:
+> POOMA stands for `pull out of my a**`
 
-```bash
-npm run dev
-# or
+## Prerequisites
+
+POOMA uses Supabase as realtime database. If you want to run it locally it's the easiest if you install the Supabase CLI. You can do this on project level or globally. See https://supabase.com/docs/guides/cli
+
+Supabase provides you a set of docker container which can easily be started and connected to.
+
+## Running locally
+
+Clone this repo and change directory to the root of the repository.
+
+```
+git clone https://github.com/christianbueschi/pooma
+cd pooma
+```
+
+Copy the sample .env file then open it and set the variables.
+
+```
+cp sample.env .env
+```
+
+Run Supabase
+
+```
+supabase start
+```
+
+Make sure to enable the realtime feature in the Supabase Studio. In order to do this
+
+- Go to the table editor http://localhost:54323/project/default/editor
+- Click on the arrow next to your table and click `Edit Table`
+- Activate the checkbox `Enable Realtime`
+
+The start command provides you with the `anon key`. Copy this key and paste it in your .env file. This key will not change after a shutdown (`supabase stop`) and restart of the containers. But if you shut down the containers they loose the Realtime setting.
+
+Install dependencies
+
+```
+yarn
+```
+
+Start the Next.js server
+
+```
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Running the tests
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+The project includes end-to-end tests that run using Playwright.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+First you need to install playwright
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+npx playwright install
+```
 
-## Learn More
+Run the tests
 
-To learn more about Next.js, take a look at the following resources:
+```
+yarn test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If you want to see what it does in the browsers
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```
+yarn test:headed
+```
 
-## Deploy on Vercel
+## Built With
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [Next.js](https://nextjs.org/) - The react framework for the web
+- [Supabase](https://supabase.com/) - Realtime Open Source Database on top of PostgreSQL
+- [Chakra UI](https://chakra-ui.com/) - Simple and modular UI library
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
