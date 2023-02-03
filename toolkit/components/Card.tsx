@@ -1,5 +1,5 @@
-import { Flex, Text, useColorModeValue } from '@chakra-ui/react';
-import { MQ } from './constants';
+import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import { CARD_HEIGHT, GENERIC_CARD_STYLES } from './constants';
 
 type CardProps = {
   card: string;
@@ -25,60 +25,35 @@ export const Card: React.FC<CardProps> = ({
     isLocked ? 'cyan.500' : 'cyan.500'
   );
 
-  const isLongText = card.length > 3;
-  const fontSize = [
-    isLongText ? '10px' : '14px',
-    isLongText ? '10px' : '14px',
-    isLongText ? '16px' : '22px',
-  ];
-  const lineHeight = [
-    isLongText ? '12px' : '18px',
-    isLongText ? '12px' : '18px',
-    isLongText ? '20px' : '26px',
-  ];
-
   return (
-    <Flex
-      as='li'
-      onClick={() => onClick(card)}
-      data-testid='card'
-      h={['100px', '130px', '150px']}
+    <Box
+      css={{ perspective: '1000px', aspectRatio: '120 / 150' }}
       borderRadius='xl'
-      backgroundColor={isActiveCard ? cardColorActive : cardColor}
-      cursor={isLocked ? 'not-allowed' : 'pointer'}
-      transition='transform 0.25s ease-in-out'
-      color={isLocked ? 'grey.300' : 'white'}
-      alignItems='center'
-      justifyContent='center'
-      padding='12px'
-      textAlign='center'
-      _hover={{
-        transform: isLocked ? 'scale(1);' : 'scale(1.08);',
-      }}
-      css={{
-        aspectRatio: '4/5',
-      }}
+      height={CARD_HEIGHT}
     >
-      <Text
-        fontSize={fontSize}
-        wordBreak='break-word'
-        lineHeight={lineHeight}
-        dangerouslySetInnerHTML={{ __html: card }}
-        css={{
-          em: {
-            fontSize: '24px',
-            opacity: isLocked ? 0.3 : 1,
-            fontStyle: 'normal',
-
-            [MQ[1]]: {
-              fontSize: '32px',
-            },
-            [MQ[2]]: {
-              fontSize: '42px',
-            },
-          },
+      <Flex
+        as='li'
+        onClick={() => onClick(card)}
+        data-testid='card'
+        {...GENERIC_CARD_STYLES(card, true)}
+        backgroundColor={isActiveCard ? cardColorActive : cardColor}
+        cursor={isLocked ? 'not-allowed' : 'pointer'}
+        transition='transform 0.25s ease-in-out'
+        color={isLocked ? 'grey.300' : 'white'}
+        _hover={{
+          transform: isLocked ? 'scale(1);' : 'scale(1.08);',
         }}
-      />
-    </Flex>
+      >
+        <Text
+          wordBreak='break-word'
+          dangerouslySetInnerHTML={{ __html: card }}
+          css={{
+            em: {
+              opacity: isLocked ? 0.3 : 1,
+            },
+          }}
+        />
+      </Flex>
+    </Box>
   );
 };

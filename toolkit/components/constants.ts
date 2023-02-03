@@ -1,3 +1,4 @@
+import { FlexProps } from '@chakra-ui/react';
 import { TFunction } from 'next-i18next';
 
 export const FIBONACCI_NUMBERS = (t: TFunction) => [
@@ -42,3 +43,40 @@ export const COOKIE_OPTIONS = {
   expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year from now
   path: '/',
 };
+
+export const CARD_HEIGHT = ['100px', '130px', '150px'];
+
+export const GENERIC_CARD_STYLES = (
+  card: string | null,
+  isFront: boolean
+): FlexProps => ({
+  fontSize:
+    isFront && card && card.length > 3
+      ? ['10px', '10px', '16px']
+      : ['14px', '14px', '22px'],
+  lineHeight:
+    isFront && card && card.length > 3
+      ? ['12px', '12px', '20px']
+      : ['18px', '18px', '26px'],
+  borderRadius: 'xl',
+  padding: '12px',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+  sx: {
+    aspectRatio: '4/5',
+    backfaceVisibility: 'hidden',
+
+    'p em': {
+      fontSize: '24px',
+      fontStyle: 'normal',
+
+      [MQ[1]]: {
+        fontSize: '32px',
+      },
+      [MQ[2]]: {
+        fontSize: '42px',
+      },
+    },
+  },
+});

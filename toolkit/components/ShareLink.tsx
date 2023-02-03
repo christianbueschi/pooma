@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { QRCode } from 'react-qrcode-logo';
+import { colors } from '../theme/colors';
 
 type ShareLinkProps = {};
 
@@ -32,8 +33,16 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
 
   const color = useColorModeValue('cyan.400', 'grey.500');
   const backgroundColor = useColorModeValue('green.400', 'green.400');
-  const qrCodeBackgroundColor = useColorModeValue('#6ea0a2', '#2c4a52');
-  const qrCodeForegroundColor = useColorModeValue('#2C3333', '#A5C9CA');
+
+  // Use explict hex values for QR code colors
+  const qrCodeBackgroundColor = useColorModeValue(
+    colors.cyan[500],
+    colors.green[500]
+  );
+  const qrCodeForegroundColor = useColorModeValue(
+    colors.grey[400],
+    colors.cyan[400]
+  );
 
   const isMedium = useBreakpointValue({ base: false, md: true });
 

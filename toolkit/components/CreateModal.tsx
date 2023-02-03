@@ -47,7 +47,6 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [createMember, memberCreating] = useInsert<MemberInsert>();
 
   const onCreateTeam = async (data: FormFields) => {
-    // 1. create a new team
     const [team, teamError] = await createTeam('teams', {
       name: data.team,
       cardMode: data.cardMode,
@@ -57,7 +56,6 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       return;
     }
 
-    // 2. create a new member and connect it to the team
     const [member, memberError] = await createMember('members', {
       name: data.member,
       teamId: team.id,

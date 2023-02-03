@@ -10,6 +10,7 @@ import { parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import { FiX } from 'react-icons/fi';
 import { Member } from '../types';
+import { CARD_HEIGHT, GENERIC_CARD_STYLES } from './constants';
 
 type FlipCardProps = {
   isOpen: boolean;
@@ -28,8 +29,6 @@ export const FlipCard: React.FC<FlipCardProps> = ({
   useEffect(() => {
     setIsMe(cookies.memberId === member.id);
   }, [cookies, member.id]);
-
-  const cardHeight = ['100px', '130px', '150px'];
 
   return (
     <VStack
@@ -51,7 +50,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({
       <Box
         css={{ perspective: '1000px', aspectRatio: '120 / 150' }}
         borderRadius='xl'
-        height={cardHeight}
+        height={CARD_HEIGHT}
       >
         <Box
           transition='all 0.6s ease-in-out'
@@ -61,8 +60,8 @@ export const FlipCard: React.FC<FlipCardProps> = ({
             transformStyle: 'preserve-3d',
           }}
         >
-          <CardSite member={member} height={cardHeight} />
-          <CardSite member={member} isFront height={cardHeight} />
+          <CardSite card={member.card} />
+          <CardSite card={member.card} isFront />
         </Box>
         {!isMe && (
           <Box
@@ -87,67 +86,42 @@ export const FlipCard: React.FC<FlipCardProps> = ({
 };
 
 type CardSiteProps = {
-  member: Member;
+  card: string | null;
   isFront?: boolean;
 } & FlexProps;
 
-const CardSite: React.FC<CardSiteProps> = ({ isFront, member, ...props }) => {
+export const CardSite: React.FC<CardSiteProps> = ({
+  isFront,
+  card,
+  ...props
+}) => {
   const cardColor = useColorModeValue('cyan.500', 'green.400');
   const cardColorReady = useColorModeValue('green.400', 'cyan.500');
 
   const styles: FlexProps = {
-    backgroundColor: !!member.card ? cardColorReady : cardColor,
+    ...GENERIC_CARD_STYLES(card, !!isFront),
+    backgroundColor: !!card ? cardColorReady : cardColor,
     zIndex: isFront ? 1 : 2,
     transform: isFront ? 'rotateY(180deg)' : 'rotateY(0deg)',
-    fontSize:
-      isFront && member.card && member.card.length > 3
-        ? '16px'
-        : ['18px', '20px', '22px'],
-    lineHeight:
-      isFront && member.card && member.card.length > 3 ? '20px' : '26px',
-    borderRadius: 'xl',
-    padding: '12px',
     position: 'absolute',
     top: '0',
     left: '0',
     color: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
     boxShadow: '0px 5px 20px -5px rgb(0, 0, 0)',
     width: '100%',
     willChange: 'transform',
-    sx: {
-      backfaceVisibility: 'hidden',
-      aspectRatio: '4/5',
-    },
     ...props,
   };
 
   return (
     <Flex {...styles}>
-      {isFront ? (
-        <>
-          {!!member.card && member.card.length > 3 ? (
-            <Text
-              textAlign='center'
-              dangerouslySetInnerHTML={{
-                __html: member.card || '',
-              }}
-              data-testid='card-value'
-            />
-          ) : (
-            <Text
-              textAlign='center'
-              dangerouslySetInnerHTML={{
-                __html: member.card || '',
-              }}
-              data-testid='card-value'
-            />
-          )}
-        </>
-      ) : (
-        <Text textAlign='center'>{member.card ? 'Ready' : '?'}</Text>
-      )}
+      <Text
+        textAlign='center'
+        dangerouslySetInnerHTML={{
+          __html: isFront ? card || '' : !card ? '?' : 'Ready',
+        }}
+        data-testid='card-value'
+      />
     </Flex>
   );
 };
