@@ -8,7 +8,7 @@ POOMA is a clean scrum poker web app built with Next.js, Supabase, and Chakra UI
 
 POOMA uses Supabase as realtime database. If you want to run it locally it's the easiest if you install the Supabase CLI. You can do this on project level or globally. See https://supabase.com/docs/guides/cli
 
-Supabase provides you a set of docker container which can easily be started and connected to.
+Supabase provides you with a set of docker containers which can easily be started and connected to.
 
 ## Running locally
 
