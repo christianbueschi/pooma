@@ -125,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                 <HStack gap={24} alignItems='center'>
                   <Link href={`/team/${team.id}`} passHref>
                     <Button variant='ghost' leftIcon={<FiUsers size='24px' />}>
-                      <Text>{team?.name}</Text>
+                      <Text display={['none', 'block']}>{team?.name}</Text>
                     </Button>
                   </Link>
                 </HStack>
@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                     leftIcon={<FiUser color='green.500' size='24px' />}
                     data-testid='user-context-menu-button'
                   >
-                    <Text>{member?.name}</Text>
+                    <Text display={['none', 'block']}>{member?.name}</Text>
                   </MenuButton>
                   <MenuList p={4} border='none'>
                     <VStack gap={4} alignItems='flex-start'>

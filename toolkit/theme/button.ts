@@ -9,7 +9,7 @@ export const buttonStyles: ComponentStyleConfig = {
   sizes: {
     md: {
       fontSize: 'md',
-      px: [2, 4, 6],
+      px: [4, 4, 6],
       py: 4,
     },
   },

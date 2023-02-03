@@ -17,7 +17,12 @@ export const Footer: React.FC = () => {
       justifyContent='space-between'
     >
       <ShareLink />
-      <Stack alignItems='center' flexDirection='row' gap={8} spacing={0}>
+      <Stack
+        alignItems='center'
+        flexDirection='row'
+        gap={[2, 4, 8]}
+        spacing={0}
+      >
         <Link href='/privacy' passHref>
           <Text>{t('privacyPolicyLink')}</Text>
         </Link>

@@ -68,6 +68,7 @@ export const Card: React.FC<CardProps> = ({
           em: {
             fontSize: '24px',
             opacity: isLocked ? 0.3 : 1,
+            fontStyle: 'normal',
 
             [MQ[1]]: {
               fontSize: '32px',
