@@ -138,7 +138,9 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                     leftIcon={<FiUser color='green.500' size='24px' />}
                     data-testid='user-context-menu-button'
                   >
-                    <Text display={['none', 'block']}>{member?.name}</Text>
+                    <Text display={['none', 'block']} isTruncated maxW={130}>
+                      {member?.name}
+                    </Text>
                   </MenuButton>
                   <MenuList p={4} border='none'>
                     <VStack gap={4} alignItems='flex-start'>

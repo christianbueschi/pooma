@@ -43,7 +43,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({
         },
       }}
     >
-      <Text noOfLines={1} textTransform='capitalize'>
+      <Text textTransform='capitalize' isTruncated maxW={130}>
         {member.name} {isMe ? '(Me)' : ''}
       </Text>
 
