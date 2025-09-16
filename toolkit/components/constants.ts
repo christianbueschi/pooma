@@ -20,7 +20,7 @@ export const FIBONACCI_NUMBERS = (t: TFunction) => [
 ];
 
 export const T_SHIRT_SIZES = (t: TFunction) => [
-  `<em>🐭</em><br>${t('cardTooBig')}`,
+  `<em>🐭</em><br>${t('cardTooSmall')}`,
   'XS',
   'S',
   'M',

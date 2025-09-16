@@ -18,8 +18,8 @@
   "cardIdk": "I don't know",
   "cardImpossible": "Impossible, we don't do that!",
   "cardBreak": "I need a break",
-  "cardToSmall": "Too small",
-  "cardToBig": "Too big",
+  "cardTooSmall": "Too small",
+  "cardTooBig": "Too big",
 
   "teamName": "Team Name",
   "memberName": "Member Name",
