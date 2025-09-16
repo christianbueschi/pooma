@@ -1,9 +1,11 @@
+SET session_replication_role = replica;
+
 --
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.1
--- Dumped by pg_dump version 15.1 (Debian 15.1-1.pgdg110+1)
+-- Dumped from database version 15.6
+-- Dumped by pg_dump version 15.6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,716 +19,658 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: pgsodium; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
-
-
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
---
-
--- *not* creating schema, since initdb creates it
-
-
-ALTER SCHEMA "public" OWNER TO "postgres";
-
---
--- Name: pg_graphql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-
-
---
--- Name: pg_stat_statements; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
---
--- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
---
--- Name: pgjwt; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
-
-
---
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
---
--- Name: install_available_extensions_and_test(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION "public"."install_available_extensions_and_test"() RETURNS boolean
-    LANGUAGE "plpgsql"
-    AS $$
-DECLARE extension_name TEXT;
-allowed_extentions TEXT[] := string_to_array(current_setting('supautils.privileged_extensions'), ',');
-BEGIN 
-  FOREACH extension_name IN ARRAY allowed_extentions 
-  LOOP
-    SELECT trim(extension_name) INTO extension_name;
-    /* skip below extensions check for now */
-    CONTINUE WHEN extension_name = 'pgroonga' OR  extension_name = 'pgroonga_database' OR extension_name = 'pgsodium';
-    CONTINUE WHEN extension_name = 'plpgsql' OR  extension_name = 'plpgsql_check' OR extension_name = 'pgtap';
-    CONTINUE WHEN extension_name = 'supabase_vault' OR extension_name = 'wrappers';
-    RAISE notice 'START TEST FOR: %', extension_name;
-    EXECUTE format('DROP EXTENSION IF EXISTS %s CASCADE', quote_ident(extension_name));
-    EXECUTE format('CREATE EXTENSION %s CASCADE', quote_ident(extension_name));
-    RAISE notice 'END TEST FOR: %', extension_name;
-  END LOOP;
-    RAISE notice 'EXTENSION TESTS COMPLETED..';
-    return true;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."install_available_extensions_and_test"() OWNER TO "postgres";
-
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
-
---
--- Name: members; Type: TABLE; Schema: public; Owner: supabase_admin
---
-
-CREATE TABLE "public"."members" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "name" "text",
-    "card" "text",
-    "teamId" "uuid",
-    "isSpectactorMode" boolean DEFAULT false
-);
-
-
-ALTER TABLE "public"."members" OWNER TO "supabase_admin";
-
---
--- Name: teams; Type: TABLE; Schema: public; Owner: supabase_admin
---
-
-CREATE TABLE "public"."teams" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "name" "text",
-    "cardMode" "text",
-    "isLocked" boolean DEFAULT false
-);
-
-
-ALTER TABLE "public"."teams" OWNER TO "supabase_admin";
-
---
--- Name: members member_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."members"
-    ADD CONSTRAINT "member_pkey" PRIMARY KEY ("id");
-
-
---
--- Name: teams team_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."teams"
-    ADD CONSTRAINT "team_pkey" PRIMARY KEY ("id");
-
-
---
--- Name: members members_teamId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."members"
-    ADD CONSTRAINT "members_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "public"."teams"("id");
-
-
---
--- Name: SCHEMA "public"; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE USAGE ON SCHEMA "public" FROM PUBLIC;
-GRANT ALL ON SCHEMA "public" TO PUBLIC;
-GRANT USAGE ON SCHEMA "public" TO "anon";
-GRANT USAGE ON SCHEMA "public" TO "authenticated";
-GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-
---
--- Name: FUNCTION "algorithm_sign"("signables" "text", "secret" "text", "algorithm" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."algorithm_sign"("signables" "text", "secret" "text", "algorithm" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "armor"("bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."armor"("bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "armor"("bytea", "text"[], "text"[]); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."armor"("bytea", "text"[], "text"[]) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "crypt"("text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."crypt"("text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "dearmor"("text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."dearmor"("text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "decrypt"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."decrypt"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "decrypt_iv"("bytea", "bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."decrypt_iv"("bytea", "bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "digest"("bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."digest"("bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "digest"("text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."digest"("text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "encrypt"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."encrypt"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "encrypt_iv"("bytea", "bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."encrypt_iv"("bytea", "bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "gen_random_bytes"(integer); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."gen_random_bytes"(integer) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "gen_random_uuid"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."gen_random_uuid"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "gen_salt"("text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."gen_salt"("text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "gen_salt"("text", integer); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."gen_salt"("text", integer) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "hmac"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."hmac"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "hmac"("text", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."hmac"("text", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pg_stat_statements"("showtext" boolean, OUT "userid" "oid", OUT "dbid" "oid", OUT "toplevel" boolean, OUT "queryid" bigint, OUT "query" "text", OUT "plans" bigint, OUT "total_plan_time" double precision, OUT "min_plan_time" double precision, OUT "max_plan_time" double precision, OUT "mean_plan_time" double precision, OUT "stddev_plan_time" double precision, OUT "calls" bigint, OUT "total_exec_time" double precision, OUT "min_exec_time" double precision, OUT "max_exec_time" double precision, OUT "mean_exec_time" double precision, OUT "stddev_exec_time" double precision, OUT "rows" bigint, OUT "shared_blks_hit" bigint, OUT "shared_blks_read" bigint, OUT "shared_blks_dirtied" bigint, OUT "shared_blks_written" bigint, OUT "local_blks_hit" bigint, OUT "local_blks_read" bigint, OUT "local_blks_dirtied" bigint, OUT "local_blks_written" bigint, OUT "temp_blks_read" bigint, OUT "temp_blks_written" bigint, OUT "blk_read_time" double precision, OUT "blk_write_time" double precision, OUT "wal_records" bigint, OUT "wal_fpi" bigint, OUT "wal_bytes" numeric); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pg_stat_statements"("showtext" boolean, OUT "userid" "oid", OUT "dbid" "oid", OUT "toplevel" boolean, OUT "queryid" bigint, OUT "query" "text", OUT "plans" bigint, OUT "total_plan_time" double precision, OUT "min_plan_time" double precision, OUT "max_plan_time" double precision, OUT "mean_plan_time" double precision, OUT "stddev_plan_time" double precision, OUT "calls" bigint, OUT "total_exec_time" double precision, OUT "min_exec_time" double precision, OUT "max_exec_time" double precision, OUT "mean_exec_time" double precision, OUT "stddev_exec_time" double precision, OUT "rows" bigint, OUT "shared_blks_hit" bigint, OUT "shared_blks_read" bigint, OUT "shared_blks_dirtied" bigint, OUT "shared_blks_written" bigint, OUT "local_blks_hit" bigint, OUT "local_blks_read" bigint, OUT "local_blks_dirtied" bigint, OUT "local_blks_written" bigint, OUT "temp_blks_read" bigint, OUT "temp_blks_written" bigint, OUT "blk_read_time" double precision, OUT "blk_write_time" double precision, OUT "wal_records" bigint, OUT "wal_fpi" bigint, OUT "wal_bytes" numeric) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pg_stat_statements_info"(OUT "dealloc" bigint, OUT "stats_reset" timestamp with time zone); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pg_stat_statements_info"(OUT "dealloc" bigint, OUT "stats_reset" timestamp with time zone) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pg_stat_statements_reset"("userid" "oid", "dbid" "oid", "queryid" bigint); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pg_stat_statements_reset"("userid" "oid", "dbid" "oid", "queryid" bigint) TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_armor_headers"("text", OUT "key" "text", OUT "value" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_armor_headers"("text", OUT "key" "text", OUT "value" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_key_id"("bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_key_id"("bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt"("bytea", "bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt"("bytea", "bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt"("bytea", "bytea", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt"("bytea", "bytea", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt_bytea"("bytea", "bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt_bytea"("bytea", "bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt_bytea"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt_bytea"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_decrypt_bytea"("bytea", "bytea", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_decrypt_bytea"("bytea", "bytea", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_encrypt"("text", "bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_encrypt"("text", "bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_encrypt"("text", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_encrypt"("text", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_encrypt_bytea"("bytea", "bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_encrypt_bytea"("bytea", "bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_pub_encrypt_bytea"("bytea", "bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_pub_encrypt_bytea"("bytea", "bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_decrypt"("bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_decrypt"("bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_decrypt"("bytea", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_decrypt"("bytea", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_decrypt_bytea"("bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_decrypt_bytea"("bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_decrypt_bytea"("bytea", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_decrypt_bytea"("bytea", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_encrypt"("text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_encrypt"("text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_encrypt"("text", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_encrypt"("text", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_encrypt_bytea"("bytea", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_encrypt_bytea"("bytea", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "pgp_sym_encrypt_bytea"("bytea", "text", "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."pgp_sym_encrypt_bytea"("bytea", "text", "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "sign"("payload" "json", "secret" "text", "algorithm" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."sign"("payload" "json", "secret" "text", "algorithm" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "try_cast_double"("inp" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."try_cast_double"("inp" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "url_decode"("data" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."url_decode"("data" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "url_encode"("data" "bytea"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."url_encode"("data" "bytea") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_generate_v1"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_generate_v1"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_generate_v1mc"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_generate_v1mc"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_generate_v3"("namespace" "uuid", "name" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_generate_v3"("namespace" "uuid", "name" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_generate_v4"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_generate_v4"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_generate_v5"("namespace" "uuid", "name" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_generate_v5"("namespace" "uuid", "name" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_nil"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_nil"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_ns_dns"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_ns_dns"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_ns_oid"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_ns_oid"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_ns_url"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_ns_url"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "uuid_ns_x500"(); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."uuid_ns_x500"() TO "dashboard_user";
-
-
---
--- Name: FUNCTION "verify"("token" "text", "secret" "text", "algorithm" "text"); Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "extensions"."verify"("token" "text", "secret" "text", "algorithm" "text") TO "dashboard_user";
-
-
---
--- Name: FUNCTION "comment_directive"("comment_" "text"); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "postgres";
--- GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "anon";
--- GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql"."comment_directive"("comment_" "text") TO "service_role";
-
-
---
--- Name: FUNCTION "exception"("message" "text"); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "postgres";
--- GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "anon";
--- GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql"."exception"("message" "text") TO "service_role";
-
-
---
--- Name: FUNCTION "get_schema_version"(); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "postgres";
--- GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "anon";
--- GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql"."get_schema_version"() TO "service_role";
-
-
---
--- Name: FUNCTION "increment_schema_version"(); Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "postgres";
--- GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "anon";
--- GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql"."increment_schema_version"() TO "service_role";
-
-
---
--- Name: FUNCTION "graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb"); Type: ACL; Schema: graphql_public; Owner: supabase_admin
---
-
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "postgres";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "anon";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "authenticated";
--- GRANT ALL ON FUNCTION "graphql_public"."graphql"("operationName" "text", "query" "text", "variables" "jsonb", "extensions" "jsonb") TO "service_role";
-
-
---
--- Name: SEQUENCE "key_key_id_seq"; Type: ACL; Schema: pgsodium; Owner: postgres
---
-
-GRANT ALL ON SEQUENCE "pgsodium"."key_key_id_seq" TO "pgsodium_keyiduser";
-
-
---
--- Name: FUNCTION "install_available_extensions_and_test"(); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION "public"."install_available_extensions_and_test"() TO "anon";
-GRANT ALL ON FUNCTION "public"."install_available_extensions_and_test"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."install_available_extensions_and_test"() TO "service_role";
-
-
---
--- Name: TABLE "pg_stat_statements"; Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON TABLE "extensions"."pg_stat_statements" TO "dashboard_user";
-
-
---
--- Name: TABLE "pg_stat_statements_info"; Type: ACL; Schema: extensions; Owner: postgres
---
-
-GRANT ALL ON TABLE "extensions"."pg_stat_statements_info" TO "dashboard_user";
-
-
---
--- Name: SEQUENCE "seq_schema_version"; Type: ACL; Schema: graphql; Owner: supabase_admin
---
-
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "postgres";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "anon";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "authenticated";
-GRANT ALL ON SEQUENCE "graphql"."seq_schema_version" TO "service_role";
-
-
---
--- Name: TABLE "valid_key"; Type: ACL; Schema: pgsodium; Owner: postgres
---
-
-GRANT ALL ON TABLE "pgsodium"."valid_key" TO "pgsodium_keyiduser";
-
-
---
--- Name: TABLE "members"; Type: ACL; Schema: public; Owner: supabase_admin
---
-
-GRANT ALL ON TABLE "public"."members" TO "postgres";
-GRANT ALL ON TABLE "public"."members" TO "anon";
-GRANT ALL ON TABLE "public"."members" TO "authenticated";
-GRANT ALL ON TABLE "public"."members" TO "service_role";
-
-
---
--- Name: TABLE "teams"; Type: ACL; Schema: public; Owner: supabase_admin
---
-
-GRANT ALL ON TABLE "public"."teams" TO "postgres";
-GRANT ALL ON TABLE "public"."teams" TO "anon";
-GRANT ALL ON TABLE "public"."teams" TO "authenticated";
-GRANT ALL ON TABLE "public"."teams" TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: supabase_admin
---
-
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: public; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: public; Owner: supabase_admin
---
-
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: supabase_admin
---
-
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
--- ALTER DEFAULT PRIVILEGES FOR ROLE "supabase_admin" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
+-- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "public"."teams" ("id", "created_at", "name", "cardMode", "isLocked") VALUES
+	('527c187e-ab05-4fe3-909c-461b05021276', '2023-01-06 15:41:57.530313+00', 'pooma', 'FIBONACCI', false),
+	('16adeee2-bc9a-4ebf-bb11-ae87f4acea24', '2023-03-09 13:00:16.500924+00', 'The Boys', 'FIBONACCI', false),
+	('f1c6fee9-a905-41d6-84a1-0f87ac6791aa', '2023-03-23 14:23:30.505803+00', 'valantic', 'FIBONACCI', true),
+	('1e160907-87d2-4b12-a6e5-34f63964c309', '2023-02-16 14:17:02.780312+00', 'Ivoclar', 'FIBONACCI', true),
+	('465284b3-960e-43c8-878e-c9f85b11ae5c', '2023-01-11 12:29:00.749272+00', 'PiB', 'FIBONACCI', false),
+	('a934623c-b511-4fc8-98a8-c30b5b6faf66', '2023-05-11 12:40:19.863824+00', 'Ivoclar', 'FIBONACCI', true),
+	('2bfbce0e-3e96-4b74-9a71-12b355a36d0f', '2023-05-31 08:46:02.596457+00', 'prl', 'FIBONACCI', false),
+	('158fa7e0-609b-4761-96e9-b96d497ca695', '2023-05-31 08:46:05.184874+00', 'prl', 'FIBONACCI', false),
+	('b00dcedf-b477-435c-ba6d-cacd9185ebbd', '2023-01-18 13:45:10.380341+00', 'PIB', 'FIBONACCI', true),
+	('278854de-8eea-4f99-bf47-a3cf79e6f902', '2023-01-17 08:32:44.768172+00', 'Ivoclar', 'FIBONACCI', false),
+	('53380bb7-fa36-440a-b51f-4f786ce26c5a', '2023-05-31 08:46:13.565138+00', 'prl', 'FIBONACCI', true),
+	('fdd8004b-fd03-4b1f-913e-7867e3e44103', '2023-07-13 08:54:25.405832+00', 'Ivoclar', 'FIBONACCI', true),
+	('f85b4e52-786b-488b-9e03-ddf14d747f91', '2023-03-21 08:49:25.485512+00', 'SWAT', 'FIBONACCI', true),
+	('bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', '2023-03-16 13:44:11.603771+00', 'Ivoclar', 'FIBONACCI', true),
+	('3849fa4a-f209-4719-b32d-ca83dbf1f5a9', '2024-02-22 09:13:44.152626+00', 'Ivoclar PIM', 'FIBONACCI', false),
+	('5efd9071-5c23-4603-a8f2-7b75ba9895e7', '2023-04-13 12:39:29.445368+00', 'Ivoclar', 'FIBONACCI', true),
+	('96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', '2023-02-14 14:05:47.968002+00', 'Ivoclar', 'FIBONACCI', true),
+	('9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', '2023-06-01 12:32:40.701269+00', 'Ivoclar', 'FIBONACCI', true),
+	('35c4849b-6c75-4376-9bad-b977b287c4fd', '2023-02-02 13:25:13.713532+00', 'valantic', 'FIBONACCI', true),
+	('3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', '2023-01-19 12:30:05.932486+00', 'Ivoclar', 'FIBONACCI', true),
+	('15613da8-ae7a-4cc7-9788-af4be7e66a9f', '2023-06-29 13:06:03.491718+00', 'Ivoclar', 'FIBONACCI', true),
+	('af4354e9-7ae3-47b9-ab94-21f8a03c4cb6', '2023-02-02 15:02:34.017643+00', 'release 1.0', 'FIBONACCI', false),
+	('dcf11a5e-f646-4d2b-a299-2507d34f7e55', '2023-01-25 12:34:21.466991+00', 'PiB', 'FIBONACCI', true),
+	('d54fccc2-8117-4062-a4c4-27c90f1c5dba', '2023-09-21 08:18:46.180889+00', 'Ivoclar', 'FIBONACCI', true),
+	('59f731e6-50a1-413d-8ec6-bac53656b0ef', '2023-01-12 14:04:36.355185+00', 'Ivoclar', 'FIBONACCI', true),
+	('eeaf3e1d-4adb-4705-87d9-d473af6c2a31', '2023-06-01 13:15:16.986627+00', 'valantic', 'FIBONACCI', true),
+	('ba550172-b967-4d3c-96b8-d56db0aa4f39', '2023-01-26 14:19:25.227215+00', 'Test', 'FIBONACCI', false),
+	('ab919030-d7cf-467b-9abd-aef329bbce9d', '2023-10-24 11:12:29.108481+00', 'anteater', 'FIBONACCI', true),
+	('e3e6a913-7f38-48ee-a481-dd7776b4212c', '2023-03-02 07:36:26.585197+00', 'valantic', 'FIBONACCI', true),
+	('db1009d3-8121-4c99-9886-4b18a01ca469', '2024-01-11 16:11:23.090825+00', 'test', 'FIBONACCI', false),
+	('73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', '2023-01-26 14:10:33.976346+00', 'Ivoclar', 'FIBONACCI', true),
+	('f87516dc-3c35-485a-b53b-599685b7c23f', '2023-08-31 07:41:18.90458+00', 'Ivoclar', 'FIBONACCI', false),
+	('9b8dec21-0f1a-4cd0-8795-5b2e693b238e', '2023-02-16 13:00:50.39621+00', 'valantic', 'FIBONACCI', false),
+	('b89349a8-e0a0-4519-b502-aec863187e37', '2023-02-09 13:32:44.538929+00', 'valantic', 'FIBONACCI', false),
+	('9c545b2c-5023-4620-a895-5ea08090d230', '2023-02-03 12:14:05.668396+00', 'Release Test', 'FIBONACCI', true),
+	('fb121d44-35c6-4590-a3f2-f1ad9c883cfa', '2023-02-02 13:29:09.040802+00', 'test', 'TSHIRT', false),
+	('f4d8a4cb-9770-4c13-a3e9-6ebc4e8869d5', '2023-02-03 14:20:45.269426+00', 'Release Test', 'FIBONACCI', false),
+	('68312ba2-118f-4540-b56f-aefdc2699100', '2023-02-03 14:23:40.984385+00', 'Release Team', 'FIBONACCI', false),
+	('784494f3-9c62-43a9-a7c2-a9a1f6340c69', '2023-02-03 14:46:22.392821+00', 'Release Test', 'FIBONACCI', false),
+	('97a231b5-fff0-4cfa-b76d-809230e92db4', '2023-08-18 08:33:04.81736+00', 'ABA', 'FIBONACCI', true),
+	('260aa2c1-efee-4244-b163-ddb28c5dd7d2', '2023-06-15 12:55:07.900367+00', 'Ivoclar', 'FIBONACCI', true),
+	('61eef7ab-a8e2-41e6-97c1-0ccaabc85ae1', '2023-06-16 07:26:54.405361+00', 'Ivoclar', 'FIBONACCI', false),
+	('11370972-6b64-4f28-a0a2-312ff414300a', '2023-06-05 13:12:31.3445+00', 'prl', 'FIBONACCI', true),
+	('997338cc-de79-42cd-a489-92af5d47c4a8', '2023-04-13 11:39:26.749427+00', 'valantic', 'FIBONACCI', true),
+	('257f77aa-f97f-45eb-a205-d96131f1d8a3', '2023-01-11 12:28:36.563201+00', 'OYU', 'FIBONACCI', true),
+	('e62d4571-de74-4672-b1c0-5a486d358e05', '2023-02-16 14:40:27.034816+00', 'valantic', 'FIBONACCI', true),
+	('be73a631-a671-496f-b75b-19255a922c72', '2023-03-30 12:59:50.554513+00', 'Ivoclar', 'FIBONACCI', false),
+	('b687b10d-a6ae-4c88-a8d3-28d28737f20a', '2023-03-22 09:29:22.167956+00', 'SABAG', 'FIBONACCI', true),
+	('2bf77ba2-367b-4cc5-98ce-6783a62a6b8e', '2023-07-05 11:49:16.476097+00', 'SNS', 'FIBONACCI', true),
+	('c7060195-3844-4a0f-8890-dae628151e94', '2023-07-06 08:11:00.249928+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('ad4100cd-be6b-4f1b-82a8-1cac71a53cf4', '2023-07-06 08:11:05.312882+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('1ad22970-761a-4f53-bf9f-5bfc8e96498d', '2023-08-23 07:06:29.283285+00', 'asdf', 'FIBONACCI', false),
+	('ee23e0d2-a6bf-4020-a138-2af6495359e4', '2023-02-23 13:10:23.562998+00', 'valantic', 'FIBONACCI', true),
+	('e3a9d706-cf84-4433-a4c0-6b487b935ba5', '2023-07-06 08:43:56.117301+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('41a8afec-45a5-4cfa-8f33-466d581dee21', '2023-05-23 13:16:39.069885+00', 'PRL', 'FIBONACCI', true),
+	('f08f1331-5765-45be-8337-a77306614ed0', '2023-08-17 08:42:21.43527+00', 'Ivoclar', 'FIBONACCI', true),
+	('cd6c1665-dd29-4367-9bfa-8166bc9dbf21', '2023-05-05 15:10:56.778779+00', 'Hackerthon', 'FIBONACCI', false),
+	('040a2b96-a352-420f-a274-fca3c442273e', '2023-05-05 15:10:57.564408+00', 'Test', 'FIBONACCI', false),
+	('8380679c-ec05-4773-9df5-dc3c0ad0b6e9', '2023-08-03 08:00:13.015926+00', 'Ivoclar', 'FIBONACCI', true),
+	('fbd8a735-2d69-449c-a9dc-8badd67919ab', '2023-03-30 13:01:46.952126+00', 'valantic', 'FIBONACCI', true),
+	('6c78023b-f8f4-425d-9e08-d5ba0372def8', '2023-05-25 12:57:57.655018+00', 'Ivoclar', 'FIBONACCI', false),
+	('82bb856f-8f55-4439-a32e-099a22d27699', '2023-04-27 13:11:40.697921+00', 'Ivoclar', 'FIBONACCI', false),
+	('f555664d-6851-481d-a04f-293b65ca84d7', '2023-08-24 08:31:20.199762+00', 'Ivoclar', 'FIBONACCI', true),
+	('95046b02-a072-4f89-ad88-9770deaaa84b', '2024-01-09 12:21:33.380704+00', 'pendelo', 'FIBONACCI', true),
+	('f7d3884e-e20d-496e-946f-123c015f8b64', '2023-07-06 08:09:58.158312+00', 'Ivoclar', 'FIBONACCI', true),
+	('e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', '2023-07-20 08:22:00.500617+00', 'Ivoclar', 'FIBONACCI', true),
+	('4ca8b055-8475-41bd-8da2-cd0d4930f3f3', '2023-07-31 06:16:57.42426+00', 'Test', 'FIBONACCI', true),
+	('0bd22c77-2523-45f1-8137-f1f9b93d3179', '2023-07-31 06:17:39.182537+00', 'Test', 'TSHIRT', false),
+	('bb5941be-0747-44c9-b958-507234d240b0', '2023-06-08 13:17:09.588029+00', 'valantic', 'FIBONACCI', true),
+	('7c8f8067-eedc-43f5-973f-02fa1ad242b8', '2023-10-24 11:17:19.71464+00', 'Anteater', 'FIBONACCI', false),
+	('2b7a5316-8233-49ea-930e-37b2277502ee', '2023-08-10 08:16:15.07081+00', 'Ivoclar', 'FIBONACCI', true),
+	('ee1224d2-1396-4890-bedb-f682c8e8db61', '2023-06-22 12:57:21.797439+00', 'Ivoclar', 'FIBONACCI', true),
+	('3cb66e65-d5bb-4a25-8d28-2fc157ea2c0d', '2023-06-28 13:41:37.237949+00', 'SN', 'FIBONACCI', true),
+	('6238861b-a6b1-4125-ad64-e454337ee9e7', '2024-02-15 07:42:17.096869+00', 'gcbv', 'FIBONACCI', true),
+	('a76e552a-4b60-48e4-b15b-de7b3e949111', '2023-07-13 08:53:06.059133+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('b30d0f30-66a0-46cb-917d-84b581182749', '2023-07-13 08:53:46.702637+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('e3aceef2-713e-4210-9f67-0ab3123fd83d', '2023-07-13 08:53:59.693581+00', 'Valantic Ivoclar', 'FIBONACCI', false),
+	('ea56e03b-8c28-43a2-adbc-c2c7f6dd3b1b', '2023-08-29 11:19:40.095071+00', 'Test', 'FIBONACCI', true),
+	('9ae71eea-10ba-4adc-bde4-7abc0488fd68', '2023-10-12 07:56:34.310604+00', 'Ivoclar', 'FIBONACCI', false),
+	('6e6c207c-6f28-4c29-8285-29ffce5f5ce0', '2023-11-22 14:10:29.917301+00', 'PRL TSHIRT', 'TSHIRT', false),
+	('62d3c669-01ff-4856-bec6-8fdc600614e8', '2024-02-28 09:11:48.021073+00', 'Ivoclar PIM', 'FIBONACCI', true),
+	('593dcef8-5386-4c22-b600-320d80b8ceaa', '2024-01-24 13:31:20.249572+00', 'MBL', 'TSHIRT', false),
+	('1337e625-5596-44d1-b416-1f80d4aeb219', '2023-10-24 11:09:56.518861+00', 'Chsb', 'FIBONACCI', true),
+	('59a0cc2c-42fc-4296-a7dc-15578e507a2f', '2024-01-16 10:52:20.175789+00', 'fds', 'FIBONACCI', false),
+	('8dc19b83-c7d0-4c80-a6e2-a4e297602e16', '2023-10-31 13:09:29.959675+00', 'Spartaner', 'FIBONACCI', true),
+	('4ed3f21e-30d1-4c94-a243-fae96dcb9cd7', '2023-03-29 05:36:53.521218+00', 'Phi-Team', 'FIBONACCI', true),
+	('8ffc7b00-7572-472b-b958-1f35279eb1c9', '2023-12-13 12:31:12.63079+00', 'Pendelo', 'FIBONACCI', true),
+	('b378a1db-ea72-4d35-bf21-65fa06a87ea4', '2023-10-31 12:32:28.508539+00', 'Pendelo', 'FIBONACCI', false),
+	('a173ab21-9df0-40e3-ad7a-0302ed91b84f', '2024-01-24 08:31:30.066619+00', 'Ivoclar', 'FIBONACCI', true),
+	('71869b01-046c-447a-822f-e956584ab57e', '2024-02-20 12:15:36.361915+00', 'V-ZUG Refinement', 'FIBONACCI', false),
+	('af1217e9-2edf-405c-b5fa-dc36836c76a0', '2024-02-22 13:24:51.677696+00', 'Hero', 'FIBONACCI', false),
+	('bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', '2024-01-11 16:18:08.201369+00', 'Octagen Relaunch', 'FIBONACCI', true),
+	('bc06a313-68f1-4f1a-9081-ba4cc581a0a1', '2024-03-12 10:12:26.596006+00', 'ABA', 'FIBONACCI', true),
+	('caccfef2-de0b-49ef-90a3-b3e37fe78602', '2024-01-04 09:40:31.723265+00', 'Fust Relaunch', 'TSHIRT', true),
+	('1827cc87-cbc1-4f9f-a556-f831583d0ea7', '2023-06-06 08:38:48.009393+00', 'prl', 'FIBONACCI', false),
+	('f94be909-edf8-422b-8206-6297659054ba', '2024-04-05 07:49:56.296488+00', 'Team Burger', 'FIBONACCI', false),
+	('e2b8eaec-c2ef-426a-bb06-7969906e9bd2', '2024-03-04 12:33:16.138122+00', 'hoodloop', 'FIBONACCI', true),
+	('344b9cd3-638d-497e-bf76-a7de15a388bc', '2024-03-27 09:17:06.860088+00', 'Contribute@Sonepar', 'FIBONACCI', true),
+	('80888853-b505-4dbe-a8f2-2d3e55c852bb', '2024-06-18 12:51:47.901711+00', 'All the Ayronyms', 'FIBONACCI', false),
+	('02fa7484-f325-41a6-969f-27a57dfbb69b', '2024-06-27 16:24:15.253756+00', 'Test', 'FIBONACCI', true),
+	('7b79cfe6-f130-476b-b3a1-dba9c8b66d5b', '2024-07-04 15:04:42.645334+00', 'sf', 'FIBONACCI', false),
+	('87522ab9-e1ec-406d-93c4-14dce8cd6020', '2024-01-04 09:18:53.54185+00', 'Motorex', 'TSHIRT', false),
+	('5eb22dd7-44c0-4aa3-851e-16adf7d59c61', '2024-10-23 08:55:13.654118+00', 'Arbeitsgruppe RMA', 'FIBONACCI', false),
+	('0575040a-404f-4bc1-ac8b-7bf032426574', '2024-08-30 20:08:48.888942+00', '1', 'TSHIRT', false),
+	('2cb8d35b-7078-43b5-b950-3b595cb17776', '2024-10-01 10:15:22.894516+00', 'Pearl', 'FIBONACCI', false),
+	('fac0f6c8-4f6f-4e57-91c3-20a97dea6ddb', '2025-03-12 08:47:10.203023+00', 'PRO', 'FIBONACCI', false),
+	('ac976931-d4c3-484c-9fc0-28f9e4d4c468', '2024-10-23 08:55:17.681832+00', 'Arbeitsgruppe RMA', 'FIBONACCI', false),
+	('4c72699b-3662-4ec5-bddb-3797ed2b501c', '2024-10-23 08:55:19.431725+00', 'Arbeitsgruppe RMA', 'FIBONACCI', false),
+	('e39204d4-059b-46ec-bcc7-4b30fb7fce5e', '2024-11-01 12:50:48.063562+00', '87987', 'TSHIRT', false),
+	('28088533-2c5c-4ab0-89aa-3a5581740bef', '2025-05-05 10:14:25.42981+00', 'aaaa', 'TSHIRT', true),
+	('9776c006-f1dd-477b-91dd-a292f4d81b9c', '2025-01-28 19:24:20.272367+00', 'Axperience', 'FIBONACCI', false),
+	('bb0e83cd-5154-41b6-b9d6-b0f570c18e49', '2025-09-04 07:29:29.107586+00', 'asd', 'TSHIRT', false),
+	('70b0be70-c649-4454-9832-f8edf7617b80', '2025-09-09 12:20:12.81583+00', 'Frennilot', 'FIBONACCI', false),
+	('78cfce5d-824a-4174-aa7d-5c9f9dc9a74f', '2025-09-09 12:18:33.314424+00', 'Test', 'FIBONACCI', true),
+	('5896d2b6-92a4-4223-9a22-5d9e85c7b805', '2025-03-12 08:48:28.737904+00', 'PRO', 'FIBONACCI', false),
+	('4f7b2bbb-b25d-4f0d-b683-f9cd4313fffe', '2025-02-25 10:51:53.60307+00', 'Motorex', 'FIBONACCI', false),
+	('41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', '2023-01-06 15:52:34.33802+00', 'Akona', 'FIBONACCI', false),
+	('6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', '2024-12-12 12:58:56.963494+00', 'FFINTEGR', 'FIBONACCI', true),
+	('ebcd38e6-6b43-48fb-931b-8b6daa227241', '2025-03-27 14:02:36.21984+00', 'Empowerment', 'FIBONACCI', false),
+	('94a97af7-e19e-4e0f-ac9d-59099254df08', '2025-03-27 14:02:48.873944+00', 'Empowerment Circle', 'FIBONACCI', false);
+
+
+--
+-- Data for Name: members; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "public"."members" ("id", "created_at", "name", "card", "teamId", "isSpectactorMode") VALUES
+	('be91f7ae-742d-4301-bfbe-7192e8c5fabf', '2023-01-25 12:59:28.824154+00', 'Nikola', '5', 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', false),
+	('4c39454c-74e9-4603-bc18-a110104b6c00', '2023-01-12 14:04:36.573796+00', 'Jeroen', '', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('35491115-594d-4043-94ed-0fad4923d1e8', '2023-01-25 12:59:31.262651+00', 'boric', '8', 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', false),
+	('15af0864-7379-4427-bc5c-949eb1576feb', '2023-01-11 12:29:00.906225+00', 'Jc', '', '465284b3-960e-43c8-878e-c9f85b11ae5c', false),
+	('6238519c-ca51-454e-a0eb-90e7d2069c89', '2023-03-07 13:39:59.586807+00', 'Ivan', '2', '257f77aa-f97f-45eb-a205-d96131f1d8a3', false),
+	('c2948330-48f0-490e-b424-4ebc174085a3', '2023-03-16 13:44:11.843437+00', 'Jeroen', '1', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('860c6ced-78b8-4d83-9840-932f3350a738', '2023-01-12 14:08:05.80957+00', 'Michael', '', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('f30699a2-2037-4c82-85e8-820a59fec35d', '2023-03-02 07:36:26.939357+00', 'Patric', '13', 'e3e6a913-7f38-48ee-a481-dd7776b4212c', false),
+	('ec7a7dee-29e7-46c6-a7c0-d250197a976e', '2023-01-12 14:07:50.144008+00', 'Walter', '1', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('1485bca8-e6b8-494c-a28d-1e4ea8c26142', '2023-01-12 14:07:53.287595+00', 'volker', '1', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('5f233858-fd63-49d8-97f4-4eebfdaf129b', '2023-01-12 14:07:59.467621+00', 'Sahin', '1', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('94d8f13e-4e93-4074-8dd9-44e4766e69b7', '2023-01-12 14:08:03.035355+00', 'Tom', '0', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('39c8db2f-d422-4b25-8c9e-38d33debb23c', '2023-01-12 14:08:53.008998+00', 'Michael', '1', '59f731e6-50a1-413d-8ec6-bac53656b0ef', false),
+	('71988a12-fc84-48d1-a499-fc3d25c61b76', '2023-04-27 13:11:41.000582+00', 'Jeroen', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('8ca4119e-ee13-4e61-8e7f-e3613922de84', '2023-02-16 14:39:57.347867+00', 'Michael The Real One', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('bb649934-6847-4ced-822f-eea449062f47', '2023-02-16 13:48:45.896431+00', 'Michael', '21', 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('f3819844-1a78-4cda-9ee0-6a0e670f264a', '2023-03-30 13:00:52.668789+00', 'Micha', NULL, 'be73a631-a671-496f-b75b-19255a922c72', false),
+	('e0a6f590-b545-4f65-b567-ccc6e70f77f4', '2023-02-09 13:33:56.383912+00', 'Bene', '', 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('d8dc5f62-8ad4-413e-b323-e1014bf18b01', '2023-02-03 14:21:05.868743+00', 'Fred', NULL, 'f4d8a4cb-9770-4c13-a3e9-6ebc4e8869d5', false),
+	('28622ea5-c836-49e0-9fce-e2aa40a85b2b', '2023-02-03 14:21:38.308996+00', 'Four', NULL, 'f4d8a4cb-9770-4c13-a3e9-6ebc4e8869d5', false),
+	('5cc70a70-025f-445b-b03f-1ddb94dd9e88', '2023-03-21 09:58:59.179112+00', 'Markus', '3', 'f85b4e52-786b-488b-9e03-ddf14d747f91', false),
+	('fdb746ef-89f3-4c0d-9f8d-f5ea0dbddeac', '2023-01-26 14:11:48.636841+00', 'Tom', '2', '73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', false),
+	('c9ed4a48-5fea-4916-b130-d9ff9acdee38', '2023-01-26 14:11:05.44848+00', 'Philip', '0', '73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', false),
+	('00655a3e-90d2-47d3-b866-b40d9486e364', '2023-01-26 14:11:01.511062+00', 'Sahin', '2', '73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', false),
+	('88a62a11-f807-488f-8c65-bb65ae9064df', '2023-01-26 14:11:20.774941+00', 'Michael', '1', '73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', false),
+	('132e864e-652a-473d-9279-67e9b2ceed10', '2023-01-26 14:10:34.17734+00', 'Jeroen', '2', '73ed8cbd-de8c-4ae2-a1c1-09c5a5f94b38', false),
+	('bcde3cbf-7b60-4af2-aa3d-ba2e14f199d5', '2023-01-19 12:33:55.098822+00', 'volker', '1', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('53731012-e938-4b51-bb71-a183c54d1fcc', '2023-01-19 12:35:15.296324+00', 'Philip', '1', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('1d1feaf8-f4fd-4ebe-9809-2d56690f3ca7', '2023-01-19 12:34:09.98724+00', 'Michael', '1', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('de2b47cd-a5d3-4028-9dc7-41a702f501a1', '2023-01-19 12:30:06.137118+00', 'Jeroen', '2', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('039f2d2b-477d-45f1-80ba-08689a80e97c', '2023-01-19 12:33:51.229219+00', 'Tom', '1', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('b9c11939-48e6-4b8e-8fe8-77a05b76ed13', '2023-01-19 12:33:51.201237+00', 'Sahin', '1', '3e4b6f2c-bb86-413e-b2b8-aac9a60a1282', false),
+	('43c91233-e27a-4ef8-8bbb-81e25b2e1ca5', '2023-02-09 13:32:44.838026+00', 'Patric', '', 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('a7ec01fd-c621-491d-96f3-91035dee9d60', '2023-03-22 07:20:41.546681+00', 'Stefan', NULL, 'f85b4e52-786b-488b-9e03-ddf14d747f91', false),
+	('ce06e97c-612f-454a-9da2-8d948ac66e09', '2023-01-26 14:19:25.426686+00', 'Patric', '21', 'ba550172-b967-4d3c-96b8-d56db0aa4f39', false),
+	('981076b4-1592-4487-8e66-84973aa8181d', '2023-02-09 13:33:07.700066+00', 'Michael', '', 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('72408aae-7f4a-433e-8928-2dde1c7707f2', '2023-02-16 13:01:18.229531+00', 'Bene', '21', '9b8dec21-0f1a-4cd0-8795-5b2e693b238e', false),
+	('d78a72d6-540d-49d3-8f17-8ab53615f0ea', '2023-01-18 13:45:10.602262+00', 'jc', '', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', true),
+	('e3bdfb89-b314-462e-9065-4a975bfc31c0', '2023-01-06 15:41:57.603153+00', 'chris', NULL, '527c187e-ab05-4fe3-909c-461b05021276', false),
+	('6879d536-924b-4af9-9ecf-a45fd6bf3443', '2023-01-18 13:45:28.158754+00', 'Pascal', '3', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('e321a52f-8221-48ba-8076-c005dbaf9fed', '2024-03-13 13:03:21.531283+00', 'Riccardo', '', '62d3c669-01ff-4856-bec6-8fdc600614e8', true),
+	('ab9b0728-992f-4c4e-9f41-a64213e558d7', '2023-02-03 14:21:59.356902+00', 'ewr', NULL, 'f4d8a4cb-9770-4c13-a3e9-6ebc4e8869d5', false),
+	('f2c95354-a843-4c2d-9623-242c2ee74414', '2023-02-02 13:25:34.047345+00', 'Michael', '5', '35c4849b-6c75-4376-9bad-b977b287c4fd', false),
+	('91c3635d-b123-489f-9752-92a16b2222ad', '2023-01-18 13:45:33.260575+00', 'Milos', '5', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('f3354388-9631-47d9-8173-23b1f127f0b7', '2023-01-18 13:45:39.258761+00', 'Djordje', '3', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('dccb215e-c01c-45ed-b320-e90daa4356a6', '2023-01-18 13:45:45.577714+00', 'Andrew', '5', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('3d527861-4b87-4f03-b44d-b9bc6029a955', '2023-01-18 13:45:28.567795+00', 'Ksenija', '5', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('c7abdc7b-4d81-4773-a76f-938df6b3da94', '2023-01-18 13:45:25.189942+00', 'simona', '3', 'b00dcedf-b477-435c-ba6d-cacd9185ebbd', false),
+	('86bc081c-a372-4c04-97de-eca94f1e5fed', '2023-01-17 08:34:30.901539+00', 'walter', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('c10ea490-b173-45f6-aeb2-3370f9a6a3b4', '2023-01-17 08:33:31.521158+00', 'Sahin', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('3e151e47-4e9f-4fe6-ba2e-ddce4c4fa87e', '2023-01-17 08:35:41.822516+00', 'Tom', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('3249ca84-d454-4389-9ad9-99c1bda429da', '2023-01-17 08:35:24.357869+00', 'Daniel', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('1bd0a214-a0fa-4600-965b-a92941f61130', '2023-01-17 08:32:45.015463+00', 'Jeroen', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('6f9b5e42-b9cc-4e2b-8c78-c6f4a77ffb92', '2023-02-02 13:29:09.180296+00', 'test', NULL, 'fb121d44-35c6-4590-a3f2-f1ad9c883cfa', false),
+	('f0933265-20b0-42cc-9f57-89e8edbf6093', '2023-01-17 08:35:43.906278+00', 'Michael', '', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('36a52c46-193a-4735-894f-7401d9e3f5d2', '2023-02-02 13:25:50.181496+00', 'BeneRichi', '3', '35c4849b-6c75-4376-9bad-b977b287c4fd', false),
+	('0340ef62-0812-479f-b6c3-92f3203d608e', '2023-02-02 13:25:13.940861+00', 'Patric', '8', '35c4849b-6c75-4376-9bad-b977b287c4fd', false),
+	('96fbab88-bdf2-487b-8b92-d4ba2bdbaae7', '2023-01-17 08:33:33.128022+00', 'Philip', '0', '278854de-8eea-4f99-bf47-a3cf79e6f902', false),
+	('93fd3ec7-0c17-418c-a06b-5e03df8032d7', '2023-02-03 14:23:41.07053+00', 'Chris', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('dcf257bf-9e14-44bc-9e09-f05cb3ec2b91', '2023-02-02 15:02:50.931716+00', 'frank', '', 'af4354e9-7ae3-47b9-ab94-21f8a03c4cb6', false),
+	('7f1cff81-0c6f-48ed-9a68-49d743f642ea', '2023-02-02 15:02:34.165936+00', 'chris', '', 'af4354e9-7ae3-47b9-ab94-21f8a03c4cb6', false),
+	('5b690528-394d-48c1-bac1-0ab9a5887eb3', '2023-02-16 13:00:50.536885+00', 'Patric', '34', '9b8dec21-0f1a-4cd0-8795-5b2e693b238e', false),
+	('ff7309aa-97ac-4f59-959d-35b283c94c3b', '2023-04-13 13:03:47.311313+00', 'Marco', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('9c4505a8-bec3-4ac8-939d-d137526921ee', '2023-02-03 14:24:13.869316+00', 'Frank', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('01dde951-9deb-4dad-965c-01eca5d968e0', '2023-02-03 14:24:24.284827+00', 'Fred', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('1d9f69ae-fde4-4e76-b9a9-1e56599d81f8', '2023-01-25 12:34:21.675447+00', 'Jc', NULL, 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', true),
+	('2f80153a-f2c7-45e0-9d7e-85884472df3a', '2023-01-25 12:59:33.198259+00', 'simona', '3', 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', false),
+	('eda1417d-2efd-4126-ab03-8925e82efb49', '2023-01-25 12:59:28.364996+00', 'Ksenija', '5', 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', false),
+	('60a35fd0-c472-4550-adcc-ae46c285ca6e', '2023-02-03 14:24:43.161243+00', 'fdsf', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('dfd24f8b-a623-4f31-b395-c99ff13eec6c', '2023-01-25 12:59:38.435708+00', 'Andrew', '5', 'dcf11a5e-f646-4d2b-a299-2507d34f7e55', false),
+	('4a929c83-63f3-4f17-8179-7f8ca456e00b', '2023-02-03 14:26:13.482015+00', 'https://pooma-asc375478-christianbueschi.vercel.app/team/68312ba2-118f-4540-b56f-aefdc2699100', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('4de19a27-8f83-46cf-bfa2-97c82b8c3719', '2023-02-03 14:27:57.574103+00', 'fdsf', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('7786d387-f6d3-414e-a2f3-4f3f3435a0a6', '2023-02-03 14:28:31.320649+00', 'wrewr', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('bdd929f1-c815-4bea-b130-43c402542a7b', '2023-02-03 14:28:58.479112+00', 'fdsf', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('be050d81-9881-4082-88cb-98165e045653', '2023-02-03 14:29:17.289529+00', 'werwe', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('c92b5839-523e-49c6-88d8-cc1ca7744b18', '2023-02-03 14:29:27.099447+00', 'fwefwr', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('62694c9a-7ad2-4f48-8ef3-5f70b490b0d0', '2023-02-03 14:29:39.556668+00', 'wrew', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('9f970b19-1b20-4a4b-aa0f-0cc3ad547152', '2023-02-03 14:29:49.979155+00', 'fdsfd', NULL, '68312ba2-118f-4540-b56f-aefdc2699100', false),
+	('287eddb3-5cdb-402f-954a-715a62fe838f', '2023-02-03 14:46:22.542073+00', 'Chris', NULL, '784494f3-9c62-43a9-a7c2-a9a1f6340c69', false),
+	('9b679178-d68c-4927-a9f7-43346e24d07b', '2023-02-03 14:46:34.098757+00', 'Fred', NULL, '784494f3-9c62-43a9-a7c2-a9a1f6340c69', false),
+	('80c45204-2685-4095-bfac-84694695b23b', '2023-02-03 14:46:46.843863+00', 'freaaa', NULL, '784494f3-9c62-43a9-a7c2-a9a1f6340c69', false),
+	('e0e53190-01f0-4d7e-b55e-9e0e02f55c6b', '2023-02-03 12:14:05.832615+00', 'Chris', '', '9c545b2c-5023-4620-a895-5ea08090d230', false),
+	('be23ef36-341c-48e1-82d8-03b708ab5376', '2023-02-03 12:36:26.223813+00', 'Peter', '', '9c545b2c-5023-4620-a895-5ea08090d230', false),
+	('4bb02f4e-6065-4e45-9eee-20b932b29ff6', '2023-01-11 12:33:07.865915+00', 'Pavle B.', '2', '257f77aa-f97f-45eb-a205-d96131f1d8a3', false),
+	('4cf6089a-64ad-4ddc-ab97-0e2e83799485', '2023-02-03 12:14:36.903124+00', 'Fred', '<em>🙅</em><br>Impossible, we don''t do that!', '9c545b2c-5023-4620-a895-5ea08090d230', false),
+	('dce1fa17-34ad-4765-9e54-5f8e57c8a6fc', '2023-02-03 14:20:45.402408+00', 'Chris', NULL, 'f4d8a4cb-9770-4c13-a3e9-6ebc4e8869d5', false),
+	('daac60ec-3308-48af-a11a-ba2ccb065b9a', '2023-02-14 14:05:48.169566+00', 'Jeroen', '1', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('f56de064-eb36-4229-8001-c6010b3a97f0', '2023-02-14 14:06:06.336889+00', 'Daniel', '2', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('252f00ea-980a-4954-98eb-42bf5564bf61', '2023-02-14 14:06:15.144137+00', 'Philip', '1', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('9bddc0b0-ce06-4309-bb4f-c548c2279ccb', '2023-02-14 14:06:12.974837+00', 'Walter', '1', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('2b2d76b5-0a03-4d13-b6f4-b907d4520483', '2023-02-14 14:07:26.701048+00', 'Tom', '2', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('05f246c6-631d-4423-9df0-194c06a59106', '2023-02-14 14:06:26.217804+00', 'Michael', '1', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('0cd028c0-3b9a-47a8-88a3-cf2c1ab6dbea', '2023-02-14 14:06:04.942587+00', 'Sahin', '2', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('054062a1-479f-430f-9614-97a502136a94', '2023-02-14 14:06:15.525284+00', 'volker', '2', '96338ccf-ccf7-4bc6-a6ec-33b3f2d324f0', false),
+	('d37aaf30-1f7f-4d78-ab4d-1c470bf620c3', '2023-02-16 14:17:55.074542+00', 'Philip1', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('ee440f6a-197c-4388-af02-9563eb4eda56', '2023-03-23 14:24:01.760993+00', 'Michael', '5', 'f1c6fee9-a905-41d6-84a1-0f87ac6791aa', false),
+	('04300aec-e8af-4c68-882f-87dad969e3d4', '2023-03-23 14:23:30.633676+00', 'Patric', '5', 'f1c6fee9-a905-41d6-84a1-0f87ac6791aa', false),
+	('030eac83-3ed3-4eb3-8150-88ea399f5c24', '2023-05-05 15:08:07.733198+00', 'Michael', NULL, 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('8846d0cf-5eca-484a-8bc6-18413b27be2f', '2023-02-16 14:40:27.164491+00', 'Patric', '34', 'e62d4571-de74-4672-b1c0-5a486d358e05', false),
+	('4f609ca3-3314-41b7-8e21-1c60b7c19dcd', '2023-08-29 11:21:43.427847+00', 'Simon', NULL, 'ea56e03b-8c28-43a2-adbc-c2c7f6dd3b1b', false),
+	('3f4a8792-e49a-4a82-997c-0bd67195d90e', '2023-05-11 13:05:23.578452+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('0ea0a918-898c-4872-935d-f002e146253c', '2023-05-11 13:05:24.341458+00', 'volker', '2', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('6aa60040-dd61-4341-bab5-c89c1624e582', '2023-05-11 13:05:26.203813+00', 'Marco', '1', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('626e704f-4066-47b9-ba8b-c78cc1f5c57f', '2023-03-16 14:06:40.640995+00', 'volker', '0', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('9955894d-a0ff-4f79-8b20-2ff68cc60b63', '2023-03-16 14:07:06.489421+00', 'Micha', '1', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('cc3e1bd0-d5b1-422f-ace8-92ac16d87ad1', '2023-08-18 08:33:35.401079+00', 'Michael', '3', '97a231b5-fff0-4cfa-b76d-809230e92db4', false),
+	('317f071c-2884-4538-a28c-c335e9a6947f', '2023-03-30 12:59:50.803621+00', 'Jeroen', NULL, 'be73a631-a671-496f-b75b-19255a922c72', false),
+	('26470ff2-3047-4109-be1a-031c1df0584d', '2023-03-22 09:29:22.357518+00', 'Julian', '2', 'b687b10d-a6ae-4c88-a8d3-28d28737f20a', false),
+	('7d1dbeff-d1eb-4648-91e2-cefd11b6a3fd', '2023-03-22 09:31:47.081154+00', 'Christian', '3', 'b687b10d-a6ae-4c88-a8d3-28d28737f20a', false),
+	('0e5aa55d-6311-4cf5-a8ed-8ddb6c0aaa29', '2023-05-11 13:05:17.853441+00', 'flo', '<em>🤷‍♀️</em><br>I don''t know', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('96d502c6-376f-4837-a2a2-fa632324cce8', '2023-03-09 12:59:50.821621+00', 'Michael', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('0ece1fcd-4b3d-4005-b0c6-9d7bf44c2fad', '2023-02-23 13:10:23.742558+00', 'Patric', '21', 'ee23e0d2-a6bf-4020-a138-2af6495359e4', false),
+	('37e1edaf-a915-4728-9454-0c1f7ca2f891', '2023-02-23 13:11:30.406203+00', 'Michael', '8', 'ee23e0d2-a6bf-4020-a138-2af6495359e4', false),
+	('a4272890-315d-4bbb-a2a9-2cf87b263b52', '2023-02-23 13:51:38.235417+00', 'Michael', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('3007d0ea-7dc1-42c5-8652-17a4a8b8b4a4', '2023-06-29 13:08:26.772341+00', 'Philip', '2', '15613da8-ae7a-4cc7-9788-af4be7e66a9f', false),
+	('ceac3b4d-2755-4753-9862-c496fd593c88', '2023-03-02 07:41:31.364172+00', 'Michael', '8', 'e3e6a913-7f38-48ee-a481-dd7776b4212c', false),
+	('a713b1a8-7196-4daa-87c7-b820a11e9950', '2023-04-27 13:12:06.842782+00', 'Florian', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('e638c7ef-3d03-410c-b1e9-8b0df0238703', '2023-04-27 13:12:56.960151+00', 'Micha', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('80ce2906-bb24-4aec-98d9-c34f33690afd', '2023-04-27 13:12:01.981253+00', 'volker', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('37158404-f922-4a55-b012-467034625242', '2023-04-27 13:48:09.202865+00', 'Tom', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('555b04ed-96c5-408b-9d04-1f401f51091d', '2023-05-25 12:57:57.931015+00', 'Jeroen', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('10957151-5205-488a-a012-425ed99a87d7', '2023-04-27 13:12:03.546731+00', 'Walter', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('7e184817-c9ca-4ed0-b039-40a752803de1', '2023-05-25 13:32:56.954339+00', 'Tom', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('4439652f-8a20-42a1-8f6e-05bca26463fa', '2023-05-11 13:05:37.621474+00', 'Michael', '1', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('8c3793a2-1cfe-4b53-b9d9-dfb9f151abd3', '2023-04-13 13:23:16.067038+00', 'Sahin', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('af079882-c665-412c-8edf-eb391e3f074c', '2023-04-13 13:11:42.189407+00', 'volker', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('e41f0af2-b01a-4e41-a409-d2254ce4d8d1', '2023-04-13 13:23:16.933484+00', 'Tom', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('13bd9801-8365-4c26-84fa-08bb0ca92cb5', '2023-04-13 13:03:51.161852+00', 'Philip', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('73e3394e-b05d-444c-a6d2-48531fe7b15b', '2023-05-16 08:56:30.230148+00', 'Michael', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('2fba2ed2-3594-44ba-afc9-ede2d7aedc29', '2023-05-25 13:13:59.678408+00', 'Michael', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('851190b9-c7ba-4649-9133-05b02ada1cc9', '2024-04-05 07:51:43.167166+00', 'Jan-Marlon Leibl', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('788af80e-3d88-4fe8-848b-35e41aa871d7', '2024-04-05 07:52:44.070134+00', 'Lea', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('58afaed5-339c-4181-9f00-4bb33ca5e2b4', '2023-03-30 13:01:47.085305+00', 'Patric', '8', 'fbd8a735-2d69-449c-a9dc-8badd67919ab', false),
+	('39dc2319-f589-4457-9779-b06493c58236', '2025-02-25 10:51:53.694933+00', 'Matthias', NULL, '4f7b2bbb-b25d-4f0d-b683-f9cd4313fffe', false),
+	('3308c858-9c68-4976-997b-67bc66871ce1', '2023-05-23 13:16:39.293976+00', 'Beni', '', '41a8afec-45a5-4cfa-8f33-466d581dee21', false),
+	('18784a36-f23f-499d-977a-4e0547a9d7c3', '2023-05-23 13:20:59.256923+00', 'Vidak', '5', '41a8afec-45a5-4cfa-8f33-466d581dee21', false),
+	('83fb34da-fe8c-48fb-95a3-fd210de98aed', '2023-04-27 13:12:22.991105+00', 'Philip', '1', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('f9494a71-f224-441c-adf7-cbaa558eee99', '2023-02-21 13:33:57.062027+00', 'Beni', '', '257f77aa-f97f-45eb-a205-d96131f1d8a3', true),
+	('ac9a09b8-bce9-442f-86ff-bb7d98e90e9b', '2023-01-11 12:28:36.67364+00', 'Micky', '', '257f77aa-f97f-45eb-a205-d96131f1d8a3', true),
+	('e268f704-5aee-487c-af82-4d3c035a0f0c', '2023-05-11 13:04:59.824137+00', 'volker', NULL, '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('b89baa78-6ee5-4ff9-bbb0-38a84fe9d507', '2023-04-13 11:39:55.412935+00', 'Michael', '21', '997338cc-de79-42cd-a489-92af5d47c4a8', false),
+	('cac86b9c-cf0c-4f8b-8b4b-2c43b40f31b1', '2023-03-21 08:49:25.887354+00', 'Dagmar', '', 'f85b4e52-786b-488b-9e03-ddf14d747f91', true),
+	('10656359-7182-496f-9e46-61452a3bdf36', '2023-04-20 13:03:44.149805+00', 'Nikolina', '34', '997338cc-de79-42cd-a489-92af5d47c4a8', false),
+	('873652c9-7245-4e52-95f9-69aca028d349', '2023-04-20 13:03:38.187504+00', 'Bene', '34', '997338cc-de79-42cd-a489-92af5d47c4a8', false),
+	('6af3ebe2-b0f0-4d99-9644-a0cb98f95572', '2023-03-21 09:05:35.989395+00', 'Robert', '2', 'f85b4e52-786b-488b-9e03-ddf14d747f91', false),
+	('d3853b1b-63ce-45f9-90e4-2981e16fa665', '2023-03-21 08:51:21.900223+00', 'Andre', '1', 'f85b4e52-786b-488b-9e03-ddf14d747f91', false),
+	('1b0cd47d-ec0d-4f5d-963d-56727c3835a0', '2023-03-21 09:04:44.336314+00', 'DOHI', '2', 'f85b4e52-786b-488b-9e03-ddf14d747f91', false),
+	('5da5dbff-6dd8-4b28-9a0e-9f9c6ee65679', '2023-06-01 13:48:23.023878+00', 'Michael', '2', 'eeaf3e1d-4adb-4705-87d9-d473af6c2a31', false),
+	('23fb6e15-6b6b-496a-a93a-e0f809a0f4bf', '2023-05-31 08:46:05.535716+00', 'Beni', NULL, '158fa7e0-609b-4761-96e9-b96d497ca695', false),
+	('2f9745d0-1dac-483d-9f1f-c10711178349', '2023-10-12 07:56:34.634978+00', 'Jeroen', '', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('060f3fb8-c2d9-4e2e-9b56-9a9b6660c857', '2023-05-31 08:46:13.622+00', 'Beni', NULL, '53380bb7-fa36-440a-b51f-4f786ce26c5a', false),
+	('925bb603-12e1-4025-8d3b-44a36b89f43f', '2023-05-31 08:47:21.265272+00', 'Pavle B.', '3', '53380bb7-fa36-440a-b51f-4f786ce26c5a', false),
+	('5239e7b3-97f2-4100-8832-d99c0ec16d72', '2024-03-05 12:58:07.025697+00', 'Ksenija', '5', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('d566c96f-7474-4516-adf4-f63e647e93e8', '2023-06-22 13:05:37.850653+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('5e934ff8-c27b-4340-b977-c69bbbcc8893', '2023-07-05 11:49:35.720871+00', 'Dragoljub', '3', '2bf77ba2-367b-4cc5-98ce-6783a62a6b8e', false),
+	('de93f962-7679-4085-a040-4007da72df8b', '2023-05-25 13:13:43.637254+00', 'Flo', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('c19e3153-34ad-4428-8377-4cb288cb4fb2', '2023-06-15 13:04:56.628258+00', 'Marco', '2', '260aa2c1-efee-4244-b163-ddb28c5dd7d2', false),
+	('cb7ce7ef-98fb-48e6-a32c-c2541b2618f2', '2023-06-15 13:08:15.450438+00', 'Walter', '3', '260aa2c1-efee-4244-b163-ddb28c5dd7d2', false),
+	('93328136-2189-46d2-8085-4ed20f2eb158', '2023-06-01 13:14:28.20568+00', 'Marco', '2', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('a1a441ee-8779-4c24-94ba-ba46f41b4d5f', '2023-06-01 13:14:40.011766+00', 'Walter', '2', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('81643dae-dd25-4f09-860a-0160d2851b9c', '2023-06-01 13:14:30.834136+00', 'volker', '3', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('927778eb-0508-4451-a089-20bae839e773', '2023-06-16 07:26:54.569115+00', 'Jeroen', NULL, '61eef7ab-a8e2-41e6-97c1-0ccaabc85ae1', false),
+	('5b1fd8c6-d341-4133-a8c4-4da2718baacf', '2023-06-23 07:44:32.559665+00', 'Bene', NULL, '997338cc-de79-42cd-a489-92af5d47c4a8', false),
+	('e0d3a276-e0dd-4cf5-81d5-64d3913502ce', '2023-06-05 13:12:51.374445+00', 'Vidak', '1', '11370972-6b64-4f28-a0a2-312ff414300a', false),
+	('6d57f4cd-843b-484e-9102-738abc3f919d', '2023-06-05 13:13:01.781443+00', 'Pavle B.', '3', '11370972-6b64-4f28-a0a2-312ff414300a', false),
+	('67a9ea2e-4f43-4073-a12e-7ee3c21b9533', '2023-06-08 13:17:10.12185+00', 'Patric', '3', 'bb5941be-0747-44c9-b958-507234d240b0', false),
+	('99d0a454-219f-4728-aa15-c608bbd0e113', '2023-06-08 13:17:39.97062+00', 'Bene', '3', 'bb5941be-0747-44c9-b958-507234d240b0', false),
+	('439bfedf-578b-4526-beec-8141ddde2d5c', '2023-06-22 13:05:35.740116+00', 'Flo', '<em>🤷‍♀️</em><br>I don''t know', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('3e6ae963-f36a-4ec0-a446-0a00490fe845', '2023-06-22 13:12:05.736428+00', 'Michael', '<em>🤷‍♀️</em><br>I don''t know', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('ce8535b5-b564-49fa-a17d-bccdb329207f', '2023-06-28 13:41:57.89935+00', 'aleksa', '5', '3cb66e65-d5bb-4a25-8d28-2fc157ea2c0d', false),
+	('521c4ce4-cfb0-4e89-ac03-7d1b244dfb89', '2023-06-28 13:41:37.372153+00', 'SN', '13', '3cb66e65-d5bb-4a25-8d28-2fc157ea2c0d', false),
+	('04a6eb43-1de6-4f25-baa0-127a28c486d2', '2023-06-29 13:08:22.101289+00', 'Marco', '1', '15613da8-ae7a-4cc7-9788-af4be7e66a9f', false),
+	('8aeafdea-071e-4964-bf34-8e52163550c8', '2023-07-06 08:26:14.332347+00', 'Philip', '1', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('63c82805-5683-48e8-9020-5cc955f62a10', '2023-07-06 08:24:09.830763+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('74af8043-ce3b-42b2-a4ea-0ef9a5d824ab', '2023-07-13 08:54:45.679143+00', 'Sarah', NULL, 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('3f6c2461-2e35-4519-a7d7-1ad99c07e092', '2023-07-13 08:54:40.390043+00', 'volker', '1', 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('e9dcbf80-e9da-4d7f-b364-24203a62a02e', '2023-07-20 08:41:13.388268+00', 'Walter', '', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('165ecc99-3a15-4698-9b30-39c5b4c938e8', '2023-07-20 08:34:39.923028+00', 'Michael', '2', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('d4b1806d-9a87-4299-be0f-944e33fdea0b', '2023-07-20 08:42:29.222278+00', 'Philip', '1', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('c9daf170-c53b-44cf-a3f3-bc01efc5f9de', '2023-07-20 08:29:08.772137+00', 'Flo', '', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('85691b4d-13ff-4305-b205-d3c390dafce0', '2023-07-20 08:22:28.945376+00', 'Tom', '', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('337cb0ce-9763-482a-89fa-0603c7f7646d', '2023-07-31 06:16:57.626106+00', 'test', '21', '4ca8b055-8475-41bd-8da2-cd0d4930f3f3', false),
+	('0a1e94e5-309f-42ba-9155-e1048f04a041', '2023-07-31 06:17:39.300505+00', 'test', NULL, '0bd22c77-2523-45f1-8137-f1f9b93d3179', false),
+	('f92e5d6d-9be6-4b29-82e1-d63e1a078c74', '2023-03-23 14:23:56.927912+00', 'BeneRichi', '5', 'f1c6fee9-a905-41d6-84a1-0f87ac6791aa', false),
+	('6922e89f-2ffe-4dd7-9592-812154f3a3f4', '2023-05-31 08:47:05.877989+00', 'Vidak', '5', '53380bb7-fa36-440a-b51f-4f786ce26c5a', false),
+	('51f7550a-49f0-4eb1-9541-fd46dbe4b97d', '2023-03-22 09:30:07.109241+00', 'Fred', '3', 'b687b10d-a6ae-4c88-a8d3-28d28737f20a', false),
+	('9a4973c1-9010-4066-9656-47ab5333fc81', '2023-05-31 08:47:26.57073+00', 'Kristina', '5', '53380bb7-fa36-440a-b51f-4f786ce26c5a', false),
+	('1b62de22-10cc-4211-86e0-bdec31628e10', '2023-03-21 08:51:24.708069+00', 'JHE', '', 'f85b4e52-786b-488b-9e03-ddf14d747f91', true),
+	('ca8c549f-ea7f-4ffb-b3a2-9f2805e5fc42', '2023-08-10 08:16:37.647866+00', 'Marco', '1', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('967596ec-f750-49e9-82da-bf048893a4d2', '2023-05-31 08:47:07.189432+00', 'Marko', '3', '53380bb7-fa36-440a-b51f-4f786ce26c5a', false),
+	('9772c5aa-3800-4498-aff0-cbff7d8fa3ae', '2023-02-16 14:17:29.88382+00', 'Sahin', '', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('34adda82-a7b7-4e7b-85e8-609baa71be99', '2023-02-16 14:17:25.01349+00', 'Walter', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('85088cf0-a246-4718-8d41-713c3c878eae', '2023-02-16 14:17:29.823267+00', 'volker', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('78ed54ab-2896-4218-9b8b-4cc1d31466e3', '2023-02-16 14:17:30.145047+00', 'Daniel', '5', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('bf937eae-d71b-420f-91e0-bc6be42883c2', '2023-02-16 14:17:02.900237+00', 'Jeroen', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('6431e3e4-4ca8-4a8d-881d-f865f95ed67c', '2023-02-16 14:17:30.668169+00', 'Tom', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('15609394-ceff-4d1f-b2cc-0f09fabb5a37', '2023-02-16 14:17:36.307114+00', 'Michael', '2', '1e160907-87d2-4b12-a6e5-34f63964c309', false),
+	('726ccdb6-4544-45d1-88d1-7d0c8a66ef1d', '2023-04-20 13:03:50.996436+00', 'Patric', '21', '997338cc-de79-42cd-a489-92af5d47c4a8', false),
+	('55adc05c-b1d3-4b6b-b62d-114a26fc980f', '2023-04-13 12:39:29.58605+00', 'Jeroen', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('f692fb08-75c0-45a3-8291-f46f15915fea', '2023-04-13 13:04:01.530868+00', 'WALTER', '0', '5efd9071-5c23-4603-a8f2-7b75ba9895e7', false),
+	('33875a42-4ee3-4f62-9576-2432ea92f62b', '2023-03-16 14:06:42.689293+00', 'Daniel', '1', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('5037bcbe-d33b-47d5-a3c0-0faa652b895c', '2023-03-16 14:06:51.552553+00', 'Walter', '1', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('a3f1cc0b-b457-4944-8324-9097b98ee70e', '2023-06-01 13:15:54.562331+00', 'Bene', '1', 'eeaf3e1d-4adb-4705-87d9-d473af6c2a31', false),
+	('6f18a2e6-5ac6-4b59-ba14-cc003e3df2a7', '2023-03-09 13:00:16.584983+00', 'Michael', NULL, '16adeee2-bc9a-4ebf-bb11-ae87f4acea24', false),
+	('fd23e19a-b345-4748-8b7b-a51ee0e2c2ff', '2023-02-23 13:12:01.783929+00', 'Bene', '13', 'ee23e0d2-a6bf-4020-a138-2af6495359e4', false),
+	('eebc2850-53b6-45b0-8f05-8469c2e3fdfc', '2023-02-23 13:51:36.621476+00', 'Michael', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('cf917dba-cf9f-4977-a070-0a0e426d6172', '2023-02-23 13:51:44.227499+00', 'Michael', NULL, 'b89349a8-e0a0-4519-b502-aec863187e37', false),
+	('9d18ebed-fcca-44a4-ae09-519a344c4195', '2023-03-16 14:06:43.941257+00', 'Philip', '0', 'bdd9ced4-7405-4850-b4b3-e0e7a6d1b74e', false),
+	('e27df367-2cac-4eb0-a61a-df603470e6b3', '2023-08-10 08:16:47.406595+00', 'Philip', '1', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('820110c0-ac3a-4247-a764-1683cb073214', '2023-03-02 07:42:31.044782+00', 'Bene', '13', 'e3e6a913-7f38-48ee-a481-dd7776b4212c', false),
+	('00a3f16a-1da6-4456-8847-5fc9367b3736', '2023-02-16 14:40:43.662478+00', 'Michael', '34', 'e62d4571-de74-4672-b1c0-5a486d358e05', false),
+	('42b8f086-6770-4c35-828d-55f05b4b3abc', '2023-02-16 14:40:50.595817+00', 'Bene', '34', 'e62d4571-de74-4672-b1c0-5a486d358e05', false),
+	('93006085-c8ba-4ba1-8bf9-a65b96a1b834', '2023-05-25 13:14:01.525782+00', 'volker', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('88b4d739-04d9-4083-a49c-c5bc14cf481e', '2023-05-25 13:13:53.58531+00', 'Philip', '', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('2489ca9e-3f6a-4402-a921-a39a6548d163', '2023-06-01 12:32:40.851178+00', 'Jeroen', '', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('9ee232ca-db00-4b41-a773-0f860b230817', '2023-05-25 13:14:03.288815+00', 'Marco', '<em>🤷‍♀️</em><br>I don''t know', '6c78023b-f8f4-425d-9e08-d5ba0372def8', false),
+	('6ee910c2-0568-4ddd-8e7f-c5b1948dea3b', '2023-05-11 12:40:20.128999+00', 'Jeroen', '', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('41b2b796-60b5-4fa4-90d4-b741747f7b99', '2023-05-11 13:05:20.176782+00', 'Philip', '2', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('a751884b-2337-4e92-ad50-e209d75b12c9', '2023-05-11 13:05:17.582773+00', 'Tom', '8', 'a934623c-b511-4fc8-98a8-c30b5b6faf66', false),
+	('ff0f83a8-5d3a-49b1-a28a-cd31b98824d4', '2023-03-30 13:00:39.916657+00', 'Tom', NULL, 'be73a631-a671-496f-b75b-19255a922c72', false),
+	('4480dd8e-da29-4bc6-a03f-3ad8862b1bc3', '2023-03-30 13:00:37.971621+00', 'volker', '0', 'be73a631-a671-496f-b75b-19255a922c72', false),
+	('0c8bb67d-d88c-4641-9590-d33d336ea719', '2023-08-31 07:41:19.09032+00', 'Jeroen', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('4b7643b5-aa8a-4a29-bfdc-58cd07a85b82', '2023-03-30 13:03:47.805263+00', 'Michael', '8', 'fbd8a735-2d69-449c-a9dc-8badd67919ab', false),
+	('5b1487a3-dbd3-4e48-b674-4481ad3acae0', '2023-03-30 13:02:22.556507+00', 'Nikolina', '13', 'fbd8a735-2d69-449c-a9dc-8badd67919ab', false),
+	('60f64640-7c1a-41c8-9e00-0d89e3945fe7', '2023-03-30 13:02:17.339058+00', 'Bene', '13', 'fbd8a735-2d69-449c-a9dc-8badd67919ab', false),
+	('366386e8-811d-4b7f-8b53-7bd3a5ef43a5', '2023-06-01 13:14:38.00589+00', 'Philip', '5', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('cb66db9b-a421-4d94-b2d4-96b79dd52d4f', '2023-06-01 13:14:35.52841+00', 'Tom', '3', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('70bdaec9-d170-4050-aedc-41062338121e', '2023-05-05 15:10:56.921415+00', 'Michael', NULL, 'cd6c1665-dd29-4367-9bfa-8166bc9dbf21', false),
+	('a0c9839f-3482-4e37-81f7-95c9ff91d1f3', '2023-05-05 15:10:57.768159+00', 'test', NULL, '040a2b96-a352-420f-a274-fca3c442273e', false),
+	('ba6e38a7-dd58-47a3-bff5-0dea434a8afe', '2024-03-19 12:45:10.639878+00', 'Tommy', '', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('5b76277d-3404-4497-b249-f8602c70bed3', '2023-06-05 13:12:31.555416+00', 'beni', '', '11370972-6b64-4f28-a0a2-312ff414300a', false),
+	('528e4140-768a-4892-880a-09f26723d6c9', '2023-06-01 13:14:45.94168+00', 'Florian', '<em>🤷‍♀️</em><br>I don''t know', '9e8251f3-cdc7-4c3a-80dd-9fc2f5347b7b', false),
+	('46bc7c5d-0517-417d-8afb-cc8c905ad859', '2023-05-05 15:11:36.845605+00', 'test', '<em>🙅</em><br>Impossible, we don''t do that!', 'cd6c1665-dd29-4367-9bfa-8166bc9dbf21', false),
+	('5ff49f3e-332c-4087-a9a3-b37a6f544431', '2023-06-05 13:12:53.896648+00', 'Marko', '3', '11370972-6b64-4f28-a0a2-312ff414300a', false),
+	('7c7d570f-7640-418c-9542-afccc31a2bf2', '2023-05-23 13:20:54.749191+00', 'Pavle B.', '5', '41a8afec-45a5-4cfa-8f33-466d581dee21', false),
+	('942bd703-2e55-4d3d-ac29-f2971ddc49fb', '2023-05-23 13:21:01.030066+00', 'Kristina', '3', '41a8afec-45a5-4cfa-8f33-466d581dee21', false),
+	('aa9ccfb4-6b20-4a5e-96b3-fc711035cf27', '2023-05-23 13:21:05.995669+00', 'Marko', '5', '41a8afec-45a5-4cfa-8f33-466d581dee21', false),
+	('fea09ed0-7ba0-44d7-adf9-a3dc87f43ffd', '2023-04-27 13:12:03.308306+00', 'Marco', '', '82bb856f-8f55-4439-a32e-099a22d27699', false),
+	('8f992093-67a2-48a2-a28b-89548977ccaf', '2023-09-21 08:18:46.458352+00', 'Jeroen', '<em>☕</em> <br>I need a break', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('9aab3422-0d6d-48e8-84e5-9d2091055132', '2023-05-31 08:46:02.897861+00', 'Beni', NULL, '2bfbce0e-3e96-4b74-9a71-12b355a36d0f', false),
+	('fea35358-d4c4-4c5c-8b65-c290c2b4879a', '2023-06-08 13:17:34.257765+00', 'Michael', '3', 'bb5941be-0747-44c9-b958-507234d240b0', false),
+	('3fc1bfde-43be-45cb-b00f-bf41b928fccf', '2023-07-13 08:54:06.083351+00', 'Josefine', NULL, 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('42b39688-fa06-4172-805f-450a7febeb0a', '2023-06-08 13:17:42.855494+00', 'Nikolina', '3', 'bb5941be-0747-44c9-b958-507234d240b0', false),
+	('940444d5-f309-417e-86a6-b0e3bd476a9e', '2023-06-15 13:05:07.331928+00', 'Tom', '3', '260aa2c1-efee-4244-b163-ddb28c5dd7d2', false),
+	('be3e945d-69da-4821-bce5-4d67ad3e92df', '2023-06-15 12:55:08.040081+00', 'Jeroen', '<em>🤷‍♀️</em><br>I don''t know', '260aa2c1-efee-4244-b163-ddb28c5dd7d2', false),
+	('2e8af6b1-ed0e-401f-be1a-e97d989245fc', '2023-06-01 13:15:17.105741+00', 'Patric', '1', 'eeaf3e1d-4adb-4705-87d9-d473af6c2a31', false),
+	('c5be28ac-69ae-4e9b-9921-5a82077f350d', '2023-06-15 13:05:45.367041+00', 'Michael', '2', '260aa2c1-efee-4244-b163-ddb28c5dd7d2', false),
+	('d4294144-f4cc-4772-93ec-f1907237839a', '2023-06-22 13:15:23.291558+00', 'Philip', '3', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('43c8a113-6e2e-43cc-9096-7d239fe476e4', '2023-06-22 13:05:36.652066+00', 'Marco', '5', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('f7327bef-02d2-4dd4-849e-b2251d8799b6', '2023-06-22 13:05:39.626151+00', 'Tom', '3', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('84116093-0552-4eb7-a266-70dab653a9b3', '2023-06-22 12:57:22.164413+00', 'Jeroen', '<em>☕</em> <br>I need a break', 'ee1224d2-1396-4890-bedb-f682c8e8db61', false),
+	('d332281f-6a61-47de-ba63-9a6ca36b7441', '2023-06-29 13:08:16.648005+00', 'volker', '2', '15613da8-ae7a-4cc7-9788-af4be7e66a9f', false),
+	('973a01fa-40e7-4c27-95b0-cb27f590ebda', '2023-07-05 11:49:16.649469+00', 'Beni', NULL, '2bf77ba2-367b-4cc5-98ce-6783a62a6b8e', false),
+	('533966a1-db64-43e6-abc1-a1987bdfd02e', '2023-06-29 13:06:03.738317+00', 'Jeroen', '1', '15613da8-ae7a-4cc7-9788-af4be7e66a9f', false),
+	('16786dff-434e-4ffb-8a81-939b3daca3f9', '2023-06-28 13:41:56.689427+00', 'call leaver', '3', '3cb66e65-d5bb-4a25-8d28-2fc157ea2c0d', false),
+	('be85e8b0-4e81-4d0c-98b8-175deb070b3f', '2023-07-05 11:49:41.040325+00', 'aleksa', '8', '2bf77ba2-367b-4cc5-98ce-6783a62a6b8e', false),
+	('893601aa-3acf-4117-a7ac-e68fe01764d1', '2023-07-06 08:44:16.089687+00', 'Michael', '', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('9d09d179-f98a-42b3-a579-3887cbc648ef', '2023-07-06 08:24:06.444719+00', 'Marco', '2', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('65246b97-2116-4292-b392-01037c38e87d', '2023-07-06 08:24:13.019935+00', 'Tom', '2', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('e48ac65f-13ed-4b0c-ae8b-96928ebdfc36', '2023-07-06 08:09:58.359417+00', 'Jeroen', '1', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('01d6b28b-1900-47bf-8290-ab43e3c80d00', '2023-07-06 08:24:03.98596+00', 'Flo', '<em>🤷‍♀️</em><br>I don''t know', 'f7d3884e-e20d-496e-946f-123c015f8b64', false),
+	('61789bc6-90a7-4932-b458-355e1333ce21', '2023-07-13 08:54:52.008421+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('db6f640f-a91e-4470-9b11-379448deb7b4', '2023-07-13 08:55:41.600856+00', 'Fine', NULL, 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('bf46f201-d780-427e-adf6-ddfe2adb0e83', '2023-07-13 08:54:25.562199+00', 'Philip', '1', 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('62e37e02-0a96-4695-b74c-1df3e0e4426c', '2023-07-13 08:54:40.802063+00', 'Flo', '5', 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('487be014-2c1a-4f81-a601-b9c1300cec2e', '2023-07-13 08:54:49.99329+00', 'Tom', '1', 'fdd8004b-fd03-4b1f-913e-7867e3e44103', false),
+	('a7a136ae-046d-4ed1-89ac-41d540ff86f2', '2023-07-20 08:22:00.804522+00', 'Jeroen', '2', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('60678073-2eeb-498b-aa9d-188a45eb9086', '2023-07-20 08:22:24.810553+00', 'volker', '1', 'e7fd3946-7fc2-4ac4-92a3-c1d8c365a654', false),
+	('0749dfd4-3a6c-43d2-bed9-bdbc6aeac6bf', '2024-03-05 09:27:48.05664+00', 'Jeroen', '', '62d3c669-01ff-4856-bec6-8fdc600614e8', false),
+	('4d1e9876-95e5-4108-95bd-3d99def67a95', '2024-03-05 09:11:42.953867+00', 'Riccardo', '', '62d3c669-01ff-4856-bec6-8fdc600614e8', true),
+	('f0d17853-ce6a-439e-b0cb-d6ef0debdee5', '2024-02-28 09:11:48.204312+00', 'Riccardo', '', '62d3c669-01ff-4856-bec6-8fdc600614e8', true),
+	('d31e56f8-4588-408a-a194-6141e1444c9c', '2024-03-05 09:27:36.105457+00', 'Walter', '5', '62d3c669-01ff-4856-bec6-8fdc600614e8', false),
+	('b506eb8b-fc6e-4a31-b0ec-0c8f1af58572', '2023-08-31 08:21:19.844146+00', 'Flo', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('00810c65-830b-41f2-bc08-164a5d5c7895', '2023-08-31 08:21:38.994356+00', 'Michael', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('b4131792-d4a2-41b2-af10-d8e277fb655a', '2023-09-07 08:22:42.453639+00', 'Sandro', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('c151d2a3-77aa-4bf5-a3ea-ffc11716cd04', '2023-08-31 08:22:09.10548+00', 'Philip', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('7dca4022-dc5b-49ab-a51d-a62581108ac5', '2023-08-18 08:34:13.232125+00', 'Chris', '3', '97a231b5-fff0-4cfa-b76d-809230e92db4', false),
+	('228531d6-56ac-4cde-8bed-77acfaebf574', '2023-08-10 08:16:59.654349+00', 'volker', '1', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('94942ee2-b221-4ac2-aa16-84cdf699c13b', '2023-08-10 08:46:40.735291+00', 'Tom', '0', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('c2c38d0d-e602-4d89-83f7-931534523fa7', '2023-08-10 08:16:57.266387+00', 'Walter', '0', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('5561d262-8f40-49fb-8828-6fe2f27eff6a', '2023-08-10 08:16:15.303032+00', 'Jeroen', '0', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('ff4c363d-4d17-44e4-9110-be39d39f5089', '2023-08-10 08:24:15.302407+00', 'Michael', '2', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('c63a509e-c8dd-4a65-9a31-cfa1ac620b0e', '2023-08-31 08:21:56.248189+00', 'Riccardo', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', true),
+	('33ea170c-83fc-40c0-986a-18af4b72cf26', '2023-09-07 08:40:43.294302+00', 'Walter', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('b216dea8-d37e-4866-877c-00b8fc8da17a', '2024-04-18 12:29:06.86333+00', 'Leander', '', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('5be1b7fe-ff65-4ef4-96ad-a88a8001de4d', '2023-10-12 08:16:28.818619+00', 'Philip', '', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('41090493-db4a-4575-bab3-144466406bd1', '2023-08-23 07:06:29.471887+00', 'w', '<em>🤷‍♀️</em><br>I don''t know', '1ad22970-761a-4f53-bf9f-5bfc8e96498d', false),
+	('2b5b7e04-7d60-4a0b-97f0-5b55ccccb505', '2023-08-24 08:30:53.700259+00', 'Benedict', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('a35c2e65-fb45-4dfe-af66-25f24a04a2d4', '2023-08-24 08:31:43.468233+00', 'Michael', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('668dbe92-aeb9-4b41-8372-5f87959ba1b4', '2023-10-12 08:16:06.863528+00', 'volker', '2', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('840f8bf3-e22d-439d-971d-f5530f92bd2f', '2024-03-05 12:58:03.095523+00', 'Dalibor', '3', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('449a2f6a-839f-4a82-a998-7bf54fd71c59', '2023-10-24 11:09:56.643011+00', 'Dhdb', '', '1337e625-5596-44d1-b416-1f80d4aeb219', false),
+	('6597ee2a-96a7-4ff4-91a1-58095af96686', '2024-03-05 12:31:23.252968+00', 'Giovanni', '5', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('19b1e9bb-0ea7-41a4-9ffc-0facdb4a1f9a', '2023-08-24 08:31:47.513305+00', 'Benedict', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('95a6f521-219e-4f56-a96c-f0c48c3eb74d', '2023-08-24 08:31:39.035502+00', 'Marco', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('3893f96f-daf4-4552-a2f2-79615659f4ec', '2023-10-12 08:31:47.031369+00', 'Tom', '2', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('82864fcb-1f72-434e-a5a2-28a2d59f4327', '2023-08-24 08:36:19.369195+00', 'Flo', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('c3c97785-ceed-472f-b656-6a2a7c90feb0', '2023-08-24 08:31:20.368606+00', 'Jeroen', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('88cd68b5-5656-447b-9736-4c4e56b97a3f', '2023-10-24 11:13:40.394783+00', 'Luca', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('adfca621-b7b0-4d18-b37c-c895513ca94d', '2023-08-17 08:42:42.020808+00', 'Flo', '1', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('3f96c2c0-c3fa-4710-896a-09609ae70c2d', '2023-08-17 08:42:37.733705+00', 'volker', '1', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('ae5f8fa0-4c5f-42f6-b143-7fd2ff300bff', '2023-08-17 08:42:21.629743+00', 'Jeroen', '1', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('a2d9073d-0865-499c-8ef8-d9c53c3cf856', '2023-10-24 11:14:09.066351+00', 'Peter', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('481e7617-5c3d-4ea4-ac0b-49cc9e665fbd', '2023-10-24 11:14:09.398828+00', 'Peter', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('0c762f66-12ec-4139-bcc9-1d2ba4039d92', '2023-10-24 11:14:03.499973+00', 'Peter', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('01186b8f-ad8e-4255-bc7e-0cc45ff4fbea', '2025-09-04 07:29:29.252766+00', 'asd', '', 'bb0e83cd-5154-41b6-b9d6-b0f570c18e49', false),
+	('0c0b73f8-15d7-44ae-b0bf-9ee3134f33cf', '2023-09-21 08:19:44.193607+00', 'Riccardo', '<em>🤷‍♀️</em><br>I don''t know', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('8cc9db8c-7a32-483e-b5a7-e72f907e9b96', '2024-04-15 11:00:24.132751+00', 'test', NULL, '4ed3f21e-30d1-4c94-a243-fae96dcb9cd7', false),
+	('cf889577-3a70-431a-b523-0c13bf640b9e', '2023-09-21 08:20:16.443726+00', 'volker', '2', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('a7ba53dd-e310-4e05-be5f-0f1b2a1296aa', '2024-02-06 13:04:20.675729+00', 'Simona', '3', '95046b02-a072-4f89-ad88-9770deaaa84b', false),
+	('c9602198-4466-4001-96dc-50b56e4e01b7', '2023-09-21 08:20:22.218024+00', 'Marco', '5', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('c04c259c-4001-4830-b43b-76a23808897f', '2023-09-21 08:19:27.70102+00', 'Flo', '<em>☕</em> <br>I need a break', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('04289ccf-eb8b-45bb-827a-196d13fd445e', '2023-10-31 13:09:30.107685+00', 'Riccardo', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('9b9de9dc-55af-4f97-ab9b-b37363858b15', '2024-10-01 10:16:22.487687+00', 'Vidak', '', '2cb8d35b-7078-43b5-b950-3b595cb17776', false),
+	('9ff162ed-2b1f-41f6-bf22-13267a720b22', '2024-01-24 09:19:11.887498+00', 'Marco', '1', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('bc75c322-f65b-4427-91b2-80c60ab1b895', '2023-12-13 13:01:48.131058+00', 'Veljko', '1', '8ffc7b00-7572-472b-b958-1f35279eb1c9', false),
+	('06c590c4-1671-4d98-990c-1fc84579c9b2', '2023-12-13 12:31:31.7761+00', 'Aleksa', '1', '8ffc7b00-7572-472b-b958-1f35279eb1c9', false),
+	('685c5852-eaf5-425d-bb84-b874f3eea6d9', '2023-12-13 12:31:12.802045+00', 'Pavle B.', '1', '8ffc7b00-7572-472b-b958-1f35279eb1c9', false),
+	('c6d58490-e2d7-43c4-8f88-adca14a36dcc', '2024-01-24 09:19:15.644264+00', 'Mateja', '1', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('3df69eb0-ceeb-4dbb-b0a8-96701914c4f8', '2023-11-22 14:10:30.048465+00', 'Micky', NULL, '6e6c207c-6f28-4c29-8285-29ffce5f5ce0', false),
+	('41b46adc-889b-428e-8479-8ead279696d6', '2024-01-24 09:19:12.560566+00', 'Walter', '2', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('5e7cd17f-08a5-46d1-b818-b85273554c0a', '2024-01-09 12:32:55.931795+00', 'Pavle B.', '1', '95046b02-a072-4f89-ad88-9770deaaa84b', false),
+	('4ee3462e-b0f9-4731-8339-5085c200fe91', '2023-12-27 12:57:12.63515+00', 'Ena', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('4dcb7c37-fafc-4958-beb8-c4ae8ca3ae7d', '2023-10-31 13:17:43.852152+00', 'Silent listener', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('6a2bb9e9-599f-448a-87ed-8268fb22c758', '2023-10-31 13:17:09.126659+00', 'Jan', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', false),
+	('753e61cb-2381-4b1e-94cb-cb573c3d923d', '2024-01-10 12:31:19.548344+00', 'Aleksa', '2', '95046b02-a072-4f89-ad88-9770deaaa84b', false),
+	('cc3719b1-598d-4333-913b-8e92f261d3d7', '2024-01-12 12:24:22.706371+00', 'Matthias', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('992861c8-95ec-487e-8349-1c71c84e124d', '2023-12-27 12:36:58.055642+00', 'Pavle B.', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('f844a536-8160-4eb8-b8d7-2f0f363eb529', '2024-02-29 13:25:52.629455+00', 'Bene', '', 'af1217e9-2edf-405c-b5fa-dc36836c76a0', false),
+	('db7a2f43-8d34-4633-8f1b-a9222418a305', '2024-02-20 12:17:54.410907+00', 'Jan', NULL, '71869b01-046c-447a-822f-e956584ab57e', false),
+	('4de32cdb-8b41-41f6-a0e0-f8288783c0c3', '2024-01-09 12:21:33.472354+00', 'dario', '', '95046b02-a072-4f89-ad88-9770deaaa84b', true),
+	('08a4da22-f24c-44e1-902e-03f7c2ebb86f', '2023-11-29 12:30:21.958989+00', 'Micky', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', true),
+	('97aee384-96ff-4309-b8b1-6eff077ddf98', '2023-12-27 12:34:10.567853+00', 'Aleksa', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('85b1506c-acb9-493a-9f31-3790f73aa888', '2024-02-27 12:08:58.088434+00', 'Frank', '3', 'bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', false),
+	('19bb941e-d735-40d3-89e7-bf4fc02505c4', '2023-11-06 12:57:59.239049+00', 'Stiller zuhörer', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('fbf3c0f4-63cb-4268-bda5-6f6a2ddfe781', '2024-01-16 10:52:20.329566+00', 'ffsad', NULL, '59a0cc2c-42fc-4296-a7dc-15578e507a2f', false),
+	('4574e2ef-cf36-40a9-acec-a9c4f01a443f', '2024-01-29 14:10:42.701415+00', 'Joachim', '1', 'bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', false),
+	('7434d0b1-f85c-49b7-bc30-19d8ff8e4f7c', '2023-12-27 12:37:17.991259+00', 'Veljko', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('f7a9aa79-dd93-400a-8c60-8d14fa4e5870', '2023-10-31 12:32:28.625896+00', 'Pendelo', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', true),
+	('454f9544-17bc-452b-904d-474f5a6c7ace', '2024-02-22 13:24:51.773501+00', 'Riccardo', '', 'af1217e9-2edf-405c-b5fa-dc36836c76a0', true),
+	('543c8667-1442-4851-b79f-213e46fee686', '2024-01-24 13:33:10.157868+00', 'Tatiana', '', '593dcef8-5386-4c22-b600-320d80b8ceaa', false),
+	('bd119fe5-6572-4ba7-8137-f244b0b9ff2f', '2024-01-24 13:31:58.020612+00', 'Pascal', '', '593dcef8-5386-4c22-b600-320d80b8ceaa', false),
+	('71d4517b-c20b-4e9c-b053-b0028ec89ff7', '2024-01-24 13:31:20.410546+00', 'Beni', '', '593dcef8-5386-4c22-b600-320d80b8ceaa', false),
+	('bbb3e3a2-263f-43e0-9ed6-4a8b4018fc23', '2024-01-09 12:32:15.024797+00', 'Veljko', '2', '95046b02-a072-4f89-ad88-9770deaaa84b', false),
+	('a00e3fcb-55a8-4bb6-b9b9-880f91a50a14', '2024-02-15 07:42:17.303564+00', 'vbbvbv', '<em>☕</em> <br>I need a break', '6238861b-a6b1-4125-ad64-e454337ee9e7', false),
+	('ee23dc63-bc2b-46c1-bc82-148175101bbd', '2024-02-22 13:25:28.250663+00', 'Linus', '', 'af1217e9-2edf-405c-b5fa-dc36836c76a0', false),
+	('4e30f473-88db-41bd-8bae-aecb7b158af9', '2023-10-31 13:17:05.930457+00', 'Fabio', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', false),
+	('f81a610d-5601-4f81-8418-9d14cbe6af7f', '2024-03-12 10:13:08.648906+00', 'Michael', '13', 'bc06a313-68f1-4f1a-9081-ba4cc581a0a1', false),
+	('f08a587e-fcad-4bc1-bbc1-3513be5561a4', '2024-03-12 10:12:26.8383+00', 'Jeroen', '8', 'bc06a313-68f1-4f1a-9081-ba4cc581a0a1', false),
+	('387eeb9d-ab71-4694-bcbf-6be91449c34e', '2024-03-12 10:13:20.591603+00', 'Christian', '8', 'bc06a313-68f1-4f1a-9081-ba4cc581a0a1', false),
+	('223f34f4-1760-4c08-9601-1f2db9611b52', '2024-03-04 12:33:16.339996+00', 'Pavle B.', '3', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('6dd15270-8659-4bfd-808b-e8199b4dae11', '2024-01-16 13:23:24.205975+00', 'Vidak', '2', '1827cc87-cbc1-4f9f-a556-f831583d0ea7', false),
+	('7a62e824-b7c4-4e34-ba11-b579cc799ed1', '2023-08-03 07:40:20.853673+00', 'Ivan', '2', '1827cc87-cbc1-4f9f-a556-f831583d0ea7', false),
+	('e576701c-5969-4023-a8d2-52c650f9dd18', '2023-08-10 08:16:40.697073+00', 'Flo', '1', '2b7a5316-8233-49ea-930e-37b2277502ee', false),
+	('1f0f0fda-2b5f-4b83-8da3-22716a046831', '2023-11-06 12:11:59.566396+00', 'Micky', '', '1827cc87-cbc1-4f9f-a556-f831583d0ea7', true),
+	('1d56f7cf-2cc5-4e84-8303-731972d3a39d', '2024-03-05 09:27:41.546238+00', 'Philip', '3', '62d3c669-01ff-4856-bec6-8fdc600614e8', false),
+	('798f2c33-3781-457f-97ca-0ab742a043d9', '2023-10-12 08:16:29.77083+00', 'Sandro', '', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('e3c8ae10-0efe-44f4-834e-e719597b7fb0', '2023-09-21 08:20:25.707927+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('f49c9005-2b5f-4d1c-b17a-bdd7502291d5', '2023-10-12 08:16:05.948602+00', 'Walter', '', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('5f26786a-956a-4f3c-bd09-0c7a264e0a11', '2023-09-21 08:22:35.505576+00', 'Philip', '1', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('09e1316e-1f67-4aa9-8eb7-c00f1204dad6', '2023-09-21 08:31:13.174336+00', 'Tom', '5', 'd54fccc2-8117-4062-a4c4-27c90f1c5dba', false),
+	('ee3ae129-6c5d-45f2-b3f9-ee0f891a6a82', '2024-03-05 09:27:54.826181+00', 'Tom', '8', '62d3c669-01ff-4856-bec6-8fdc600614e8', false),
+	('00f87e50-c6fa-40c6-acf1-195522161e2c', '2024-01-16 13:02:38.193069+00', 'Micky', '', '1827cc87-cbc1-4f9f-a556-f831583d0ea7', true),
+	('c79977c9-5855-4c75-a0ef-2e552a4634f5', '2023-11-22 14:10:42.532542+00', 'Micky', '', '1827cc87-cbc1-4f9f-a556-f831583d0ea7', true),
+	('14d3c2ed-4531-452d-bb13-9ce98a32b9a2', '2023-10-12 08:16:45.660069+00', 'Marco', '', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('0b4139b0-3a71-46ff-8c92-48d8da086542', '2023-10-24 11:17:19.884897+00', 'Dänu', '', '7c8f8067-eedc-43f5-973f-02fa1ad242b8', false),
+	('2796761d-0fa6-4a36-b15d-763b004d3253', '2023-08-17 08:41:59.542795+00', 'Tom', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('d402746e-73a0-4932-ad6e-aecf1ca2d621', '2023-08-17 08:42:01.6396+00', 'volker', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('a4eae2de-6f39-40c7-8da8-935f8637e1d1', '2023-08-17 08:42:02.122473+00', 'Flo', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('c801686c-ccad-44c6-be14-1b761cab90ee', '2023-08-17 08:42:06.14709+00', 'Benedict', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('72ce484b-420a-472f-95d9-cf67f29ff57d', '2023-08-18 08:33:04.990386+00', 'Jeroen', '', '97a231b5-fff0-4cfa-b76d-809230e92db4', false),
+	('3fbbc00e-e99b-4167-a400-028333edafdb', '2023-08-18 08:34:08.137573+00', 'Ülü', '5', '97a231b5-fff0-4cfa-b76d-809230e92db4', false),
+	('58d784ca-bf00-40eb-9bdf-49923481afbf', '2023-08-24 08:30:50.568649+00', 'Tom', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('289894ef-15b2-4888-bfba-61d55ee1c1bd', '2023-08-24 08:31:00.148061+00', 'Marco', NULL, '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('a68b9f03-cbaf-45c9-9043-2ccfc6236abf', '2023-10-12 08:16:07.613573+00', 'Florian', '3', '9ae71eea-10ba-4adc-bde4-7abc0488fd68', false),
+	('35879474-9702-45ab-9d78-5e371260d7d1', '2024-01-08 08:27:23.55786+00', 'Matthias', '', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', true),
+	('11054dc1-1346-47d9-a782-d4ad7aaf4fab', '2023-08-24 08:31:37.850632+00', 'Tom', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('6918339f-4071-48df-9d2c-0ba7282df694', '2023-08-24 08:37:43.293258+00', 'Michael', '1', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('f85c2c7a-b9be-47f2-9043-aa8baca698fc', '2023-08-24 08:31:39.821663+00', 'Mateja', '0', 'f555664d-6851-481d-a04f-293b65ca84d7', false),
+	('ccea653b-8c7e-49d8-97db-d2106d65ccc2', '2023-08-03 08:20:12.077075+00', 'Sarah', '', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('93b3bf55-566e-4cdf-835b-a5606d7bb906', '2023-08-31 08:31:23.676482+00', 'Mateja', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('b77b7e79-1a53-4b37-af4f-e2d3c23a29fe', '2023-08-31 08:21:28.634129+00', 'Tom', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('98b6e181-5941-48fe-8c20-e98aec19bda7', '2023-08-03 08:22:09.899593+00', 'Philip', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('aef6e169-6d60-4a95-80fb-5aa99e52b021', '2023-08-03 08:21:59.928103+00', 'Bene', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('37ce8425-eb50-4031-bd04-578a2ce37e5f', '2024-01-04 09:18:53.70752+00', 'Riccardo', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', true),
+	('d187a372-0236-4024-909c-c32426eef0e9', '2024-01-04 09:19:09.375704+00', 'pat', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('e63e3270-107f-4d53-81fa-b3433385c734', '2025-08-29 07:18:33.93587+00', 'Tante Erna', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false),
+	('92bf8e02-81fc-4a8e-ac0c-97f34d77df2c', '2025-03-27 14:02:36.312903+00', 'Vidak', NULL, 'ebcd38e6-6b43-48fb-931b-8b6daa227241', false),
+	('87ef2502-e76b-4e32-9fb9-42bcfb82824b', '2023-08-03 08:22:00.60684+00', 'Tom', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('91803889-010f-46e0-a118-fb07034aeeb1', '2023-08-03 08:22:06.066827+00', 'Walter', '<em>🤷‍♀️</em><br>I don''t know', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('ca9ca46d-925c-4221-a825-998d2dbe6467', '2023-08-03 08:00:13.192601+00', 'Jeroen', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('aaad7be9-9f25-43be-b726-46a4972b61a6', '2023-08-03 08:22:02.108916+00', 'Mateja Podravac', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('f7b1e78a-9c6c-42e6-84ca-82b651380a74', '2023-08-03 08:23:03.84197+00', 'Sandro Mrvčić', '<em>🤷‍♀️</em><br>I don''t know', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('2b59de73-d744-4b32-ab67-67c455a3b4a6', '2023-08-17 08:42:39.24576+00', 'Tom', '1', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('73cc5206-0836-40fe-b67e-9b4ebefe8df0', '2023-08-31 08:33:44.646568+00', 'Marco', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('354f6576-9b2b-4598-b5bd-4958a935aebb', '2023-08-17 08:42:42.644232+00', 'Marco', '2', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('76f3dc01-fa8a-48a6-afad-f83941ab347f', '2023-08-03 08:20:14.48478+00', 'volker', '0', '8380679c-ec05-4773-9df5-dc3c0ad0b6e9', false),
+	('b411f935-cc8f-48c3-b684-fb5b32fd12d0', '2023-08-17 08:42:38.951711+00', 'Walter', '2', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('65715e4c-ac2f-4cd6-9bc4-4f8bba4860ca', '2023-08-17 08:42:41.127406+00', 'Benedict', '1', 'f08f1331-5765-45be-8337-a77306614ed0', false),
+	('024de9c0-5417-4e36-93fb-c29ba33557d6', '2024-04-05 07:49:56.50268+00', 'Henni', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('0f24196b-d2f9-4b83-a3c6-16cbbf3aff96', '2023-09-07 08:40:39.546309+00', 'Bene', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('cd20e154-974b-4b95-8a8f-9ee08a487af0', '2023-09-07 08:31:29.951943+00', 'volker', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('1df75a8e-cbaa-4290-bfa3-a75826eb93d6', '2023-08-31 08:22:23.348008+00', 'volker', '', 'f87516dc-3c35-485a-b53b-599685b7c23f', false),
+	('cbc6f0f7-7b26-429d-a825-1a998e299338', '2024-11-04 09:04:57.894371+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('c3ef6f9d-4d05-4abd-ae5a-6f0ee13d0294', '2024-01-11 16:11:23.275615+00', 'Joachim', NULL, 'db1009d3-8121-4c99-9886-4b18a01ca469', false),
+	('97ae2f34-f6d1-4a59-9e6a-3264e0fa6791', '2023-10-17 10:42:55.574801+00', 'Elodie', '5', '4ed3f21e-30d1-4c94-a243-fae96dcb9cd7', false),
+	('3b6797f5-d262-4793-aecf-af2ecb9f6969', '2023-10-17 10:43:27.036331+00', 'Dani', '3', '4ed3f21e-30d1-4c94-a243-fae96dcb9cd7', false),
+	('35811538-df93-4a4e-965e-32c257ce45b2', '2023-10-17 10:42:11.148424+00', 'Mike', '5', '4ed3f21e-30d1-4c94-a243-fae96dcb9cd7', false),
+	('6c3ad6c8-4155-4fd2-9869-290d5eef3d41', '2024-02-06 12:19:02.817015+00', 'Matthias', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('ac1bb573-5da7-4d86-98ab-0def59f8060e', '2023-10-24 11:14:27.12983+00', 'Peter', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('bb4ba9ae-eec0-4e66-93fd-86a6be70bfe5', '2024-02-06 12:28:42.596801+00', 'Philippe', '2', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', false),
+	('d6b4ad2c-f026-4e12-bed4-df84d5dfdef3', '2023-10-24 11:12:29.366312+00', 'd:anu', '', 'ab919030-d7cf-467b-9abd-aef329bbce9d', false),
+	('297fc685-632e-48da-867e-9114856db912', '2023-12-13 12:36:59.502838+00', 'Simona', '2', '8ffc7b00-7572-472b-b958-1f35279eb1c9', false),
+	('bd4b077c-6eb1-412b-8b6f-965887155f59', '2023-12-13 12:34:42.753613+00', 'Ena', '<em>🤷‍♀️</em><br>I don''t know', '8ffc7b00-7572-472b-b958-1f35279eb1c9', false),
+	('59c6c8b3-61de-4ffb-8b13-ba9c63ae9c0d', '2024-02-27 12:30:01.099407+00', 'Sören', '1', 'bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', false),
+	('d4c604c9-434d-4dce-830a-1f524e0af93f', '2024-01-24 08:31:30.251007+00', 'Jeroen', '', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('6a426a8a-b36c-4c1d-89b2-8f5b08c70ed1', '2024-01-24 09:38:05.834894+00', 'Tom', '1', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('14deb04b-4d42-4ee4-8ee0-dc665a5fc0c2', '2024-01-24 09:38:08.778252+00', 'Philip', '<em>🤷‍♀️</em><br>I don''t know', 'a173ab21-9df0-40e3-ad7a-0302ed91b84f', false),
+	('f736e622-3a43-4d79-bb88-0d1bd4725589', '2024-01-15 11:58:49.001791+00', 'Henni', '2', 'bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', false),
+	('a7c114c5-85f9-4725-a7a5-c0e29fb2b908', '2024-02-29 12:34:27.815479+00', 'Riccardo', '', 'af1217e9-2edf-405c-b5fa-dc36836c76a0', true),
+	('1f22ade4-ae5f-4b54-bdf2-c014a1d9a623', '2024-01-10 12:30:47.870677+00', 'Aleksa', '', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('30e0e3ca-a30c-46f9-b650-16a4c3652fcd', '2024-02-06 13:02:12.319722+00', 'Simona', '3', 'b378a1db-ea72-4d35-bf21-65fa06a87ea4', false),
+	('a964e9c8-e7db-4c77-9223-790cd53ad782', '2024-02-06 12:27:40.228573+00', 'Stefano', '2', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', false),
+	('0bb1dc35-768d-4a74-9ff2-9b0f28b866c0', '2023-12-05 12:38:26.490037+00', 'Matthias', '', '8dc19b83-c7d0-4c80-a6e2-a4e297602e16', true),
+	('356960d9-f68f-421d-93b9-666707de8f4f', '2024-02-20 12:15:36.496353+00', 'Matthias', NULL, '71869b01-046c-447a-822f-e956584ab57e', false),
+	('41b3a1ca-7a4f-4465-b94a-491b376fea09', '2024-02-20 12:16:28.806396+00', 'Fabio', NULL, '71869b01-046c-447a-822f-e956584ab57e', false),
+	('86aef297-a1c8-4808-bc23-cb88e03e11a4', '2024-02-22 09:13:44.305791+00', 'Riccardo', NULL, '3849fa4a-f209-4719-b32d-ca83dbf1f5a9', false),
+	('3cd0bb66-99a4-4b80-88a1-b6375b341d87', '2024-01-15 12:32:46.749331+00', 'Robin', '2', 'bb6f02d5-8d2d-43b3-8eab-1ff13daaa4b3', false),
+	('8b206cf7-0774-49fc-abac-25a814d76589', '2024-02-29 12:34:43.786576+00', 'Mathias', '', 'af1217e9-2edf-405c-b5fa-dc36836c76a0', false),
+	('5ad7e000-6346-4bcb-baa9-55f02785195c', '2024-03-12 10:13:13.638721+00', 'Elüäs', '13', 'bc06a313-68f1-4f1a-9081-ba4cc581a0a1', false),
+	('78a45e58-1db7-478d-928b-24f005d9dca0', '2024-03-12 10:30:37.893237+00', 'Elüäs', NULL, 'bc06a313-68f1-4f1a-9081-ba4cc581a0a1', false),
+	('cfb3b51c-5b52-4fd3-9aa9-08c7ed262def', '2024-07-08 11:16:22.480476+00', 'Michael', 'XL', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('3eb66f3f-1310-4e0f-9467-312974d150b5', '2024-07-08 11:16:15.122054+00', 'Simon', 'M', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('812cc216-aac2-4b38-8985-fd4baf437fca', '2024-07-08 11:16:20.682563+00', 'Betty', 'XL', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('bf7ebbda-8590-4d3d-9a0f-9acfe1053c31', '2024-05-14 12:57:03.160384+00', 'edin', '', 'e2b8eaec-c2ef-426a-bb06-7969906e9bd2', false),
+	('cda64016-3e89-4b8c-9302-ef225cecc93a', '2024-07-04 15:04:42.790558+00', 'asd', '<em>🙅</em><br>Impossible, we don''t do that!', '7b79cfe6-f130-476b-b3a1-dba9c8b66d5b', false),
+	('cfec3158-6520-4add-a753-b0035a114f58', '2024-07-08 11:16:58.879671+00', 'Fabian', 'S', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('77423b28-1627-4170-a828-39dd537b21f3', '2024-07-10 09:12:00.054782+00', 'Matthias', NULL, 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('17190cab-0975-4476-b87c-f0fa029876e9', '2024-04-24 06:38:24.182843+00', 'Jan Klattenhoff', NULL, 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('6c41386a-6811-40dc-9b45-15125acfef26', '2025-03-12 08:47:10.316655+00', 'Dagmar', NULL, 'fac0f6c8-4f6f-4e57-91c3-20a97dea6ddb', false),
+	('aa7d0c40-5a84-4cc1-931d-d1b7e08987e5', '2024-04-05 07:51:39.838856+00', 'Constantin', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('cbb1a8e4-5fec-40c8-8aec-6541fe93ebfc', '2024-05-24 07:00:56.188548+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('71791046-3ec1-4fc5-be7b-557b3bb6c71a', '2025-05-16 07:42:06.054669+00', 'Riccardo', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('083541a7-0b6f-4c40-8b44-cbc4c86232d0', '2025-04-09 08:29:06.506996+00', 'Dagmar', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', true),
+	('5f81aa86-d9fd-418b-a25b-f5990547c5a9', '2025-03-27 14:02:48.941477+00', 'Raphael', NULL, '94a97af7-e19e-4e0f-ac9d-59099254df08', false),
+	('e5cbb362-605a-458a-8573-60ec4e095d7d', '2024-05-16 12:12:25.919445+00', 'Naomi', '', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('3ab7dfe9-8a87-4b8b-9dde-66fc738f8800', '2024-04-18 12:36:42.243446+00', 'Naike', '', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('5a918ab9-9344-4b93-8d44-53c9a946e61c', '2024-04-18 12:30:41.74702+00', 'Nicole', '', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('5f00d5cf-6e1f-45c1-9bdc-b1daa5068f51', '2024-04-05 07:52:28.298406+00', 'Marvin', '', 'f94be909-edf8-422b-8206-6297659054ba', true),
+	('f8a2241d-a20d-42ba-ba9f-e02d216a970f', '2024-04-05 07:52:29.85075+00', 'Henning', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('44666556-4017-41ea-a286-d771cde3d0ec', '2024-04-05 07:52:30.843989+00', 'Dorian', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('4c532c9b-1003-47b2-8766-d9afe21bf810', '2024-04-05 07:52:32.960984+00', 'Huy', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('3eb86bf6-c6dd-437d-9bcd-8252c10669b3', '2024-04-05 07:52:35.135528+00', 'Lasma', '', 'f94be909-edf8-422b-8206-6297659054ba', false),
+	('18fbff45-c33e-4abe-8c25-4d66bca99d71', '2024-05-16 12:15:40.992051+00', 'Silae', '5', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('87c20764-64f2-48e8-b0be-34b7a0482bd4', '2024-04-18 12:30:43.300063+00', 'Kerstin', '144', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('7a59a98a-46fd-48c5-a609-9fba8cbdf398', '2024-05-16 12:10:55.185523+00', 'Dariusch', '55', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('99596c4f-6f81-4091-bae2-33e9afde59dc', '2024-04-18 12:30:53.648615+00', 'Zuhal', '55', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('ee822135-83c3-40f7-b6cf-ae39bd9b8278', '2024-05-07 14:39:54.688087+00', 'Hendrik', '34', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('e9d95548-49ae-4e4a-9315-57e2b501f9d4', '2024-06-18 12:51:48.013356+00', 'Beni', '', '80888853-b505-4dbe-a8f2-2d3e55c852bb', false),
+	('bfd6f2c7-ed44-4a6f-ac6b-637c7f0c10f6', '2024-04-18 12:29:41.265214+00', 'Lirim Jonuzi', '8', '344b9cd3-638d-497e-bf76-a7de15a388bc', false),
+	('a3d44adc-446e-476a-83c7-c685f3236d7c', '2024-06-18 12:52:51.911449+00', 'Bojan', '', '80888853-b505-4dbe-a8f2-2d3e55c852bb', false),
+	('f345108a-e4ba-4836-be66-1a4bf2170362', '2024-06-27 16:24:15.862642+00', 'TEst', '34', '02fa7484-f325-41a6-969f-27a57dfbb69b', false),
+	('2fcf6052-8ac3-46d9-8c86-b42f0928e30f', '2024-04-08 11:15:12.679681+00', 'Matthias', '', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', true),
+	('5ebbdf61-95e3-4440-a372-ae9a7e81deb6', '2024-07-08 06:55:39.469121+00', 'Matthias', '', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', true),
+	('d71bc308-e203-4d75-abba-0d041fddbfac', '2024-07-08 11:16:20.465015+00', 'Claudio', '', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('69578731-eea4-4347-9721-1c3f252f7fbd', '2024-07-08 11:16:28.644826+00', 'Sy Viet', 'L', 'caccfef2-de0b-49ef-90a3-b3e37fe78602', false),
+	('8821d2dd-742a-40a8-a256-9b24b112230b', '2024-05-23 07:17:03.357492+00', 'Walter', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('ed7096cc-ba13-4a1e-85b0-26b24e8b8eee', '2024-05-23 07:16:20.091007+00', 'Riccardo', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', true),
+	('91086ac9-e080-4174-9f0e-8f857c7dc01e', '2024-05-23 07:16:57.886497+00', 'Mathias', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('d8165ff5-26b6-4a98-a085-64c4f654965f', '2024-01-04 09:19:12.314778+00', 'Remo', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('603c7bbb-2ae3-46d7-bbd9-ad8a43e1eca6', '2024-05-23 07:16:48.205063+00', 'Remo', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('cc913a23-cd6b-4357-ac58-fbe8412ee75f', '2024-08-06 11:50:37.255672+00', 'Riccardo', '', '87522ab9-e1ec-406d-93c4-14dce8cd6020', false),
+	('90be1963-e9d1-4f95-978d-a469b73078f5', '2024-10-01 11:01:25.517212+00', 'Ivan', '', '2cb8d35b-7078-43b5-b950-3b595cb17776', false),
+	('0290305c-f637-4fb3-b4b0-aefe5caab345', '2025-09-09 12:18:33.479763+00', 'Test', '144', '78cfce5d-824a-4174-aa7d-5c9f9dc9a74f', false),
+	('02100c1a-9f43-4b49-a1de-873bdfd42503', '2024-10-23 09:03:33.21105+00', 'Jean-Paul', '', '4c72699b-3662-4ec5-bddb-3797ed2b501c', false),
+	('569a6249-a5e0-409b-bd48-e5217d60fe64', '2025-02-28 09:58:15.679939+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('1d3ecd31-e0bf-4685-8628-a3cad600d3e7', '2024-10-01 10:15:23.075758+00', 'Micky', '', '2cb8d35b-7078-43b5-b950-3b595cb17776', false),
+	('647767f9-8879-4941-bcb8-0a3473c7c40b', '2024-10-23 09:03:59.484904+00', 'Dani', '', '4c72699b-3662-4ec5-bddb-3797ed2b501c', false),
+	('013c6092-5a66-4010-8f3e-72bef6414cdd', '2025-03-25 14:04:50.68192+00', 'Dagmar', '', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', true),
+	('d20977c8-b808-40ad-a868-5361f35cf793', '2024-10-23 09:03:30.014693+00', 'Iana', '', '4c72699b-3662-4ec5-bddb-3797ed2b501c', false),
+	('9e6ec2b9-d018-4b8e-9668-9932d2ba29f9', '2025-09-09 12:19:21.931694+00', 'Raphael', '', '78cfce5d-824a-4174-aa7d-5c9f9dc9a74f', false),
+	('6e4ebe96-fe27-4fb8-a0f4-b343bf699198', '2025-05-21 07:59:06.300325+00', 'Claudia', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('3fb21ddf-c75d-46c5-8320-aa1e81f646d2', '2025-05-21 08:00:42.405659+00', 'Matthias', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('68c2aa93-592e-47fd-a481-a2b57bf2f7f3', '2025-09-09 12:20:50.915356+00', 'Tomek', '<em>☕</em> <br>I need a break', '78cfce5d-824a-4174-aa7d-5c9f9dc9a74f', false),
+	('df1fedde-24d9-4c05-bc04-fb86019e367e', '2024-11-01 12:50:49.006306+00', '787', 'XS', 'e39204d4-059b-46ec-bcc7-4b30fb7fce5e', false),
+	('852b5853-4105-4ae5-ba2e-1be5e9725017', '2025-01-28 19:24:20.37585+00', 'Pascal', '', '9776c006-f1dd-477b-91dd-a292f4d81b9c', false),
+	('51608b42-0e98-4e82-9f78-7cdc2e83aaeb', '2025-05-06 13:20:02.888938+00', 'dagmar', '', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', true),
+	('1f45c131-fc6e-48de-964e-2f73b18a5943', '2025-06-03 13:31:58.017409+00', 'dagmar', '', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', true),
+	('f7c75a18-9668-432e-a0b1-164669f78cf0', '2025-04-08 13:01:46.014777+00', 'dagmar', '', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', true),
+	('a9b716e2-8f9d-4d92-971f-3f11119d246a', '2025-01-20 13:18:30.092803+00', 'Cedric', '34', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', false),
+	('3ae068e5-4f36-45ef-85f5-53df8d36ba33', '2024-12-12 13:04:36.324635+00', 'Daniel', '13', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', false),
+	('bdbf5dd0-bc75-4e24-8e5c-e42359503038', '2025-06-11 08:13:05.045925+00', 'dagmar', NULL, '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('b71d9956-e073-4fc6-b3fb-a3e1d7e1f7d0', '2024-01-05 08:17:46.362186+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('e395bbd3-2727-4f92-8d35-72f05570b8cd', '2023-01-13 09:15:32.763363+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('3e9a395f-9685-4105-81e2-447372bfc702', '2023-05-19 07:26:42.80706+00', 'Riccardo', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('8fab8aa8-35fa-4c2b-a138-fb480b806782', '2025-05-05 10:14:26.036561+00', 'aaaaaaq', '<em>☕</em> <br>I need a break', '28088533-2c5c-4ab0-89aa-3a5581740bef', false),
+	('757525b0-43ea-4ea5-bece-118e4cbb18d5', '2024-10-23 08:55:13.772574+00', 'Hendrik', NULL, '5eb22dd7-44c0-4aa3-851e-16adf7d59c61', false),
+	('380d6978-3815-4ff5-bdd4-5b1f8a10dc0d', '2024-10-23 08:55:17.77055+00', 'Hendrik', NULL, 'ac976931-d4c3-484c-9fc0-28f9e4d4c468', false),
+	('9a773ffb-b57c-47eb-bca8-dc7e34377f07', '2025-09-09 12:20:12.900133+00', 'Bela', NULL, '70b0be70-c649-4454-9832-f8edf7617b80', false),
+	('245ac147-08cb-4376-94fc-4909b2d5d3d4', '2024-10-23 08:55:19.492632+00', 'Hendrik', '', '4c72699b-3662-4ec5-bddb-3797ed2b501c', false),
+	('ed807351-8325-4234-811c-9b3593f69832', '2024-08-30 20:08:49.038581+00', '1', '', '0575040a-404f-4bc1-ac8b-7bf032426574', false),
+	('7df5412b-b6f2-4f70-a9df-e8f75fd73247', '2025-05-21 07:59:13.571442+00', 'Bogdan', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('d92580a8-dba6-41bd-a06e-f908eb71dd05', '2025-05-21 07:59:30.447236+00', 'Fredrik', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('2a504b39-1df2-421c-b093-cbd82b3cb0a2', '2025-03-26 08:26:07.795263+00', 'Dagmar', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', true),
+	('9bab6135-eafe-4fc1-b619-5de6d9a6e9f2', '2025-05-21 07:58:20.182941+00', 'Dagmar', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', true),
+	('bc515a7b-ada1-4a4a-a767-5afc763727b9', '2025-05-21 07:59:13.401495+00', 'Adrian', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('81687518-3156-42c4-9adc-25d78b6ccf09', '2025-05-21 07:59:00.142522+00', 'Felix', '', '5896d2b6-92a4-4223-9a22-5d9e85c7b805', false),
+	('6b06b32a-6bb1-48ba-80ee-c12033d4e2b1', '2024-11-04 09:04:43.203597+00', 'Georg', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false),
+	('41bfbcde-cd89-4e89-abd8-13980a914af1', '2024-04-05 08:47:36.183906+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('48855658-0a2e-40ca-864d-d312a1c0711e', '2024-12-12 12:58:57.070884+00', 'Dagmar', '', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', true),
+	('3c26a3a7-5319-417a-aa32-2187675a2b30', '2025-04-08 13:40:36.872411+00', 'Vince', '13', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', false),
+	('07e2275f-c76c-4533-9640-5c8fdccd75e4', '2024-12-12 13:14:47.805454+00', 'Till', '<em>🤷‍♀️</em><br>I don''t know', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', false),
+	('0ed26e62-0417-4deb-9ed7-7a64e7179c2c', '2025-06-03 13:31:11.854805+00', 'Florian', '<em>🤷‍♀️</em><br>I don''t know', '6fa2f6c1-c8f5-4968-89d3-6453b5cdb791', false),
+	('329a3253-093b-45f0-81f8-54c9abecac4b', '2024-04-19 06:56:25.309568+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('bc9f2f5b-4e21-470a-ab0f-5a73fa937355', '2024-10-25 07:13:02.157809+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('480f216b-9e95-43fe-958c-f14a3ecedf1d', '2023-08-25 07:02:24.394284+00', 'Hendrik', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('f6eb1749-fd32-4281-9811-7015d01d37ef', '2025-06-20 08:14:52.88985+00', 'Ivan', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false),
+	('f2629aca-d90b-49fb-813e-2f8744c1d27f', '2025-01-24 08:43:53.438322+00', 'Pedro', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false),
+	('69403d61-631f-4e49-911e-052707517940', '2025-06-17 07:52:30.615821+00', 'Riccardo', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', true),
+	('e9afdebb-55af-4b9c-a15d-699f4fe3d8d4', '2025-08-12 07:35:59.843367+00', 'chris', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false),
+	('3c90d082-05a1-4c36-9487-9803e9f365c2', '2025-08-20 20:25:01.898233+00', 'richi', '', '41ebd6eb-e0dd-4d33-8a34-392b65ee90b1', false);
 
 
 --
