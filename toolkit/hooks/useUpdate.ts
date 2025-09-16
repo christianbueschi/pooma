@@ -6,14 +6,14 @@ export const useUpdate = <T extends { id: string }>(table: string) => {
   const [error, setError] = useState<any>(null);
 
   const update = useCallback(
-    async (team: Partial<T>) => {
+    async (data: Partial<T>) => {
       setIsLoading(true);
 
       try {
-        const { error } = await client
+        const { error } = await (client as any)
           .from(table)
-          .update(team)
-          .eq('id', team.id)
+          .update(data)
+          .eq('id', data.id)
           .single();
 
         if (error) {

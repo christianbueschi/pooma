@@ -9,7 +9,7 @@ import { TeamCards } from '../../../toolkit/components/TeamCards';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { Member, Team } from '../../../toolkit/types';
+import { Member, type Team } from '../../../toolkit/types';
 import { useDelete } from '../../../toolkit/hooks/useDelete';
 import { useModalContext } from '../../../toolkit/context/ModalProvider';
 import { client } from '../../../toolkit/supabase/client';
