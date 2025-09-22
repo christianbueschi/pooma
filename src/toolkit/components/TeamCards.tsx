@@ -1,5 +1,6 @@
+'use client';
+
 import { Button, Flex, Text, VStack } from '@chakra-ui/react';
-import { useTranslation } from 'next-i18next';
 import { Member } from '../types';
 import { FlipCard } from './FlipCard';
 
@@ -16,8 +17,6 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   onRemove,
   handleResolve,
 }) => {
-  const { t } = useTranslation(['common']);
-
   const sortedMembers = members.sort((a, b) => {
     if (!a.name || !b.name) return 0;
 
@@ -60,7 +59,7 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
         </>
       ) : (
         <Flex gap={8} css={{ alignItems: 'center' }} px={4}>
-          <Text>{t('noPlayersText')}</Text>
+          <Text>No players in the game</Text>
         </Flex>
       )}
     </VStack>

@@ -1,35 +1,25 @@
+'use client';
+
 import { Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
-import { GetServerSidePropsContext, NextPage } from 'next';
-import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 import { CardDeck } from '../../../toolkit/components/CardDeck';
 import { Header } from '../../../toolkit/components/Header';
 import { Modal } from '../../../toolkit/components/Modal';
 import { TeamCards } from '../../../toolkit/components/TeamCards';
-import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useParams } from 'next/navigation';
 import { Member, type Team } from '../../../toolkit/types';
 import { useDelete } from '../../../toolkit/hooks/useDelete';
 import { useModalContext } from '../../../toolkit/context/ModalProvider';
-import { client } from '../../../toolkit/supabase/client';
 import { useSelect } from '../../../toolkit/hooks/useSelect';
 import { parseCookies } from 'nookies';
 import { teamSelectProps } from '../../../toolkit/constants';
 import { useUpdate } from '../../../toolkit/hooks/useUpdate';
 
-type TeamProps = {};
-
-const Team: NextPage<TeamProps> = () => {
-  const { t } = useTranslation(['common']);
-
+export default function TeamPage() {
   const [isOpen, toggleIsOpen] = useState(false);
-
   const { setShowJoinModal } = useModalContext();
-
-  const router = useRouter();
-
-  const teamId = (router.query.teamId as string) || '';
+  const params = useParams();
+  const teamId = params.teamId as string;
 
   const cookies = parseCookies();
 
@@ -121,7 +111,6 @@ const Team: NextPage<TeamProps> = () => {
     if (!team) return;
 
     setMemberToRemove(member);
-
     toggleRemoveMemberModal(true);
   };
 
@@ -134,55 +123,46 @@ const Team: NextPage<TeamProps> = () => {
     }
 
     await deleteMember('members', memberToRemove.id);
-
-    // refetchMembers();
-
     toggleRemoveMemberModal(false);
   };
 
   useEffect(() => {
     toggleIsOpen(!!team?.isLocked);
-  }, [team, router, isLoading]);
+  }, [team, isLoading]);
 
-  const title = `${t('title')} ${team ? ' - ' + team?.name : ''}`;
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (!isMemberInTeam || !members?.length || !member || !team) {
+    return <></>;
+  }
 
   return (
     <VStack gap={[2, 4, 8]} mb={12}>
-      <Head>
-        <title>{title}</title>
-      </Head>
-
       <Header />
 
-      {isLoading ? (
-        <Spinner />
-      ) : isMemberInTeam && members?.length && member && team ? (
-        <>
-          {!member.isSpectactorMode && (
-            <VStack css={{ alignItems: 'center' }}>
-              <CardDeck member={member} team={team} />
-            </VStack>
-          )}
-          <Heading data-testid='title'>{team?.name}</Heading>
-          <TeamCards
-            members={members}
-            isOpen={isOpen}
-            onRemove={handleRemove}
-            handleResolve={handleResolve}
-          />
-        </>
-      ) : (
-        <></>
+      {!member.isSpectactorMode && (
+        <VStack css={{ alignItems: 'center' }}>
+          <CardDeck member={member} team={team} />
+        </VStack>
       )}
+      <Heading data-testid='title'>{team?.name}</Heading>
+      <TeamCards
+        members={members}
+        isOpen={isOpen}
+        onRemove={handleRemove}
+        handleResolve={handleResolve}
+      />
 
       <Modal
-        title={t('removeMemberModalTitle')}
+        title='Remove Member'
         onClose={() => toggleRemoveMemberModal(false)}
         isOpen={!!removeMemberModal && !!memberToRemove}
       >
         <VStack gap={2}>
           <Text css={{ textAlign: 'center' }}>
-            {t('removeMemberHint', { name: memberToRemove?.name })}
+            Are you sure you want to remove {memberToRemove?.name}?
           </Text>
           <Button
             variant='solid'
@@ -190,43 +170,16 @@ const Team: NextPage<TeamProps> = () => {
             colorScheme='red'
             data-testid='modal-remove-button'
           >
-            {t('removeButton')}
+            Remove
           </Button>
           <Button
             variant='ghost'
             onClick={() => toggleRemoveMemberModal(false)}
           >
-            {t('cancelButton')}
+            Cancel
           </Button>
         </VStack>
       </Modal>
     </VStack>
   );
-};
-
-export async function getServerSideProps({
-  locale,
-  query,
-}: GetServerSidePropsContext) {
-  const teamId = query.teamId as string;
-
-  const { data } = await client
-    .from('teams')
-    .select()
-    .eq('id', teamId)
-    .single();
-
-  if (!data) {
-    return {
-      notFound: true,
-    };
-  }
-
-  return {
-    props: {
-      ...(await serverSideTranslations(locale || 'en', ['common'])),
-    },
-  };
 }
-
-export default Team;

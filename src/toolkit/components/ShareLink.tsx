@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Button,
   Flex,
@@ -8,28 +10,26 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { useTranslation } from 'next-i18next';
 import { QRCode } from 'react-qrcode-logo';
 import { colors } from '../theme/colors';
 
 type ShareLinkProps = {};
 
 export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
-  const { t } = useTranslation(['common']);
-
   const router = useRouter();
+  const pathname = usePathname();
 
   const { hasCopied, onCopy, setValue, value } = useClipboard('');
 
   useEffect(() => {
-    if (router.pathname === '/team/[teamId]') {
+    if (pathname?.startsWith('/team/')) {
       setValue(window.location.href);
     } else {
       setValue('');
     }
-  }, [router.pathname, setValue]);
+  }, [pathname, setValue]);
 
   const color = useColorModeValue('cyan.400', 'grey.500');
   const backgroundColor = useColorModeValue('green.400', 'green.400');
@@ -63,7 +63,7 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
               p={2}
               borderRadius='8px 8px 0 0'
             >
-              {t('inviteOthers')}
+              Invite Others
             </Heading>
             <HStack p={2} justifyContent='center'>
               {isMedium && (

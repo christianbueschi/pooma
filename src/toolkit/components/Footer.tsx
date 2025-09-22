@@ -1,12 +1,11 @@
+'use client';
+
 import { Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react';
 import Link from 'next/link';
-import { useTranslation } from 'next-i18next';
 import { ShareLink } from './ShareLink';
 import { FiGithub } from 'react-icons/fi';
 
 export const Footer: React.FC = () => {
-  const { t } = useTranslation(['common']);
-
   const backgroundcolor = useColorModeValue('cyan.500', 'green.500');
 
   return (
@@ -24,10 +23,10 @@ export const Footer: React.FC = () => {
         spacing={0}
       >
         <Link href='/privacy' passHref>
-          <Text>{t('privacyPolicyLink')}</Text>
+          <Text>Privacy Policy</Text>
         </Link>
         <Link href='mailto:hello@pooma.app' passHref>
-          <Text>{t('email')}</Text>
+          <Text>Contact</Text>
         </Link>
         <Link
           href='https://github.com/christianbueschi/pooma'

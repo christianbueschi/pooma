@@ -1,7 +1,9 @@
+'use client';
+
 import styled from '@emotion/styled';
 import { FiUser, FiUsers, FiMoon } from 'react-icons/fi';
 import { LogoTitle } from './Brand';
-import { useRouter } from 'next/router';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
@@ -18,7 +20,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { colors } from '../theme/colors';
-import { useTranslation } from 'next-i18next';
 import { useSelect } from '../hooks/useSelect';
 import { useEffect, useRef } from 'react';
 import { destroyCookie, parseCookies } from 'nookies';
@@ -33,9 +34,8 @@ type HeaderProps = {
 };
 
 export const Header: React.FC<HeaderProps> = ({ isHome }) => {
-  const { t } = useTranslation(['common']);
-
   const router = useRouter();
+  const params = useParams();
 
   const { toggleColorMode } = useColorMode();
 
@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     router.push('/');
   };
 
-  const teamId = router.query.teamId as string;
+  const teamId = params.teamId as string;
 
   const cookies = parseCookies();
 
@@ -89,11 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     destroyCookie(null, 'teamId', COOKIE_OPTIONS);
     destroyCookie(null, 'memberId', COOKIE_OPTIONS);
 
-    if (router.pathname === '/') {
-      location.reload();
-    }
-
-    await router.push('/');
+    router.push('/');
   };
 
   const [updateMember] = useUpdate<Member>('members');
@@ -116,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
         justifyItems='center'
         w='100%'
       >
-        {!isHome && <LogoTitle onClick={onClickLogo}>{t('title')}</LogoTitle>}
+        {!isHome && <LogoTitle onClick={onClickLogo}>Pooma</LogoTitle>}
 
         <GridItem as='nav' gridColumnStart={3} marginLeft='auto'>
           <HStack alignItems='center'>
@@ -151,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                               defaultChecked={member?.isSpectactorMode || false}
                               onChange={handleToggleSpectactoreMode}
                             />
-                            <Text>{t('spectactorMode')}</Text>
+                            <Text>Spectator Mode</Text>
                           </HStack>
                         </>
                       )}
@@ -160,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
                         data-testid='logout-button'
                         alignSelf='flex-end'
                       >
-                        {t('logout')}
+                        Logout
                       </Button>
                     </VStack>
                   </MenuList>

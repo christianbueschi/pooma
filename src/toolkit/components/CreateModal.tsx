@@ -1,9 +1,10 @@
+'use client';
+
 import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Modal } from './Modal';
 import { Controller, useForm } from 'react-hook-form';
 import { Select } from 'chakra-react-select';
-import { useTranslation } from 'next-i18next';
 import { useInsert } from '../hooks/useInsert';
 import { MemberInsert, TeamInsert } from '../types';
 import { setCookie } from 'nookies';
@@ -32,8 +33,6 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   handleClose,
   isOpen,
 }) => {
-  const { t } = useTranslation(['common']);
-
   const router = useRouter();
 
   const {
@@ -68,27 +67,27 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     setCookie(null, 'teamId', team.id, COOKIE_OPTIONS);
     setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
-    router.push('/team' + '/' + team.id);
+    router.push('/team/' + team.id);
   };
 
   return (
-    <Modal title={t('startModalTitle')} onClose={handleClose} isOpen={isOpen}>
+    <Modal title='Start New Game' onClose={handleClose} isOpen={isOpen}>
       <form onSubmit={handleSubmit(onCreateTeam)}>
         <VStack gap={12}>
           <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-            <FormLabel>{t('teamName')}</FormLabel>
+            <FormLabel>Team Name</FormLabel>
             <Input
               {...register('team', { required: true })}
               data-testid='team-name-input'
             />
 
-            <FormLabel>{t('memberName')}</FormLabel>
+            <FormLabel>Member Name</FormLabel>
             <Input
               {...register('member', { required: true })}
               data-testid='member-name-input'
             />
 
-            <FormLabel>{t('cardDeck')}</FormLabel>
+            <FormLabel>Card Deck</FormLabel>
             <Controller
               control={control}
               name='cardMode'
@@ -98,7 +97,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
                   ref={ref}
                   options={CARD_MODE_OPTIONS}
                   onChange={(option) => onChange(option?.value)}
-                  placeholder={t('selectOptionPlaceholder')}
+                  placeholder='Select an option'
                 />
               )}
             />
@@ -111,7 +110,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             isLoading={teamCreating || memberCreating}
             data-testid='start-game-button'
           >
-            {t('startGame')}
+            Start Game
           </Button>
         </VStack>
       </form>

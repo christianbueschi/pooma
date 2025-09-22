@@ -1,8 +1,9 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { Card } from './Card';
 import { CARDS } from './constants';
 import { Grid } from '@chakra-ui/react';
-import { useTranslation } from 'next-i18next';
 import { Member, Team } from '../types';
 import { useUpdate } from '../hooks/useUpdate';
 
@@ -12,8 +13,6 @@ type CardDeckProps = {
 };
 
 export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
-  const { t } = useTranslation(['common']);
-
   const [activeCard, setActiveCard] = useState<string | null>();
 
   const [updateMember] = useUpdate<Member>('members');
@@ -40,7 +39,7 @@ export const CardDeck: React.FC<CardDeckProps> = ({ team, member }) => {
 
   const cardMode = team.cardMode as 'FIBONACCI' | 'TSHIRT';
 
-  const cards = CARDS(t)[cardMode];
+  const cards = CARDS()[cardMode];
 
   return (
     <>

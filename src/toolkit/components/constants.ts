@@ -1,7 +1,6 @@
 import { FlexProps } from '@chakra-ui/react';
-import { TFunction } from 'next-i18next';
 
-export const FIBONACCI_NUMBERS = (t: TFunction) => [
+export const FIBONACCI_NUMBERS = [
   '0',
   '1',
   '2',
@@ -14,25 +13,25 @@ export const FIBONACCI_NUMBERS = (t: TFunction) => [
   '55',
   '89',
   '144',
-  `<em>🤷‍♀️</em><br>${t('cardIdk')}`,
-  `<em>🙅</em><br>${t('cardImpossible')}`,
-  `<em>☕</em> <br>${t('cardBreak')}`,
+  `<em>🤷‍♀️</em><br>I don't know`,
+  `<em>🙅</em><br>Impossible`,
+  `<em>☕</em> <br>Break`,
 ];
 
-export const T_SHIRT_SIZES = (t: TFunction) => [
-  `<em>🐭</em><br>${t('cardTooSmall')}`,
+export const T_SHIRT_SIZES = [
+  `<em>🐭</em><br>Too Small`,
   'XS',
   'S',
   'M',
   'L',
   'XL',
-  `<em>🐘</em><br>${t('cardTooBig')}`,
-  `<em>☕</em> <br>${t('cardBreak')}`,
+  `<em>🐘</em><br>Too Big`,
+  `<em>☕</em> <br>Break`,
 ];
 
-export const CARDS = (t: TFunction) => ({
-  FIBONACCI: FIBONACCI_NUMBERS(t),
-  TSHIRT: T_SHIRT_SIZES(t),
+export const CARDS = () => ({
+  FIBONACCI: FIBONACCI_NUMBERS,
+  TSHIRT: T_SHIRT_SIZES,
 });
 
 const BREAKPOINTS = [375, 576, 768, 992, 1200];

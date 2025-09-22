@@ -1,3 +1,5 @@
+'use client';
+
 import styled from '@emotion/styled';
 import { NextPage, NextPageContext } from 'next';
 import { Header } from '../../toolkit/components/Header';
@@ -540,13 +542,5 @@ const StyledContent = styled.div`
     word-break: break-all;
   }
 `;
-
-export function getServerSideProps({ req }: NextPageContext) {
-  return {
-    props: {
-      cookies: req?.headers.cookie ?? '',
-    },
-  };
-}
 
 export default Privacy;

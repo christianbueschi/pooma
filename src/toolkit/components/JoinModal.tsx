@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
-import { useRouter } from 'next/router';
+import { useRouter, useParams } from 'next/navigation';
 import {
   Button,
   FormLabel,
@@ -16,7 +18,6 @@ import {
 import { useForm } from 'react-hook-form';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { ComponentWithTooltip } from './ComponentWithTooltip';
-import { useTranslation } from 'next-i18next';
 import { useModalContext } from '../context/ModalProvider';
 import { useSelect } from '../hooks/useSelect';
 import { MemberInsert, Team } from '../types';
@@ -36,9 +37,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   title,
   preventClosing,
 }) => {
-  const { t } = useTranslation(['common']);
-
   const router = useRouter();
+  const params = useParams();
 
   const { showJoinModal, setShowJoinModal } = useModalContext();
 
@@ -51,7 +51,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     formState: { isValid },
   } = useForm<FormFields>({
     defaultValues: {
-      teamId: router.query.teamId as string,
+      teamId: params.teamId as string,
     },
   });
 
@@ -98,9 +98,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
     setCookie(null, 'teamId', data.teamId, COOKIE_OPTIONS);
     setCookie(null, 'memberId', member.id, COOKIE_OPTIONS);
 
-    router.push({
-      pathname: '/team' + '/' + data.teamId,
-    });
+    router.push('/team/' + data.teamId);
   };
 
   useEffect(() => {
@@ -127,7 +125,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
         <form onSubmit={handleSubmit(onJoinTeam)}>
           <VStack gap={12}>
             <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-              <FormLabel>{t('teamId')}</FormLabel>
+              <FormLabel>Team ID</FormLabel>
               <InputGroup>
                 <Input
                   {...register('teamId', { required: true })}
@@ -158,7 +156,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                   </InputRightAddon>
                 )}
               </InputGroup>
-              <FormLabel>{t('memberName')}</FormLabel>
+              <FormLabel>Member Name</FormLabel>
               <Input
                 {...register('member', { required: true, minLength: 3 })}
                 data-testid='member-name-input'
@@ -174,11 +172,11 @@ export const JoinModal: React.FC<JoinModalProps> = ({
                 data-testid='join-button'
                 colorScheme='green'
               >
-                {t('joinButton')}
+                Join
               </Button>
 
               <Button variant='ghost' onClick={handleClose}>
-                {t('cancelButton')}
+                Cancel
               </Button>
             </VStack>
           </VStack>
