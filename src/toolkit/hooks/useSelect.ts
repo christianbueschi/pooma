@@ -122,7 +122,7 @@ export const useSelect = <T extends { id: string }>(
             [key]: data,
           };
         });
-      } catch (error) {
+      } catch {
       } finally {
         activePromises[key] = false;
       }

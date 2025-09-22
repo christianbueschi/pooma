@@ -5,19 +5,16 @@ import { Modal } from './Modal';
 import { useRouter, useParams } from 'next/navigation';
 import {
   Button,
-  FormLabel,
   Grid,
   Input,
-  InputGroup,
-  InputRightAddon,
   Spinner,
   Text,
-  Tooltip,
   VStack,
+  InputGroup,
+  Box,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { FiCheck, FiX } from 'react-icons/fi';
-import { ComponentWithTooltip } from './ComponentWithTooltip';
 import { useModalContext } from '../context/ModalProvider';
 import { useSelect } from '../hooks/useSelect';
 import { MemberInsert, Team } from '../types';
@@ -125,38 +122,41 @@ export const JoinModal: React.FC<JoinModalProps> = ({
         <form onSubmit={handleSubmit(onJoinTeam)}>
           <VStack gap={12}>
             <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-              <FormLabel>Team ID</FormLabel>
-              <InputGroup>
+              <Text as='label'>Team ID</Text>
+              <InputGroup
+                endElement={
+                  showTeamExistsBadge || team ? (
+                    <Box
+                      bg={
+                        teamIsLoading
+                          ? 'grey.400'
+                          : team
+                          ? 'green.400'
+                          : 'red.400'
+                      }
+                      px={3}
+                      display='flex'
+                      alignItems='center'
+                      borderRightRadius='md'
+                    >
+                      {teamIsLoading ? (
+                        <Spinner color='white' size='sm' />
+                      ) : team ? (
+                        <FiCheck color='white' />
+                      ) : (
+                        <FiX color='white' />
+                      )}
+                    </Box>
+                  ) : undefined
+                }
+              >
                 <Input
                   {...register('teamId', { required: true })}
                   data-testid='team-name-input'
                   onBlur={handleBlurTeamId}
                 />
-                {(showTeamExistsBadge || team) && (
-                  <InputRightAddon
-                    bg={
-                      teamIsLoading
-                        ? 'grey.400'
-                        : team
-                        ? 'green.400'
-                        : 'red.400'
-                    }
-                  >
-                    {teamIsLoading ? (
-                      <Spinner color='white' size='sm' />
-                    ) : team ? (
-                      <FiCheck color='white' />
-                    ) : (
-                      <Tooltip label='No team found'>
-                        <ComponentWithTooltip>
-                          <FiX color='white' />
-                        </ComponentWithTooltip>
-                      </Tooltip>
-                    )}
-                  </InputRightAddon>
-                )}
               </InputGroup>
-              <FormLabel>Member Name</FormLabel>
+              <Text as='label'>Member Name</Text>
               <Input
                 {...register('member', { required: true, minLength: 3 })}
                 data-testid='member-name-input'
@@ -167,8 +167,8 @@ export const JoinModal: React.FC<JoinModalProps> = ({
               <Button
                 variant='solid'
                 type='submit'
-                isDisabled={!isValid || !team}
-                isLoading={memberCreating}
+                disabled={!isValid || !team}
+                loading={memberCreating}
                 data-testid='join-button'
                 colorScheme='green'
               >

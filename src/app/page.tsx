@@ -24,7 +24,9 @@ export default function Home() {
           textAlign='center'
           padding={12}
         >
-          Planning poker made simple
+          Scrum Planning Poker at it&apos;s finest!
+          <br />
+          Estimate virtually your team stories with ease 🎉
         </Heading>
         <VStack gap={2}>
           <Button
@@ -35,7 +37,7 @@ export default function Home() {
             Start New Game
           </Button>
           <Button
-            variant='link'
+            variant='ghost'
             onClick={() => setShowJoinModal(true)}
             data-testid='join-game-button'
           >

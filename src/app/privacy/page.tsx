@@ -1,14 +1,42 @@
 'use client';
 
-import styled from '@emotion/styled';
-import { NextPage, NextPageContext } from 'next';
+import { NextPage } from 'next';
 import { Header } from '../../toolkit/components/Header';
+import { Box } from '@chakra-ui/react';
 
 const Privacy: NextPage = () => {
   return (
     <>
       <Header />
-      <StyledContent>
+      <Box
+        maxWidth='600px'
+        padding='12px'
+        margin='0 auto'
+        css={{
+          'h1, h2, h3, p, ul, li': {
+            marginBottom: '8px',
+          },
+          h1: {
+            fontSize: '24px',
+            margin: '24px 0',
+          },
+          h2: {
+            fontSize: '20px',
+            margin: '16px 0',
+          },
+          h3: {
+            fontSize: '18px',
+            margin: '16px 0',
+          },
+          'p, li': {
+            lineHeight: '20px',
+          },
+          a: {
+            color: 'var(--colors-green-500)',
+            wordBreak: 'break-all',
+          },
+        }}
+      >
         <h1>Privacy Policy</h1>
         <p>Last updated: February 14, 2022</p>
         <p>
@@ -499,48 +527,9 @@ const Privacy: NextPage = () => {
         <ul>
           <li>By email: hello@pooma.app</li>
         </ul>
-      </StyledContent>
+      </Box>
     </>
   );
 };
-
-const StyledContent = styled.div`
-  max-width: 600px;
-  padding: 12px;
-  margin: 0 auto;
-
-  h1,
-  h2,
-  h3,
-  p,
-  ul,
-  li {
-    margin-bottom: 8px;
-  }
-  h1 {
-    font-size: 24px;
-    margin: 24px 0;
-  }
-
-  h2 {
-    font-size: 20px;
-    margin: 16px 0;
-  }
-
-  h3 {
-    font-size: 18px;
-    margin: 16px 0;
-  }
-
-  p,
-  li {
-    line-height: 20px;
-  }
-
-  a {
-    color: 'green.500';
-    word-break: break-all;
-  }
-`;
 
 export default Privacy;

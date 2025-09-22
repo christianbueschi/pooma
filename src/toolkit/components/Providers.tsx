@@ -8,18 +8,17 @@ import { ModalProvider } from '../context/ModalProvider';
 import { JoinModal } from './JoinModal';
 import { Footer } from './Footer';
 import CookieConsent from 'react-cookie-consent';
+import { Grid, GridItem } from '@chakra-ui/react';
 import { colors } from '../theme/colors';
-import { theme } from '../theme';
-import { Grid, GridItem, ColorModeScript } from '@chakra-ui/react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      {/* <ColorModeScript initialColorMode={theme.config.initialColorMode} /> */}
       <Chakra>
         <SupabaseQueryProvider>
           <ModalProvider>
-            <Grid gridTemplateRows='1fr auto' height='100vh'>
+            <Grid gridTemplateRows='1fr auto' minHeight='100vh'>
               <GridItem>
                 {children}
                 <JoinModal title='Join Game' />
@@ -30,10 +29,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   location='bottom'
                   buttonText='Accept'
                   cookieName='poomaCookieConsent'
-                  style={{ background: colors.green[400] }}
+                  style={{ background: colors.green[400].value }}
                   buttonStyle={{
-                    background: colors.green[500],
-                    color: theme.colors.white,
+                    background: colors.green[500].value,
+                    color: 'white',
                     fontSize: '13px',
                     borderRadius: '8px',
                   }}

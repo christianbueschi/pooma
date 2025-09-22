@@ -4,7 +4,6 @@ import { Providers } from '../toolkit/components/Providers';
 export const metadata: Metadata = {
   title: 'Pooma',
   description: 'Planning poker made simple',
-  viewport: 'width=device-width, initial-scale=1.0',
 };
 
 export default function RootLayout({
@@ -13,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
       </body>

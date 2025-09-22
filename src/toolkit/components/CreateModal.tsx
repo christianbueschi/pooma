@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, FormLabel, Grid, Input, VStack } from '@chakra-ui/react';
+import { Button, Grid, Input, VStack, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { Modal } from './Modal';
 import { Controller, useForm } from 'react-hook-form';
@@ -75,19 +75,19 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       <form onSubmit={handleSubmit(onCreateTeam)}>
         <VStack gap={12}>
           <Grid templateColumns='1fr 2fr' gridGap={2} alignItems='center'>
-            <FormLabel>Team Name</FormLabel>
+            <Text as='label'>Team Name</Text>
             <Input
               {...register('team', { required: true })}
               data-testid='team-name-input'
             />
 
-            <FormLabel>Member Name</FormLabel>
+            <Text as='label'>Member Name</Text>
             <Input
               {...register('member', { required: true })}
               data-testid='member-name-input'
             />
 
-            <FormLabel>Card Deck</FormLabel>
+            <Text as='label'>Card Deck</Text>
             <Controller
               control={control}
               name='cardMode'
@@ -106,8 +106,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
           <Button
             variant='solid'
             type='submit'
-            isDisabled={!isValid}
-            isLoading={teamCreating || memberCreating}
+            disabled={!isValid}
+            loading={teamCreating || memberCreating}
             data-testid='start-game-button'
           >
             Start Game

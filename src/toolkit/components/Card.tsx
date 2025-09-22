@@ -1,5 +1,6 @@
-import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { CARD_HEIGHT, GENERIC_CARD_STYLES } from './constants';
+import { useTheme } from 'next-themes';
 
 type CardProps = {
   card: string;
@@ -14,16 +15,26 @@ export const Card: React.FC<CardProps> = ({
   isLocked,
   onClick,
 }) => {
+  const { theme } = useTheme();
   const isActiveCard = card === activeCard;
 
-  const cardColor = useColorModeValue(
-    isLocked ? 'cyan.400' : 'cyan.500',
-    isLocked ? 'grey.400' : 'green.400'
-  );
-  const cardColorActive = useColorModeValue(
-    isLocked ? 'green.500' : 'green.400',
-    isLocked ? 'cyan.500' : 'cyan.500'
-  );
+  const cardColor =
+    theme === 'dark'
+      ? isLocked
+        ? 'grey.400'
+        : 'green.400'
+      : isLocked
+      ? 'cyan.400'
+      : 'cyan.500';
+
+  const cardColorActive =
+    theme === 'dark'
+      ? isLocked
+        ? 'cyan.500'
+        : 'cyan.500'
+      : isLocked
+      ? 'green.500'
+      : 'green.400';
 
   return (
     <Box

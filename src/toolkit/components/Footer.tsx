@@ -1,12 +1,14 @@
 'use client';
 
-import { Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react';
+import { Stack, Text, VStack } from '@chakra-ui/react';
 import Link from 'next/link';
 import { ShareLink } from './ShareLink';
 import { FiGithub } from 'react-icons/fi';
+import { useTheme } from 'next-themes';
 
 export const Footer: React.FC = () => {
-  const backgroundcolor = useColorModeValue('cyan.500', 'green.500');
+  const { theme } = useTheme();
+  const backgroundcolor = theme === 'dark' ? 'green.500' : 'cyan.500';
 
   return (
     <VStack
@@ -16,12 +18,7 @@ export const Footer: React.FC = () => {
       justifyContent='space-between'
     >
       <ShareLink />
-      <Stack
-        alignItems='center'
-        flexDirection='row'
-        gap={[2, 4, 8]}
-        spacing={0}
-      >
+      <Stack alignItems='center' flexDirection='row' gap={[2, 4, 8]}>
         <Link href='/privacy' passHref>
           <Text>Privacy Policy</Text>
         </Link>

@@ -1,16 +1,10 @@
-import {
-  Box,
-  Flex,
-  FlexProps,
-  Text,
-  useColorModeValue,
-  VStack,
-} from '@chakra-ui/react';
+import { Box, Flex, FlexProps, Text, VStack } from '@chakra-ui/react';
 import { parseCookies } from 'nookies';
 import { useEffect, useState } from 'react';
 import { FiX } from 'react-icons/fi';
 import { Member } from '../types';
 import { CARD_HEIGHT, GENERIC_CARD_STYLES } from './constants';
+import { useTheme } from 'next-themes';
 
 type FlipCardProps = {
   isOpen: boolean;
@@ -37,13 +31,14 @@ export const FlipCard: React.FC<FlipCardProps> = ({
       position='relative'
       _hover={{
         borderRadius: 'xl',
-
-        '> div span': {
+      }}
+      css={{
+        '&:hover > div span': {
           display: 'block',
         },
       }}
     >
-      <Text textTransform='capitalize' isTruncated maxW={130}>
+      <Text textTransform='capitalize' truncate maxW={130}>
         {member.name} {isMe ? '(Me)' : ''}
       </Text>
 
@@ -95,8 +90,9 @@ export const CardSite: React.FC<CardSiteProps> = ({
   card,
   ...props
 }) => {
-  const cardColor = useColorModeValue('cyan.500', 'green.400');
-  const cardColorReady = useColorModeValue('green.400', 'cyan.500');
+  const { theme } = useTheme();
+  const cardColor = theme === 'dark' ? 'green.400' : 'cyan.500';
+  const cardColorReady = theme === 'dark' ? 'cyan.500' : 'green.400';
 
   const styles: FlexProps = {
     ...GENERIC_CARD_STYLES(card, !!isFront),

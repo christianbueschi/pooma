@@ -1,33 +1,19 @@
 'use client';
 
-import styled from '@emotion/styled';
-import { FiUser, FiUsers, FiMoon } from 'react-icons/fi';
+import { FiUser, FiUsers } from 'react-icons/fi';
 import { LogoTitle } from './Brand';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
-import {
-  Button,
-  Grid,
-  GridItem,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuList,
-  Text,
-  useColorMode,
-  VStack,
-} from '@chakra-ui/react';
-import { colors } from '../theme/colors';
+import { Button, Grid, GridItem, HStack, Text } from '@chakra-ui/react';
+import { useTheme } from 'next-themes';
 import { useSelect } from '../hooks/useSelect';
 import { useEffect, useRef } from 'react';
 import { destroyCookie, parseCookies } from 'nookies';
 import { Member, Team } from '../types';
 import { teamSelectProps } from '../constants';
-import { useUpdate } from '../hooks/useUpdate';
 import { COOKIE_OPTIONS } from './constants';
 import { StickyHeader } from './StickyHeader';
+import { ColorModeButton } from '../../components/ui/color-mode';
 
 type HeaderProps = {
   isHome?: boolean;
@@ -36,8 +22,11 @@ type HeaderProps = {
 export const Header: React.FC<HeaderProps> = ({ isHome }) => {
   const router = useRouter();
   const params = useParams();
+  const { theme, setTheme } = useTheme();
 
-  const { toggleColorMode } = useColorMode();
+  const toggleColorMode = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   const onClickLogo = () => {
     router.push('/');
@@ -92,17 +81,6 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     router.push('/');
   };
 
-  const [updateMember] = useUpdate<Member>('members');
-
-  const handleToggleSpectactoreMode = (event: any) => {
-    if (!team || !member) return;
-
-    updateMember({
-      id: member.id,
-      isSpectactorMode: event.currentTarget.checked,
-    });
-  };
-
   return (
     <StickyHeader>
       <Grid
@@ -120,52 +98,35 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
               {isTeamSet && (
                 <HStack gap={24} alignItems='center'>
                   <Link href={`/team/${team.id}`} passHref>
-                    <Button variant='ghost' leftIcon={<FiUsers size='24px' />}>
+                    <Button variant='ghost'>
+                      <FiUsers size='24px' />
                       <Text display={['none', 'block']}>{team?.name}</Text>
                     </Button>
                   </Link>
                 </HStack>
               )}
               {isMemberSet && (
-                <Menu>
-                  <MenuButton
-                    as={Button}
+                <HStack gap={2}>
+                  <Button
                     variant='ghost'
-                    leftIcon={<FiUser color='green.500' size='24px' />}
                     data-testid='user-context-menu-button'
                   >
-                    <Text display={['none', 'block']} isTruncated maxW={130}>
+                    <FiUser color='green.500' size='24px' />
+                    <Text display={['none', 'block']} truncate maxW={130}>
                       {member?.name}
                     </Text>
-                  </MenuButton>
-                  <MenuList p={4} border='none'>
-                    <VStack gap={4} alignItems='flex-start'>
-                      {!isHome && (
-                        <>
-                          <HStack as='label' gap={2} alignItems='center'>
-                            <StyledToggle
-                              defaultChecked={member?.isSpectactorMode || false}
-                              onChange={handleToggleSpectactoreMode}
-                            />
-                            <Text>Spectator Mode</Text>
-                          </HStack>
-                        </>
-                      )}
-                      <Button
-                        onClick={handleLogout}
-                        data-testid='logout-button'
-                        alignSelf='flex-end'
-                      >
-                        Logout
-                      </Button>
-                    </VStack>
-                  </MenuList>
-                </Menu>
+                  </Button>
+                  <Button
+                    onClick={handleLogout}
+                    data-testid='logout-button'
+                    variant='ghost'
+                  >
+                    Logout
+                  </Button>
+                </HStack>
               )}
               <HStack>
-                <Button variant='ghost' onClick={toggleColorMode}>
-                  <FiMoon />
-                </Button>
+                <ColorModeButton />
               </HStack>
             </HStack>
           </HStack>
@@ -174,17 +135,3 @@ export const Header: React.FC<HeaderProps> = ({ isHome }) => {
     </StickyHeader>
   );
 };
-
-const StyledToggle = styled(Toggle)`
-  .react-toggle-track {
-    background-color: ${colors.green[400]};
-  }
-
-  &.react-toggle--checked .react-toggle-track {
-    background-color: ${colors.green[400]};
-
-    &:hover {
-      background-color: ${colors.green[400]};
-    }
-  }
-`;

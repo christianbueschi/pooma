@@ -2,26 +2,26 @@
 
 import {
   Button,
+  Clipboard,
   Flex,
   Heading,
   HStack,
   useBreakpointValue,
-  useClipboard,
-  useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { QRCode } from 'react-qrcode-logo';
+import { useTheme } from 'next-themes';
 import { colors } from '../theme/colors';
 
 type ShareLinkProps = {};
 
 export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
-  const router = useRouter();
   const pathname = usePathname();
+  const { theme } = useTheme();
 
-  const { hasCopied, onCopy, setValue, value } = useClipboard('');
+  const [value, setValue] = useState('');
 
   useEffect(() => {
     if (pathname?.startsWith('/team/')) {
@@ -31,18 +31,14 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
     }
   }, [pathname, setValue]);
 
-  const color = useColorModeValue('cyan.400', 'grey.500');
-  const backgroundColor = useColorModeValue('green.400', 'green.400');
+  const color = theme === 'dark' ? 'grey.500' : 'cyan.400';
+  const backgroundColor = 'green.400';
 
   // Use explict hex values for QR code colors
-  const qrCodeBackgroundColor = useColorModeValue(
-    colors.cyan[500],
-    colors.green[500]
-  );
-  const qrCodeForegroundColor = useColorModeValue(
-    colors.grey[400],
-    colors.cyan[400]
-  );
+  const qrCodeBackgroundColor =
+    theme === 'dark' ? colors.green[500].value : colors.cyan[500].value;
+  const qrCodeForegroundColor =
+    theme === 'dark' ? colors.cyan[400].value : colors.grey[400].value;
 
   const isMedium = useBreakpointValue({ base: false, md: true });
 
@@ -77,9 +73,16 @@ export const ShareLink: React.FC<ShareLinkProps> = ({}) => {
                   removeQrCodeBehindLogo={true}
                 />
               )}
-              <Button onClick={onCopy} w='150px' title={value}>
-                {hasCopied ? 'Copied' : 'Copy Link'}
-              </Button>
+
+              <Clipboard.Root value={value}>
+                {/* @ts-ignore */}
+                <Clipboard.Trigger asChild>
+                  <Button w='150px' title={value}>
+                    <Clipboard.Indicator />
+                    <Clipboard.CopyText />
+                  </Button>
+                </Clipboard.Trigger>
+              </Clipboard.Root>
             </HStack>
           </VStack>
         </Flex>

@@ -62,7 +62,7 @@ export const GENERIC_CARD_STYLES = (
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center',
-  sx: {
+  css: {
     aspectRatio: '4/5',
     backfaceVisibility: 'hidden',
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { ChakraProvider, localStorageManager } from '@chakra-ui/react';
-import { theme } from '../theme';
+import { ChakraProvider } from '@chakra-ui/react';
+import { ColorModeProvider } from '../../components/ui/color-mode';
+import { system } from '../theme';
 
 type ChakraProps = {
   children: React.ReactNode;
@@ -9,8 +10,8 @@ type ChakraProps = {
 
 export const Chakra: React.FC<ChakraProps> = ({ children }) => {
   return (
-    <ChakraProvider colorModeManager={localStorageManager} theme={theme}>
-      {children}
+    <ChakraProvider value={system}>
+      <ColorModeProvider>{children}</ColorModeProvider>
     </ChakraProvider>
   );
 };
